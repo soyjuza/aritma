@@ -25,6 +25,15 @@ func run(arg: String) -> void:
 		await _roots_room()
 		game.get_tree().quit()
 		return
+	if parts.size() > 1 and parts[1] == "jefe":
+		game.machine.change("play", {"mode": "new"})
+		await _wait(0.5)
+		game.dialog.close()
+		game.load_chamber(5)
+		game.timer.start()
+		await _boss_fight()
+		game.get_tree().quit()
+		return
 	await _wait(1.0)
 	await _shot("00_titulo")
 	game.machine.change("play", {"mode": "new"})
@@ -117,6 +126,49 @@ func _roots_room() -> void:
 		await _wait(0.3)
 	await _wait(1.0)
 	await _shot("26_mural_resuelto")
+
+
+## El jefe final (Sala 6): el pasillo, la entrada a la sala y cada parte de la pelea.
+func _boss_fight() -> void:
+	var lvl := game.level as ThroneLevel
+	await _wait(1.0)
+	game.dialog.close()
+	await _shot("j0_pasillo")
+	game.player.place(lvl.room_entrance(), Vector2.UP)
+	lvl._on_hall_entered()
+	await _wait(1.6)
+	await _shot("j1_aparece")
+	await _wait(0.8)
+	game.dialog.close()
+	await _shot("j2_sala")
+	game.player.place(lvl.boss.global_position + Vector2(-60, 60), Vector2.UP)
+	lvl.boss.change("volley")
+	await _wait(0.9)
+	await _shot("j3_rafaga")
+	game.health.refill()
+	game.player.place(lvl.boss.global_position + Vector2(20, 30), Vector2.LEFT)
+	lvl.boss.change("slam")
+	await _wait(0.8)
+	await _shot("j4_pisoton")
+	await _wait(0.8)
+	await _shot("j5_cansado")
+	game.health.refill()
+	for i in lvl.boss.phase_hp():
+		lvl.boss.take_hit(1, Vector2.UP)
+	await _wait(2.5)
+	await _shot("j6_escudo")
+	while lvl.boss.hp > 0:
+		if lvl.boss.can_be_hit():
+			lvl.boss.take_hit(1, Vector2.UP)
+		else:
+			for g in lvl.nodes_of(Guardian):
+				if g.is_active() and g.can_be_hit():
+					g.take_hit(99, Vector2.UP)
+			await _wait(1.0)
+	await _wait(0.8)
+	await _shot("j7_vencido")
+	await _wait(3.5)
+	await _shot("j8_final")
 
 
 func _wait(seconds: float) -> void:

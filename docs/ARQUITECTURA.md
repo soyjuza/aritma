@@ -3,7 +3,7 @@
 ## Patrones de diseño (lo que pide la guía de la actividad)
 | Tipo | Patrón | Dónde | Para qué |
 |---|---|---|---|
-| Creacional | **Factory Method** | `ChamberBuilder` → `FilterBuilder`, `RootsBuilder`, `VortexBuilder`, `BalanceBuilder`, `CoreBuilder`; `ChamberRegistry` | Cada creador instancia la escena de su sala según el `kind` de `chambers.json`. Para agregar una sala se crea una escena y un creador nuevos, sin tocar los demás. |
+| Creacional | **Factory Method** | `ChamberBuilder` → `FilterBuilder`, `RootsBuilder`, `VortexBuilder`, `BalanceBuilder`, `CoreBuilder`, `ThroneBuilder`; `ChamberRegistry` | Cada creador instancia la escena de su sala según el `kind` de `chambers.json`. Para agregar una sala se crea una escena y un creador nuevos, sin tocar los demás. |
 | Creacional | **Factory** | `AlarmDirector` (instancia `centinela.tscn`, `hechicero.tscn`, `runico.tscn`); `OrbShot` (instancia `orbe.tscn`) | Crea los guardianes de cada ola y los orbes del hechicero. |
 | Estructural | **Facade** | `TileKit`, `AudioService` | Ocultan cómo se arman las partículas y el sonido con el pack de arte. |
 | Estructural | **Adapter** | `DoorAdapter`, `FilterAdapter`, `BalanceAdapter`, `NetworkAdapter` | Pasan los objetos del juego al lenguaje del Códice (`puerta.abrir()`, `tolva.soltar()`, `plato_izq.poner(i)`, `red.vecinos(id)`). |
@@ -62,6 +62,7 @@ classDiagram
     ChamberLevel <|-- VortexLevel
     ChamberLevel <|-- BalanceLevel
     ChamberLevel <|-- CoreLevel
+    ChamberLevel <|-- ThroneLevel
     Game --> Level
 
     class ChamberBuilder {
@@ -77,9 +78,11 @@ classDiagram
     ChamberBuilder <|-- VortexBuilder
     ChamberBuilder <|-- BalanceBuilder
     ChamberBuilder <|-- CoreBuilder
+    ChamberBuilder <|-- ThroneBuilder
     VortexBuilder ..> VortexLevel : sala_3_vortice.tscn
     BalanceBuilder ..> BalanceLevel : sala_4_balanza.tscn
     CoreBuilder ..> CoreLevel : sala_5_singularidad.tscn
+    ThroneBuilder ..> ThroneLevel : sala_6_trono.tscn
 
     class CodeMachine {
         <<abstract>>
@@ -109,6 +112,8 @@ classDiagram
     BalanceMachine ..> BalanceAdapter
     CoreLevel o-- NetworkConsole
     CoreLevel o-- SkyNetwork
+    ThroneLevel o-- ZeroBoss
+    ZeroBoss ..> AlarmDirector : summon(ola)
     NetworkConsole ..> NetworkRules
     NetworkConsole ..> NetworkAdapter
 

@@ -14,7 +14,7 @@ construía por código al ejecutar el juego.
 | Carpeta | Qué hay |
 |---|---|
 | `main.tscn` | Escena principal: `Main` (game.gd), `Camara`, `Tala` y la `Interfaz`. |
-| `scenes/niveles/` | `pueblo.tscn` y las 5 salas: `sala_1_filtro`, `sala_2_raices`, `sala_3_vortice`, `sala_4_balanza`, `sala_5_singularidad`. |
+| `scenes/niveles/` | `pueblo.tscn` y las 6 salas: `sala_1_filtro`, `sala_2_raices`, `sala_3_vortice`, `sala_4_balanza`, `sala_5_singularidad`, `sala_6_trono` (el jefe final). |
 | `scenes/objetos/` | Piezas reutilizables: antorcha, brasero, columna, letrero, estatua, árboles, prensa. |
 | `scenes/maquinas/` | Atril, Criba (Sala 1), Mural (Sala 2), Faro (Sala 3), Balanza (Sala 4), Consola de la Red (Sala 5) y el atril de la puerta del templo. |
 | `scenes/personajes/` | Tala (jugadora, con su garrote) y Orun. |
@@ -41,14 +41,15 @@ Cada nivel tiene los mismos nodos:
 El script del nivel no dibuja nada. Al cargarse, conecta lo que hay en la escena (letreros,
 puntos seguros, fosos, máquinas).
 
-## Las 5 salas (15 minutos en total)
+## Las 6 salas (15 minutos en total)
 | Sala | Máquina | Qué hay que programar | Después |
 |---|---|---|---|
 | 1. El Filtro de la Dualidad | Criba | Separar esferas pares e impares (3 rondas) | — |
 | 2. Las Raíces Gemelas | Mural | `factorizar(b, c)`: raíces entre −60 y 60, máx. 12 000 pasos | — |
-| 3. El Vórtice de Celdas | Faro | `vecinas(x, y)` en un tablero de 8×8 (enciende el tablero) | Buscaminas: E destapa, Q bandera; 10 minas; siempre se resuelve sin adivinar; una mina = −2 corazones y tablero nuevo. Sin guardianes. |
-| 4. La Balanza | Balanza | Repartir todas las pesas en dos sumas iguales (2 juegos: uno oculto) | — |
-| 5. La Singularidad del Cero | Consola | El camino más corto (búsqueda en anchura) por una red de plataformas (2 redes de prueba + la de la sala) | El atril levanta los puentes; duran poco: correr hasta el núcleo. Caer al abismo = −7 s. Tomar el núcleo gana. |
+| 3. El Vórtice de Celdas | Faro | `dentro(x, y)`: True si la casilla está dentro del tablero de 8×8 (enciende el tablero) | Buscaminas: E destapa, Q bandera; 10 minas; siempre se resuelve sin adivinar; una mina = −2 corazones y tablero nuevo. Sin guardianes. |
+| 4. La Balanza | Balanza | Repartir todas las pesas en dos sumas iguales con `plato_liviano().poner(i)` en un `for` (2 juegos: uno oculto) | — |
+| 5. La Singularidad del Cero | Consola | Un `while` que salta a `red.mas_cercano(actual)` y levanta cada puente con `puentes.levantar(actual)` (2 redes de prueba + la de la sala) | El atril levanta los puentes (quedan para siempre). Caer al abismo = −7 s. Tomar el núcleo lleva a la Sala 6. |
+| 6. El Trono del Cero | — | Nada: es el **jefe final**, el Guardián del Cero (tengu rojo) | 3 fases. Ráfaga de orbes (3, 5, 7), pisotón con círculo rojo (salir o saltar con ESPACIO; −1 corazón) y, al cambiar de fase, escudo + ola de guardianes. Al entrar se recuperan 2 corazones. Vencerlo gana. |
 
 ## Guardianes, corazones y castigos de tiempo
 - Cada vez que una máquina rechaza el código (también por un error de escritura) sube la
@@ -57,7 +58,7 @@ puntos seguros, fosos, máquinas).
   color bajo los pies: dorado el caballero, morado el hechicero (desde la alarma 2), rojo el
   rúnico (desde la alarma 3). Atacan en formación: los caballeros rodean a Tala y cubren al
   hechicero; el hechicero mantiene la distancia y, si algo le tapa el tiro, se teletransporta. Mientras quede uno, la máquina
-  está bloqueada. Al resolver la sala la alarma vuelve a 0 y se recupera 1 corazón.
+  está bloqueada. Al resolver la sala la alarma vuelve a 0. Resolver salas **no** cura: la única curación son 2 corazones al entrar a la sala del jefe.
 - Desde la alarma 3 cae también el **guardián rúnico** (calavera con aura roja): no golpea,
   se carga y explota. Si Tala queda dentro del círculo rojo, aparece el **reto de teclas**:
   pulsar en orden 4 a 7 teclas (A S D F J K L) en 5 a 8 segundos, tras un segundo para
@@ -72,6 +73,6 @@ puntos seguros, fosos, máquinas).
 
 ## Pruebas automáticas
 ```
-godot --path . -- --selftest                       # 127 pruebas de reglas y del recorrido completo
-godot --path . -- --recorrido=/carpeta[:sala2]     # capturas del camino del jugador
+godot --path . -- --selftest                       # 136 pruebas de reglas y del recorrido completo
+godot --path . -- --recorrido=/carpeta[:sala2|:jefe]  # capturas del camino del jugador
 ```

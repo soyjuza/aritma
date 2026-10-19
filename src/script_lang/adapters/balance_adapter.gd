@@ -1,5 +1,6 @@
 ## PATRÓN ADAPTER — La Balanza vista desde el Códice:
 ##   pesas.lista()   pesas.cantidad()   plato_izq.poner(i)   plato_der.poner(i)   plato_izq.peso()
+##   plato_liviano()  (el plato que pesa menos; si empatan, el izquierdo)
 ## Cada objeto traduce sus llamadas a las reglas puras (BalanceRules). Los mensajes de error
 ## vienen de texts.json (text: Callable(clave, datos) -> String).
 class_name BalanceAdapter
@@ -7,10 +8,14 @@ extends RefCounted
 
 
 static func objects(rules: BalanceRules, text: Callable) -> Dictionary:
+	var left := Plate.new(rules, text, BalanceRules.LEFT)
+	var right := Plate.new(rules, text, BalanceRules.RIGHT)
+	var lighter := func(_c, _a, _l): return left if rules.total(BalanceRules.LEFT) <= rules.total(BalanceRules.RIGHT) else right
 	return {
 		"pesas": Weights.new(rules),
-		"plato_izq": Plate.new(rules, text, BalanceRules.LEFT),
-		"plato_der": Plate.new(rules, text, BalanceRules.RIGHT),
+		"plato_izq": left,
+		"plato_der": right,
+		"plato_liviano": HostFunction.new("plato_liviano", lighter, 0, 0),
 	}
 
 

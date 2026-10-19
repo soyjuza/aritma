@@ -1,8 +1,8 @@
 @tool
 ## La Consola de la Red (Sala 5): un pedestal de piedra con una esfera de luz. Prueba el
 ## programa del jugador en dos redes de prueba (ocultas) y en la red de la sala: en cada una
-## debe pasar a puentes.levantar() un camino de red.inicio a red.salida (con "shortest" en
-## chambers.json, solo el MÁS CORTO). Mientras
+## debe levantar, con puentes.levantar(id), un puente tras otro desde red.inicio hasta
+## red.salida (con "shortest" en chambers.json, solo por el camino MÁS CORTO). Mientras
 ## prueba, la red del abismo muestra cada red de prueba con el camino que encontró el programa.
 ## Si todo sale bien, la red de la sala queda lista: desde entonces, usar el atril levanta los
 ## puentes (sin volver a programar) cada vez que haga falta.

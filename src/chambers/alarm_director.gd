@@ -17,6 +17,7 @@ const RUNIC := preload("res://scenes/enemigos/runico.tscn")
 const SORCERER := preload("res://scenes/enemigos/hechicero.tscn")
 
 var level := 0                  # nivel de alarma: errores en esta sala
+var cleared_key := "alarm_cleared"   # aviso al vencer la ola (la sala del jefe usa otro)
 
 var _game
 var _room: ChamberLevel
@@ -142,6 +143,12 @@ func _on_machine_failed(payload: Dictionary) -> void:
 	_send_wave(level)
 
 
+## El jefe final llama a la ola "n" sin subir la alarma.
+func summon(n: int) -> void:
+	_slow_motion()
+	_send_wave(n)
+
+
 func _send_wave(n: int) -> void:
 	var wave := _wave
 	var kinds := wave_kinds(n)
@@ -221,7 +228,7 @@ func _on_defeated(g: Guardian) -> void:
 	_alive.erase(g)
 	if _alive.is_empty() and _pending == 0 and not _room.solved:
 		_game.bus.publish(GameEvents.WAVE_CLEARED, {"level": level})
-		_game.notify([_game.data.message("alarm_cleared")], 3.5)
+		_game.notify([_game.data.message(cleared_key)], 3.5)
 		_room.lock_machines(false)
 
 

@@ -229,7 +229,7 @@ func strike() -> void:
 		var at: Vector2 = orb.global_position - (global_position + Vector2(0, -6))
 		if at.length() <= attack_reach + 4.0 and absf(facing.angle_to(at)) <= attack_arc:
 			orb.shatter()
-	for guardian in get_tree().get_nodes_in_group("guardians"):
+	for guardian in get_tree().get_nodes_in_group("guardians") + get_tree().get_nodes_in_group("boss"):
 		if not guardian.can_be_hit():
 			continue
 		var to: Vector2 = guardian.global_position - global_position

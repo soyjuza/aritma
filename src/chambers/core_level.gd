@@ -2,7 +2,8 @@
 ## Un pasillo sin trampas lleva a la antesala, frente al abismo. Allí la Consola de la Red:
 ## hay que programar una búsqueda de un camino (en anchura, por ejemplo) por las plataformas
 ## flotantes. Con el programa aceptado, el atril levanta los puentes de ese camino (en
-## chambers.json, "life" 0 = quedan para siempre) y se camina por ellos hasta el núcleo. Tomar el núcleo gana el juego.
+## chambers.json, "life" 0 = quedan para siempre) y se camina por ellos hasta el núcleo.
+## Tomar el núcleo lleva a la Sala 6, la del jefe final.
 ## Fuera de las plataformas y de los puentes, Tala cae al abismo (−7 s). Los errores de la
 ## consola despiertan a los guardianes, que no pueden entrar al abismo.
 class_name CoreLevel
@@ -77,7 +78,7 @@ func player_fall() -> void:
 	_on_player_fell()
 
 
-## El final: Tala toma el núcleo.
+## Tala toma el núcleo: se abre el camino a la Sala 6 (o, si no hay más salas, se gana).
 func _take_core() -> void:
 	_won = true
 	network.core_taken = true
@@ -86,4 +87,9 @@ func _take_core() -> void:
 	_game.rig.shake(5.0)
 	_game.notify([_game.data.message("core_taken")], 4.0)
 	await get_tree().create_timer(2.0).timeout
-	_game.finish(true)
+	solved = true
+	alarm.calm()
+	if _game.data.chamber_count() > index + 1:
+		_game.enter_chamber(index + 1)
+	else:
+		_game.finish(true)

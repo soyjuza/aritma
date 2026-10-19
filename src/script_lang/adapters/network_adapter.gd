@@ -1,7 +1,7 @@
 ## PATRÓN ADAPTER — La red de la Singularidad vista desde el Códice:
 ##   red.inicio   red.salida   red.cantidad()   red.vecinos(id)   red.distancia(id)
 ##   red.mas_cercano(id)
-##   puentes.levantar(camino)
+##   puentes.levantar(id)  (tiende un puente desde la última plataforma hasta id)
 ## Traduce las llamadas a las reglas puras (NetworkRules). Los mensajes de error vienen de
 ## texts.json (text: Callable(clave, datos) -> String).
 class_name NetworkAdapter
@@ -66,7 +66,8 @@ class Network extends ScriptObject:
 		return _rules.neighbors(id)
 
 
-## Los puentes: se levantan una sola vez, siguiendo el camino que se les da.
+## Los puentes: empiezan en red.inicio y cada levantar(id) tiende uno desde la última
+## plataforma hasta id. El camino que queda se revisa al terminar el programa.
 class Bridges extends ScriptObject:
 	var _rules: NetworkRules
 	var _text: Callable
@@ -84,9 +85,15 @@ class Bridges extends ScriptObject:
 		return null
 
 	func _raise(ctx: ScriptContext, args: Array, line: int):
-		if _rules.raised:
+		var id = args[0]
+		if typeof(id) != TYPE_INT:
+			ctx.fail(_text.call("network_not_a_path", {}), line)
+			return null
+		if not _rules.raised:
+			_rules.raised = true
+			_rules.path = [_rules.start]
+		if _rules.path[-1] == _rules.goal:
 			ctx.fail(_text.call("network_twice", {}), line)
 			return null
-		_rules.raised = true
-		_rules.path = args[0].duplicate() if typeof(args[0]) == TYPE_ARRAY else args[0]
+		_rules.path.append(id)
 		return null

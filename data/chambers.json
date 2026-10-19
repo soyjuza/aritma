@@ -158,32 +158,32 @@
 				"rows": 8,
 				"mines": 10
 			},
-			"starter_code": "# El Faro enciende el tablero si vecinas(x, y) funciona.\n# Devuelve la lista de casillas que rodean a (x, y), sin salirse del tablero de 8 x 8.\n# Ejemplo: vecinas(0, 0) -> [[1, 0], [0, 1], [1, 1]] (el orden no importa).\n#\n# Pista: alrededor(x, y) ya te da las 8 casillas de alrededor, pero algunas se salen\n# del tablero. Quédate solo con las que tienen x e y entre 0 y 7.\n\ndef vecinas(x, y):\n    \n",
+			"starter_code": "# El Faro enciende el tablero si dentro(x, y) funciona.\n# dentro(x, y) devuelve True si la casilla (x, y) está dentro del tablero de 8 x 8\n# y False si se sale. x e y van de 0 a 7.\n# Ejemplo: dentro(3, 5) -> True    dentro(8, 2) -> False    dentro(0, -1) -> False\n\ndef dentro(x, y):\n    \n",
 			"help": [
 				[
-					"def vecinas(x, y):",
-					"devuelve una lista de casillas [cx, cy]"
+					"def dentro(x, y):",
+					"devuelve True o False"
 				],
 				[
-					"alrededor(x, y)",
-					"las 8 casillas de alrededor (algunas se salen)"
+					"return ...",
+					"devuelve el resultado de la función"
 				],
 				[
-					"c[0] / c[1]",
-					"la x y la y de la casilla c"
+					"0 <= x < 8",
+					"True si x está entre 0 y 7"
+				],
+				[
+					"a and b",
+					"True solo si las dos cosas son True"
 				],
 				[
 					"Tablero",
 					"8 x 8: x e y van de 0 a 7"
-				],
-				[
-					"lista.append(c)",
-					"agrega la casilla c a la lista"
 				]
 			],
 			"intro": [
 				"INSCRIPCIÓN: El Vórtice guarda diez minas bajo sus baldosas. Todas se ven iguales: solo los números dicen dónde está el peligro.",
-				"Primero enciende el Faro: escribe vecinas(x, y), que devuelva las casillas que rodean a (x, y) sin salirse del tablero de 8 x 8. alrededor(x, y) ya te da las 8 de alrededor: quédate con las que están dentro.",
+				"Primero enciende el Faro: escribe dentro(x, y), que devuelva True si la casilla (x, y) está dentro del tablero de 8 x 8 y False si se sale. Con esa regla el Faro sabe qué baldosas rodean a cada una.",
 				"Encendido el tablero, párate sobre una baldosa: E la destapa y Q le pone o quita una bandera. Cada número dice cuántas minas la rodean. Destapa todas las que no son mina.",
 				"La primera baldosa nunca es mina y el tablero siempre se resuelve pensando, sin adivinar. Si destapas una mina pierdes 2 corazones y el tablero vuelve a empezar, con las minas en otro lugar."
 			],
@@ -206,37 +206,33 @@
 				1.7,
 				1.4
 			],
-			"starter_code": "# Reparte TODAS las pesas entre los dos platos para que sumen lo mismo.\n# Cada pesa se pone por su posición (0, 1, 2...): plato_izq.poner(0).\n# La Balanza prueba tu programa con dos juegos de pesas: el que ves y uno oculto.\n#\n# Pista: recorre las pesas en orden y pon cada una en el plato que pese MENOS en ese\n# momento (si pesan igual, en el izquierdo). plato_izq.peso() dice cuánto lleva.\n\n",
+			"starter_code": "# Reparte TODAS las pesas entre los dos platos para que sumen lo mismo.\n# Cada pesa se pone por su posición (0, 1, 2...): plato_izq.poner(0).\n# La Balanza prueba tu programa con dos juegos de pesas: el que ves y uno oculto.\n#\n# Pista: plato_liviano() te da el plato que pesa MENOS en ese momento.\n# Recorre las pesas en orden y pon cada una en ese plato.\n\n",
 			"help": [
 				[
-					"pesas.lista()",
-					"lista con el valor de cada pesa"
+					"for i in range(pesas.cantidad()):",
+					"recorre las pesas: i = 0, 1, 2..."
 				],
 				[
-					"pesas.cantidad()",
-					"cuántas pesas hay"
+					"plato_liviano()",
+					"el plato que pesa menos ahora"
+				],
+				[
+					"plato_liviano().poner(i)",
+					"pone la pesa i en el plato más liviano"
 				],
 				[
 					"plato_izq.poner(i)",
-					"pone la pesa de la posición i en el plato izquierdo"
-				],
-				[
-					"plato_der.poner(i)",
-					"pone la pesa de la posición i en el plato derecho"
+					"pone la pesa i en el plato izquierdo"
 				],
 				[
 					"plato_izq.peso()",
 					"cuánto suma ese plato ahora"
-				],
-				[
-					"for i in range(pesas.cantidad()):",
-					"recorre las pesas: i = 0, 1, 2..."
 				]
 			],
 			"intro": [
 				"INSCRIPCIÓN: El peso del conocimiento no está en acumular, sino en hallar el justo equilibrio.",
 				"Programa la Balanza: reparte TODAS las pesas entre el plato izquierdo y el derecho para que los dos sumen lo mismo. Cada pesa se pone por su posición en el estante (el número cian de abajo): plato_izq.poner(0).",
-				"Pista: pon cada pesa, en orden, en el plato que pese menos en ese momento. La Balanza prueba tu programa con dos juegos de pesas, el que ves y uno oculto. Si no queda nivelada, las pesas caen a la lava y llegan otras.",
+				"Pista: plato_liviano() te da el plato que pesa menos en ese momento; pon cada pesa, en orden, en ese plato. La Balanza prueba tu programa con dos juegos de pesas, el que ves y uno oculto. Si no queda nivelada, las pesas caen a la lava y llegan otras.",
 				"INSCRIPCIÓN: Los caballeros de piedra también vigilan la Balanza. Cada error del código los despierta."
 			],
 			"tunnel_intro": [
@@ -261,42 +257,51 @@
 				"interval": 0.35,
 				"life": 0
 			},
-			"starter_code": "# Busca un camino de red.inicio a red.salida y pásalo a puentes.levantar(camino).\n# El camino es una lista de plataformas: [red.inicio, ..., red.salida].\n# La consola lo prueba en dos redes de prueba y en la de esta sala.\n#\n# Pista: red.mas_cercano(id) te dice a qué plataforma saltar desde id para acercarte\n# al núcleo. Empieza en red.inicio y, mientras no llegues a red.salida, salta y anota\n# cada plataforma en el camino.\n\n",
+			"starter_code": "# Levanta los puentes desde red.inicio hasta red.salida, uno por uno.\n# puentes.levantar(id) tiende un puente desde la última plataforma hasta id.\n# red.mas_cercano(id) te dice a qué plataforma saltar desde id para acercarte al núcleo.\n# La consola prueba tu programa en dos redes de prueba y en la de esta sala.\n#\n# Pista: empieza en red.inicio y, MIENTRAS no llegues a red.salida, salta al más cercano\n# y levanta su puente.\n\nactual = red.inicio\n",
 			"help": [
 				[
 					"red.inicio / red.salida",
 					"plataforma de partida y la del núcleo"
 				],
 				[
-					"red.vecinos(id)",
-					"lista de plataformas conectadas con id"
-				],
-				[
-					"puentes.levantar(camino)",
-					"levanta los puentes de ese camino (una vez)"
-				],
-				[
 					"red.mas_cercano(id)",
 					"el vecino de id más cercano al núcleo"
 				],
 				[
-					"camino.append(x)",
-					"agrega x al final del camino"
+					"puentes.levantar(id)",
+					"tiende un puente hasta la plataforma id"
 				],
 				[
 					"while actual != red.salida:",
 					"repite hasta llegar al núcleo"
+				],
+				[
+					"actual = ...",
+					"cambia la plataforma en la que vas"
 				]
 			],
 			"intro": [
 				"INSCRIPCIÓN: Quien domine el flujo de las funciones encontrará la salida hacia la superficie.",
 				"El núcleo flota al otro lado del abismo, sobre la última plataforma. Las plataformas están unidas por hilos de luz, pero no se pueden pisar: hacen falta puentes.",
-				"Programa la Consola: busca un camino de red.inicio a red.salida y pásalo a puentes.levantar(camino). Sirve cualquier camino que llegue al núcleo. Pista: red.mas_cercano(id) dice a qué plataforma saltar desde id para acercarte al núcleo. La consola prueba tu programa en dos redes de prueba y en la de esta sala.",
+				"Programa la Consola: empieza en red.inicio y, mientras no llegues a red.salida, salta a red.mas_cercano(actual) y levanta su puente con puentes.levantar(actual). La consola prueba tu programa en dos redes de prueba y en la de esta sala.",
 				"Cuando la consola acepte tu programa, usa su atril para levantar los puentes: aparecen uno tras otro y ya no se caen. Camina por ellos hasta el núcleo.",
 				"INSCRIPCIÓN: Los últimos guardianes vigilan la Consola. No pueden cruzar el abismo, pero cada error del código los despierta."
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Más allá, la Singularidad del Cero: el corazón del templo."
+			]
+		},
+		{
+			"name": "El Trono del Cero",
+			"kind": "throne",
+			"intro": [
+				"Una sombra roja baja del techo y abre las alas sobre el trono: el Guardián del Cero.",
+				"EL GUARDIÁN DEL CERO: «Tomaste el núcleo, pero no saldrás con él mientras yo exista».",
+				"Golpéalo con J o clic. Cuando el círculo rojo marque su pisotón, sal corriendo o salta con ESPACIO. Los orbes se esquivan o se deshacen con el garrote.",
+				"Al perder un tercio de la vida se cubre con un escudo y llama a sus guardianes: vence a todos para romperlo. Al entrar recuperas 2 corazones: es la única curación del templo."
+			],
+			"tunnel_intro": [
+				"INSCRIPCIÓN: Aquí termina el templo. Quien llegue al trono deberá vencer a su último guardián."
 			]
 		}
 	]

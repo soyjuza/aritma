@@ -24,3 +24,4 @@ static func _register_defaults() -> void:
 	register("vortex", VortexBuilder.new())
 	register("balance", BalanceBuilder.new())
 	register("core", CoreBuilder.new())
+	register("throne", ThroneBuilder.new())

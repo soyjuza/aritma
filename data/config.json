@@ -172,7 +172,11 @@
 		"mine_exploded": "explosion",
 		"board_powered": "powerup",
 		"bridges_raised": "powerup",
-		"core_taken": "success"
+		"core_taken": "success",
+		"boss_appeared": "spirit",
+		"boss_slam": "explosion",
+		"boss_shield": "alarm",
+		"boss_defeated": "success"
 	},
 	"camera_shake": {
 		"door_opened": 3.0,
@@ -187,7 +191,10 @@
 		"guardian_hit": 1.0,
 		"rune_blast": 7.0,
 		"mine_exploded": 6.0,
-		"core_taken": 5.0
+		"core_taken": 5.0,
+		"boss_appeared": 4.0,
+		"boss_slam": 6.0,
+		"boss_defeated": 6.0
 	},
 	"tile": 16,
 	"zoom": 3,
@@ -197,7 +204,7 @@
 		"knockback": 170.0,
 		"fall_penalty_sec": 7,
 		"death_penalty_sec": 60,
-		"heal_on_solve": 2,
+		"heal_on_solve": 0,
 		"attack_time": 0.28,
 		"attack_cooldown": 0.12,
 		"attack_reach": 20.0,
@@ -250,6 +257,7 @@
 			2,
 			2
 		],
-		"mine_damage": 4
+		"mine_damage": 4,
+		"heal_on_boss": 4
 	}
 }

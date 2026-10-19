@@ -10,14 +10,14 @@ const ROOTS_RANGE_OK := "def factorizar(b, c):\n    for p in range(-60, 61):\n  
 const ROOTS_RANGE_SLOW := "def factorizar(b, c):\n    for p in range(-60, 61):\n        for q in range(-60, 61):\n            if p + q == b and p * q == c:\n                return [p, q]\n"
 const BALANCE_OK := "p = pesas.lista()\nn = len(p)\ntotal = sum(p)\nfor m in range(2 ** n):\n    izq = 0\n    for i in range(n):\n        if (m // (2 ** i)) % 2 == 1:\n            izq += p[i]\n    if izq * 2 == total:\n        for i in range(n):\n            if (m // (2 ** i)) % 2 == 1:\n                plato_izq.poner(i)\n            else:\n                plato_der.poner(i)\n        break\n"
 const BALANCE_HALF := "p = pesas.lista()\nfor i in range(len(p)):\n    if i % 2 == 0:\n        plato_izq.poner(i)\n    else:\n        plato_der.poner(i)\n"
-const NETWORK_BFS := "n = red.cantidad()\nprevio = []\nfor i in range(n):\n    previo.append(-1)\nvisto = [red.inicio]\ncola = [red.inicio]\nwhile len(cola) > 0:\n    actual = cola.pop(0)\n    for v in red.vecinos(actual):\n        if v not in visto:\n            visto.append(v)\n            previo[v] = actual\n            cola.append(v)\ncamino = []\nx = red.salida\nwhile x != -1:\n    camino.insert(0, x)\n    x = previo[x]\npuentes.levantar(camino)\n"
-const NETWORK_PATHS := "visto = [red.inicio]\ncaminos = [[red.inicio]]\nwhile len(caminos) > 0:\n    c = caminos.pop(0)\n    u = c[len(c) - 1]\n    if u == red.salida:\n        puentes.levantar(c)\n        break\n    for v in red.vecinos(u):\n        if v not in visto:\n            visto.append(v)\n            caminos.append(c + [v])\n"
-const NETWORK_GREEDY := "camino = [red.inicio]\nactual = red.inicio\nwhile actual != red.salida:\n    mejor = red.vecinos(actual)[0]\n    for v in red.vecinos(actual):\n        if red.distancia(v) < red.distancia(mejor):\n            mejor = v\n    actual = mejor\n    camino.append(actual)\npuentes.levantar(camino)\n"
-const NETWORK_WRONG := "puentes.levantar([red.inicio])\n"
-const NETWORK_DFS := "visto = [red.inicio]\npila = [[red.inicio]]\ncamino = []\nwhile len(pila) > 0:\n    c = pila.pop()\n    u = c[len(c) - 1]\n    if u == red.salida:\n        camino = c\n        break\n    for v in red.vecinos(u):\n        if v not in visto:\n            visto.append(v)\n            pila.append(c + [v])\npuentes.levantar(camino)\n"
-const BEACON_SIMPLE := "def vecinas(x, y):\n    lista = []\n    for c in alrededor(x, y):\n        if 0 <= c[0] < 8 and 0 <= c[1] < 8:\n            lista.append(c)\n    return lista\n"
-const BALANCE_SIMPLE := "for i in range(pesas.cantidad()):\n    if plato_izq.peso() <= plato_der.peso():\n        plato_izq.poner(i)\n    else:\n        plato_der.poner(i)\n"
-const NETWORK_SIMPLE := "camino = [red.inicio]\nactual = red.inicio\nwhile actual != red.salida:\n    actual = red.mas_cercano(actual)\n    camino.append(actual)\npuentes.levantar(camino)\n"
+const NETWORK_BFS := "n = red.cantidad()\nprevio = []\nfor i in range(n):\n    previo.append(-1)\nvisto = [red.inicio]\ncola = [red.inicio]\nwhile len(cola) > 0:\n    actual = cola.pop(0)\n    for v in red.vecinos(actual):\n        if v not in visto:\n            visto.append(v)\n            previo[v] = actual\n            cola.append(v)\ncamino = []\nx = red.salida\nwhile x != -1:\n    camino.insert(0, x)\n    x = previo[x]\nfor k in range(1, len(camino)):\n    puentes.levantar(camino[k])\n"
+const NETWORK_PATHS := "visto = [red.inicio]\ncaminos = [[red.inicio]]\nwhile len(caminos) > 0:\n    c = caminos.pop(0)\n    u = c[len(c) - 1]\n    if u == red.salida:\n        for k in range(1, len(c)):\n            puentes.levantar(c[k])\n        break\n    for v in red.vecinos(u):\n        if v not in visto:\n            visto.append(v)\n            caminos.append(c + [v])\n"
+const NETWORK_GREEDY := "camino = [red.inicio]\nactual = red.inicio\nwhile actual != red.salida:\n    mejor = red.vecinos(actual)[0]\n    for v in red.vecinos(actual):\n        if red.distancia(v) < red.distancia(mejor):\n            mejor = v\n    actual = mejor\n    camino.append(actual)\nfor k in range(1, len(camino)):\n    puentes.levantar(camino[k])\n"
+const NETWORK_WRONG := "puentes.levantar(red.mas_cercano(red.inicio))\n"
+const NETWORK_DFS := "visto = [red.inicio]\npila = [[red.inicio]]\ncamino = []\nwhile len(pila) > 0:\n    c = pila.pop()\n    u = c[len(c) - 1]\n    if u == red.salida:\n        camino = c\n        break\n    for v in red.vecinos(u):\n        if v not in visto:\n            visto.append(v)\n            pila.append(c + [v])\nfor k in range(1, len(camino)):\n    puentes.levantar(camino[k])\n"
+const BEACON_SIMPLE := "def dentro(x, y):\n    return 0 <= x < 8 and 0 <= y < 8\n"
+const BALANCE_SIMPLE := "for i in range(pesas.cantidad()):\n    plato_liviano().poner(i)\n"
+const NETWORK_SIMPLE := "actual = red.inicio\nwhile actual != red.salida:\n    actual = red.mas_cercano(actual)\n    puentes.levantar(actual)\n"
 const CRIBA_OK := "while tolva.quedan() > 0:\n    n = tolva.soltar()\n    if n % 2 == 0:\n        caliz.recibir()\n    else:\n        crisol.desintegrar()\n"
 
 var game: Game
@@ -589,14 +589,14 @@ func _test_vortex() -> void:
 	game.open_codex(lvl.machine.session)
 	await _wait(0.6)
 	Engine.time_scale = 4.0
-	game.codex.editor.text = "def vecinas(x, y):\n    lista = []\n    for dx in [-1, 0, 1]:\n        for dy in [-1, 0, 1]:\n            if dx != 0 or dy != 0:\n                lista.append([x + dx, y + dy])\n    return lista\n"
+	game.codex.editor.text = "def dentro(x, y):\n    return x < 8 and y < 8\n"
 	game.machine.current.run()
 	await _wait(0.3)
 	var t := 0.0
 	while not game.codex.visible and t < 20.0:
 		await _wait(0.2)
 		t += 0.2
-	_check(not lvl.machine.is_solved and not lvl.board.powered and game.machine.current is CodexState, "Faro: si vecinas() se sale del tablero, no enciende (y no despierta guardianes)")
+	_check(not lvl.machine.is_solved and not lvl.board.powered and game.machine.current is CodexState, "Faro: si dentro() acepta casillas negativas, no enciende (y no despierta guardianes)")
 	game.codex.editor.text = BEACON_SIMPLE
 	game.machine.current.run()
 	t = 0.0
@@ -606,7 +606,7 @@ func _test_vortex() -> void:
 	Engine.time_scale = 1.0
 	await _wait(0.8)
 	game.dialog.close()
-	_check(lvl.board.powered and game.machine.current is PlayState, "Faro: con vecinas() filtrando alrededor(x, y), el tablero se enciende")
+	_check(lvl.board.powered and game.machine.current is PlayState, "Faro: con dentro(x, y) bien escrito (una línea), el tablero se enciende")
 	# E destapa la baldosa que pisa Tala; Q le pone bandera
 	var start := Vector2i(3, 6)
 	game.player.place(lvl.board.cell_center(start), Vector2.UP)
@@ -679,7 +679,7 @@ func _test_balance_rules() -> void:
 		var r := BalanceRules.new(BalanceRules.make_set(7 + i % 2, rng, 2, 19, true))
 		var result := sandbox.run(BALANCE_SIMPLE, BalanceAdapter.objects(r, func(k, a): return k), 200000)
 		easy = easy and result.ok and r.verdict() == BalanceRules.Verdict.LEVEL
-	_check(easy, "Balanza (fácil): poner cada pesa en el plato más liviano siempre la nivela (100 juegos)")
+	_check(easy, "Balanza (fácil): plato_liviano().poner(i) en un for siempre la nivela (100 juegos)")
 
 
 ## La Sala 4 de verdad: un reparto a medias hace caer las pesas (y despierta guardianes); el
@@ -803,7 +803,7 @@ func _test_core() -> void:
 	Engine.time_scale = 1.0
 	await _wait(1.0)
 	game.dialog.close()
-	_check(machine.is_solved and machine.real.check(machine.path) == "", "Consola: saltar con red.mas_cercano hasta el núcleo sirve y la red queda lista")
+	_check(machine.is_solved and machine.real.check(machine.path) == "", "Consola: saltar con red.mas_cercano y levantar cada puente sirve y la red queda lista")
 	# Caer al abismo
 	var before := game.timer.remaining
 	game.player.place(lvl.network.to_global(lvl.network.void_rect.get_center() + Vector2(0, 30)), Vector2.UP)
@@ -819,15 +819,74 @@ func _test_core() -> void:
 	_check(lvl.network.is_ground(a.lerp(b, 0.5)), "Puentes: sobre un puente levantado no se cae")
 	await _wait(10.0)
 	_check(lvl.network.bridges_up() and lvl.network.is_ground(a.lerp(b, 0.5)), "Puentes: siguen ahí 10 s después (quedan para siempre)")
-	# El núcleo
+	# El núcleo: tomarlo lleva a la Sala 6
 	for id in machine.path:
 		game.player.global_position = lvl.network.platform_global(id) + Vector2(0, 2)
 		await _wait(0.15)
 	t = 0.0
-	while not game.machine.current is EndState and t < 5.0:
+	while not game.level is ThroneLevel and t < 6.0:
 		await _wait(0.2)
 		t += 0.2
-	_check(game.machine.current is EndState and game.machine.current._won, "Núcleo: al tomarlo se gana el juego")
+	_check(game.level is ThroneLevel and game.chamber_index == 5, "Núcleo: al tomarlo se llega a la Sala 6, el Trono del Cero (Factory: ThroneBuilder)")
+	await _test_boss(game.level as ThroneLevel)
+
+
+## La Sala 6: al entrar despierta el jefe (y cura 2 corazones); el pisotón quita un corazón,
+## la ráfaga lanza orbes, al cambiar de fase se cubre con un escudo y llama guardianes, y
+## vencerlo gana el juego.
+func _test_boss(lvl: ThroneLevel) -> void:
+	if lvl == null:
+		return
+	var boss := lvl.boss
+	game.dialog.close()
+	_check(not boss.is_awake(), "Jefe: duerme mientras Tala va por el pasillo")
+	game.health.halves = 4
+	game.player.place(lvl.room_entrance() + Vector2(0, 20), Vector2.UP)
+	await _walk_up_until(func(): return lvl._in_hall, 3.0)
+	_check(boss.is_awake() and game.health.halves == 8, "Jefe: al entrar a la sala despierta y Tala recupera 2 corazones (la única curación)")
+	var t := 0.0
+	while boss.state == "appear" and t < 4.0:
+		await _wait(0.2)
+		t += 0.2
+	game.dialog.close()
+	game.health.refill()
+	game.player.invulnerable = 0.0
+	game.player.place(boss.global_position + Vector2(0, 30), Vector2.UP)
+	boss.change("slam")
+	var halves := game.health.halves
+	await _wait(1.6)
+	_check(game.health.halves == halves - 2 and boss.state == "tired", "Jefe: el pisotón quita un corazón y después queda cansado")
+	game.player.place(boss.global_position + Vector2(0, 90), Vector2.UP)
+	await _wait(1.2)
+	var orbs := game.get_tree().get_nodes_in_group("orbs").size()
+	boss.change("volley")
+	await _wait(0.85)
+	_check(game.get_tree().get_nodes_in_group("orbs").size() >= orbs + 3, "Jefe: la ráfaga lanza un abanico de orbes")
+	game.health.refill()
+	for i in boss.phase_hp():
+		boss.take_hit(1, Vector2.UP)
+	_check(boss.state == "shield" and not boss.can_be_hit(), "Jefe: al perder un tercio de la vida se cubre con un escudo")
+	await _wait(1.5)
+	_check(lvl.alarm.fighting(), "Jefe: el escudo llama una ola de guardianes")
+	await _clear_guardians(lvl)
+	await _wait(0.5)
+	_check(boss.can_be_hit(), "Jefe: vencida la ola, el escudo cae")
+	game.health.refill()
+	while boss.hp > 0:
+		if boss.can_be_hit():
+			boss.take_hit(1, Vector2.UP)
+		else:
+			await _clear_guardians(lvl)
+			await _wait(1.2)
+	t = 0.0
+	while boss.state != "hidden" and t < 5.0:
+		await _wait(0.2)
+		t += 0.2
+	t = 0.0
+	while not game.machine.current is EndState and t < 6.0:
+		await _wait(0.2)
+		t += 0.2
+	_check(game.machine.current is EndState and game.machine.current._won, "Jefe: al vencerlo se gana el juego")
 
 
 ## Reglas puras del Mural de las Raíces.

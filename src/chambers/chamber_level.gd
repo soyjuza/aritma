@@ -26,7 +26,7 @@ func open_exit() -> void:
 		return
 	solved = true
 	alarm.calm()
-	_game.health.heal(int(_game.combat("heal_on_solve", 2)))
+	_game.health.heal(int(_game.combat("heal_on_solve", 0)))    # 0: resolver no cura
 	_game.bus.publish(GameEvents.CHAMBER_CLEARED, {"index": index})
 	_game.rig.shake(3.0)
 	for grate in nodes_of(Grate):
