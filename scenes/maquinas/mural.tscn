@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/chambers/mural_machine.gd" id="1_3xy1t"]
+[ext_resource type="Texture2D" path="res://assets/efectos/luz_suave.tres" id="2_30ro2"]
+[ext_resource type="PackedScene" path="res://scenes/maquinas/atril.tscn" id="3_aov2d"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8ka0m"]
+size = Vector2(208, 14)
+
+[node name="Mural" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_3xy1t")
+
+[node name="Cuerpo" type="StaticBody2D" parent="."]
+
+[node name="Forma" type="CollisionShape2D" parent="Cuerpo"]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_8ka0m")
+
+[node name="Luz" type="PointLight2D" parent="."]
+position = Vector2(0, -60)
+color = Color(0.247059, 0.878431, 1, 1)
+energy = 0.6
+shadow_filter = 1
+texture = ExtResource("2_30ro2")
+texture_scale = 1.17188
+metadata/casts_shadow = false
+
+[node name="Atril" parent="." instance=ExtResource("3_aov2d")]
+position = Vector2(0, 26)

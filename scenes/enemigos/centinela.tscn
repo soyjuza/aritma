@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/enemies/guardian.gd" id="1_guard"]
+[ext_resource type="Texture2D" path="res://assets/pack/actors/Shadow.png" id="2_shadow"]
+[ext_resource type="SpriteFrames" path="res://assets/personajes/caballero_animaciones.tres" id="3_frames"]
+[ext_resource type="Texture2D" path="res://assets/efectos/luz_suave.tres" id="4_light"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 6.5
+
+[node name="Caballero" type="CharacterBody2D"]
+motion_mode = 1
+script = ExtResource("1_guard")
+ring_color = Color(1, 0.78, 0.25, 1)
+body_scale = 1.5
+
+[node name="Colision" type="CollisionShape2D" parent="."]
+position = Vector2(0, -3)
+shape = SubResource("CircleShape2D_body")
+
+[node name="Sombra" type="Sprite2D" parent="."]
+modulate = Color(1, 1, 1, 0.75)
+position = Vector2(0, -1)
+texture = ExtResource("2_shadow")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -8)
+sprite_frames = ExtResource("3_frames")
+animation = &"idle_down"
+
+[node name="Ojos" type="PointLight2D" parent="."]
+position = Vector2(0, -11)
+color = Color(1, 0.35, 0.25, 1)
+energy = 0.0
+texture = ExtResource("4_light")
+texture_scale = 0.25
+metadata/casts_shadow = false

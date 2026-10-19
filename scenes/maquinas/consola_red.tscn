@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/chambers/network_console.gd" id="1_con"]
+[ext_resource type="Texture2D" path="res://assets/efectos/luz_suave.tres" id="2_luz"]
+[ext_resource type="PackedScene" path="res://scenes/maquinas/atril.tscn" id="3_atril"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_con"]
+size = Vector2(22, 8)
+
+[node name="Consola" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_con")
+
+[node name="Cuerpo" type="StaticBody2D" parent="."]
+
+[node name="Forma" type="CollisionShape2D" parent="Cuerpo"]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_con")
+
+[node name="Luz" type="PointLight2D" parent="."]
+position = Vector2(0, -38)
+color = Color(0.247059, 0.878431, 1, 1)
+energy = 0.4
+texture = ExtResource("2_luz")
+texture_scale = 0.6
+metadata/casts_shadow = false
+
+[node name="Atril" parent="." instance=ExtResource("3_atril")]
+position = Vector2(0, 20)

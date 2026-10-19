@@ -1,0 +1,40 @@
+[gd_scene load_steps=7 format=3 uid="uid://bpa1r11af3j2a"]
+
+[ext_resource type="Script" uid="uid://cgnf78b7yyhkk" path="res://src/game.gd" id="1_272bh"]
+[ext_resource type="PackedScene" uid="uid://cqy8kkyln35b7" path="res://scenes/niveles/pueblo.tscn" id="2_5vw27"]
+[ext_resource type="Script" uid="uid://ch3282wtri55g" path="res://src/camera/camera_rig.gd" id="3_kek77"]
+[ext_resource type="PackedScene" uid="uid://pg2ulh4f3o1c" path="res://scenes/personajes/tala.tscn" id="4_4c57u"]
+[ext_resource type="Script" uid="uid://dlhtwc5nknx8k" path="res://src/ui/codex_panel.gd" id="6_dg77c"]
+[ext_resource type="Script" uid="uid://4eg706eddoe" path="res://src/ui/overlay_canvas.gd" id="7_ycdy4"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_272bh")
+town_scene = ExtResource("2_5vw27")
+
+[node name="Camara" type="Camera2D" parent="."]
+script = ExtResource("3_kek77")
+
+[node name="Tala" parent="." instance=ExtResource("4_4c57u")]
+
+[node name="Interfaz" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="Codice" type="Control" parent="Interfaz"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("6_dg77c")
+
+[node name="Pantalla" type="Control" parent="Interfaz"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("7_ycdy4")

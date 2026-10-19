@@ -1,0 +1,255 @@
+{
+	"title": "PAREDES VIVAS",
+	"subtitle": "La Cámara de los Aritmanos",
+	"author": "JUAN JOSE ZAPATA",
+	"version": "v3.0",
+	"time_limit_sec": 900,
+	"time_warning_sec": 60,
+	"secret_code": "PROFE",
+	"text_speeds": [
+		30,
+		60,
+		1000
+	],
+	"default_settings": {
+		"music": 6,
+		"sfx": 7,
+		"quality": 1,
+		"full": false,
+		"text": 1,
+		"shake": true
+	},
+	"movement": {
+		"walk_speed": 72.0,
+		"run_speed": 124.0,
+		"accel": 900.0,
+		"stamina_max": 3.5,
+		"stamina_regen": 0.9,
+		"jump_time": 0.42,
+		"jump_height": 10.0,
+		"jump_cooldown": 0.15
+	},
+	"controls": {
+		"move_up": [
+			"key:W",
+			"key:Up"
+		],
+		"move_down": [
+			"key:S",
+			"key:Down"
+		],
+		"move_left": [
+			"key:A",
+			"key:Left"
+		],
+		"move_right": [
+			"key:D",
+			"key:Right"
+		],
+		"run": [
+			"key:Shift"
+		],
+		"jump": [
+			"key:Space"
+		],
+		"interact": [
+			"key:E",
+			"key:F"
+		],
+		"book": [
+			"key:Tab"
+		],
+		"pause": [
+			"key:Escape",
+			"key:P"
+		],
+		"accept": [
+			"key:Enter",
+			"key:Kp Enter",
+			"key:E",
+			"key:Space"
+		],
+		"cancel": [
+			"key:Escape",
+			"key:Backspace"
+		],
+		"ui_up": [
+			"key:W",
+			"key:Up"
+		],
+		"ui_down": [
+			"key:S",
+			"key:Down"
+		],
+		"ui_left": [
+			"key:A",
+			"key:Left"
+		],
+		"ui_right": [
+			"key:D",
+			"key:Right"
+		],
+		"fullscreen": [
+			"key:F11"
+		],
+		"run_code": [
+			"key:F5"
+		],
+		"attack": [
+			"key:J",
+			"mouse:1"
+		],
+		"flag": [
+			"key:Q"
+		]
+	},
+	"quality_presets": {
+		"low": {
+			"shadows": false,
+			"particles": 0.5,
+			"light_scale": 1.0,
+			"glow": false
+		},
+		"high": {
+			"shadows": true,
+			"particles": 1.0,
+			"light_scale": 1.0,
+			"glow": true
+		}
+	},
+	"music": {
+		"title": "res://assets/pack/music/title.ogg",
+		"town": "res://assets/pack/music/town.ogg",
+		"temple": "res://assets/pack/music/temple.ogg",
+		"ruins": "res://assets/pack/music/ruins.ogg",
+		"tension": "res://assets/pack/music/tension.ogg",
+		"end": "res://assets/pack/music/end.ogg"
+	},
+	"sounds": {
+		"step": "",
+		"jump": "jump",
+		"land": "bounce",
+		"menu_move": "move",
+		"menu_confirm": "accept",
+		"menu_cancel": "cancel",
+		"dialog_char": "voice",
+		"time_warning": "alarm",
+		"interact": "accept",
+		"code_ran": "magic",
+		"code_failed": "cancel",
+		"door_opened": "secret",
+		"player_reset": "hit",
+		"chamber_entered": "spirit",
+		"checkpoint": "coin",
+		"chamber_cleared": "success",
+		"time_up": "gameover",
+		"passage_collapsed": "explosion",
+		"machine_step": "move",
+		"machine_good": "coin",
+		"machine_bad": "impact",
+		"machine_round": "powerup",
+		"player_fell": "hit",
+		"player_attack": "move",
+		"player_hurt": "hit",
+		"player_healed": "coin",
+		"player_died": "gameover",
+		"time_penalty": "alert",
+		"alarm_raised": "alarm",
+		"guardian_waking": "strange",
+		"guardian_landed": "impact",
+		"guardian_hit": "impact",
+		"guardian_defeated": "magic",
+		"wave_cleared": "powerup",
+		"guardian_charging": "alert",
+		"rune_blast": "explosion",
+		"key_ok": "move",
+		"key_bad": "cancel",
+		"keys_won": "success",
+		"keys_lost": "hit",
+		"orb_fired": "magic",
+		"tile_revealed": "move",
+		"tile_flagged": "accept",
+		"mine_exploded": "explosion",
+		"board_powered": "powerup",
+		"bridges_raised": "powerup",
+		"core_taken": "success"
+	},
+	"camera_shake": {
+		"door_opened": 3.0,
+		"player_reset": 3.0,
+		"passage_collapsed": 6.0,
+		"machine_bad": 1.5,
+		"player_fell": 4.0,
+		"alarm_raised": 3.0,
+		"guardian_waking": 1.5,
+		"guardian_landed": 3.0,
+		"player_hurt": 2.5,
+		"guardian_hit": 1.0,
+		"rune_blast": 7.0,
+		"mine_exploded": 6.0,
+		"core_taken": 5.0
+	},
+	"tile": 16,
+	"zoom": 3,
+	"combat": {
+		"hearts": 5,
+		"invulnerable_sec": 1.0,
+		"knockback": 170.0,
+		"fall_penalty_sec": 7,
+		"death_penalty_sec": 60,
+		"heal_on_solve": 2,
+		"attack_time": 0.28,
+		"attack_cooldown": 0.12,
+		"attack_reach": 20.0,
+		"attack_arc_deg": 75.0,
+		"waves": [
+			2,
+			3,
+			4,
+			4,
+			5,
+			6
+		],
+		"speed_step": 0.12,
+		"speed_max": 1.6,
+		"wake_time": 1.5,
+		"drop_warning": 1.0,
+		"crouch_time": 0.5,
+		"drop_stagger": 0.5,
+		"min_drop_distance": 48.0,
+		"eyes_distance": 64.0,
+		"slowmo_scale": 0.35,
+		"slowmo_sec": 0.6,
+		"runic_waves": [
+			0,
+			0,
+			1,
+			1,
+			1,
+			2
+		],
+		"challenge_keys": [
+			"A",
+			"S",
+			"D",
+			"F",
+			"J",
+			"K",
+			"L"
+		],
+		"blast_damage": 4,
+		"challenge_time_scale": 0.15,
+		"challenge_base_sec": 1.0,
+		"challenge_sec_per_key": 1.0,
+		"challenge_ready_sec": 1.0,
+		"ranged_waves": [
+			0,
+			1,
+			1,
+			1,
+			2,
+			2
+		],
+		"mine_damage": 4
+	}
+}

@@ -1,0 +1,54 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/pack/backgrounds/Tilesets/TilesetElement.png" id="1_tuwi5"]
+[ext_resource type="Texture2D" path="res://assets/pack/fx/Particle/Fire.png" id="2_4axro"]
+[ext_resource type="Texture2D" path="res://assets/efectos/luz_suave.tres" id="3_giu2j"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tahtu"]
+atlas = ExtResource("1_tuwi5")
+region = Rect2(64, 0, 16, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hixt7"]
+size = Vector2(12, 8)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_l3ufk"]
+particles_animation = true
+particles_anim_h_frames = 8
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[node name="BraseroCian" type="Node2D"]
+
+[node name="Olla" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_tahtu")
+
+[node name="Cuerpo" type="StaticBody2D" parent="."]
+
+[node name="Forma" type="CollisionShape2D" parent="Cuerpo"]
+position = Vector2(0, 2)
+shape = SubResource("RectangleShape2D_hixt7")
+
+[node name="Fuego" type="CPUParticles2D" parent="."]
+modulate = Color(0.6, 1.4, 1.6, 1)
+z_index = 20
+material = SubResource("CanvasItemMaterial_l3ufk")
+position = Vector2(0, -6)
+amount = 10
+texture = ExtResource("2_4axro")
+lifetime = 0.6
+direction = Vector2(0, -1)
+spread = 25.0
+gravity = Vector2(0, -20)
+initial_velocity_min = 4.0
+initial_velocity_max = 12.0
+anim_speed_min = 1.0
+anim_speed_max = 1.0
+
+[node name="Luz" type="PointLight2D" parent="."]
+position = Vector2(0, -8)
+color = Color(0.247059, 0.878431, 1, 1)
+energy = 0.9
+shadow_filter = 1
+texture = ExtResource("3_giu2j")
+texture_scale = 0.5
+metadata/casts_shadow = false

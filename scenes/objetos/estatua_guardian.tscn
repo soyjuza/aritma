@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://src/world/pedestal.gd" id="1_ped"]
+[ext_resource type="PackedScene" path="res://scenes/enemigos/centinela.tscn" id="2_cent"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ped"]
+size = Vector2(24, 6)
+
+[node name="EstatuaGuardian" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_ped")
+
+[node name="Cuerpo" type="StaticBody2D" parent="."]
+
+[node name="Forma" type="CollisionShape2D" parent="Cuerpo"]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_ped")
+
+[node name="Caballero" parent="." instance=ExtResource("2_cent")]
+dormant = true
+
+[node name="Sprite" parent="Caballero" index="2"]
+modulate = Color(0.75, 0.78, 0.8, 1)
+scale = Vector2(1.5, 1.5)
+position = Vector2(0, -19)

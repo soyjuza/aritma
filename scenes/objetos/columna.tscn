@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/pack/backgrounds/Tilesets/TilesetVillageAbandoned.png" id="1_2jitq"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gili3"]
+atlas = ExtResource("1_2jitq")
+region = Rect2(32, 48, 16, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kiqws"]
+size = Vector2(12, 8)
+
+[node name="Columna" type="Node2D"]
+
+[node name="Piedra" type="Sprite2D" parent="."]
+position = Vector2(0, -24)
+texture = SubResource("AtlasTexture_gili3")
+
+[node name="Cuerpo" type="StaticBody2D" parent="."]
+
+[node name="Forma" type="CollisionShape2D" parent="Cuerpo"]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_kiqws")

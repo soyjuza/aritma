@@ -1,0 +1,37 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://src/world/sign_post.gd" id="1_ww1wx"]
+[ext_resource type="Texture2D" path="res://assets/pack/backgrounds/Tilesets/TilesetVillageAbandoned.png" id="2_ahkx7"]
+[ext_resource type="Script" path="res://src/world/interactable.gd" id="3_mbep6"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_886sw"]
+atlas = ExtResource("2_ahkx7")
+region = Rect2(160, 96, 16, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_suoki"]
+size = Vector2(12, 8)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_noi3a"]
+size = Vector2(22, 22)
+
+[node name="Letrero" type="Node2D"]
+script = ExtResource("1_ww1wx")
+
+[node name="Placa" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_886sw")
+
+[node name="Cuerpo" type="StaticBody2D" parent="."]
+
+[node name="Forma" type="CollisionShape2D" parent="Cuerpo"]
+position = Vector2(0, 8)
+shape = SubResource("RectangleShape2D_suoki")
+
+[node name="Lectura" type="Area2D" parent="."]
+position = Vector2(0, 8)
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+script = ExtResource("3_mbep6")
+
+[node name="Forma" type="CollisionShape2D" parent="Lectura"]
+shape = SubResource("RectangleShape2D_noi3a")

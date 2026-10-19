@@ -1,0 +1,63 @@
+[gd_scene load_steps=7 format=3 uid="uid://d1fvhhe4r8t03"]
+
+[ext_resource type="Texture2D" uid="uid://cifxge4uisn1k" path="res://assets/pack/backgrounds/Tilesets/TilesetDungeon.png" id="1_pt25u"]
+[ext_resource type="Texture2D" uid="uid://b3k42g1ao17ty" path="res://assets/efectos/luz_suave.tres" id="2_icfyv"]
+[ext_resource type="Script" uid="uid://cynjb30ysc501" path="res://src/world/interactable.gd" id="3_vrv6p"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5ixuj"]
+atlas = ExtResource("1_pt25u")
+region = Rect2(32, 48, 16, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4g2a1"]
+size = Vector2(12, 6)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_452hw"]
+size = Vector2(24, 24)
+
+[node name="Atril" type="Node2D"]
+
+[node name="Pedestal" type="Sprite2D" parent="."]
+position = Vector2(0, -6)
+texture = SubResource("AtlasTexture_5ixuj")
+
+[node name="Marco" type="ColorRect" parent="."]
+offset_left = -7.0
+offset_top = -19.0
+offset_right = 7.0
+offset_bottom = -10.0
+mouse_filter = 2
+color = Color(0.431373, 0.321569, 0.196078, 1)
+
+[node name="Pantalla" type="ColorRect" parent="."]
+offset_left = -6.0
+offset_top = -18.0
+offset_right = 6.0
+offset_bottom = -11.0
+mouse_filter = 2
+color = Color(0.113725, 0.435294, 0.501961, 1)
+
+[node name="Luz" type="PointLight2D" parent="."]
+position = Vector2(0, -14)
+color = Color(0.247059, 0.878431, 1, 1)
+energy = 0.7
+shadow_filter = 1
+texture = ExtResource("2_icfyv")
+texture_scale = 0.3125
+metadata/casts_shadow = false
+
+[node name="Cuerpo" type="StaticBody2D" parent="."]
+
+[node name="Forma" type="CollisionShape2D" parent="Cuerpo"]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_4g2a1")
+
+[node name="Uso" type="Area2D" parent="."]
+position = Vector2(0, -6)
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+script = ExtResource("3_vrv6p")
+prompt_key = "prompt_machine"
+
+[node name="Forma" type="CollisionShape2D" parent="Uso"]
+shape = SubResource("RectangleShape2D_452hw")

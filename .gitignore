@@ -1,0 +1,5 @@
+# Godot
+.godot/
+
+# Ejecutables exportados (pesan más de 100 MB, el límite de GitHub)
+export/

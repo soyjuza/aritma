@@ -1,0 +1,317 @@
+{
+	"lore_intro": [
+		{
+			"title": "Aritma",
+			"text": "Hace siglos existió una civilización que no conocía la magia. Los aritmanos construían máquinas que obedecían a los números y a programas escritos: puertas que se abrían con una cuenta exacta, luces que hablaban en binario y autómatas que seguían órdenes."
+		},
+		{
+			"title": "El Sol Negro",
+			"text": "Una noche el cielo se oscureció y una tormenta de fuego solar cayó sobre el mundo. Todas las máquinas se quemaron a la vez. Sin ellas, el saber de Aritma se olvidó en pocas generaciones."
+		},
+		{
+			"title": "Raíz",
+			"text": "Hoy sus descendientes viven en Raíz, un pueblo levantado con piedras de las ruinas. Ya no saben leer los números antiguos. Solo les quedan leyendas, columnas rotas y una puerta en la montaña que todavía brilla."
+		},
+		{
+			"title": "El Códice",
+			"text": "Tala, una rastreadora del pueblo, encontró entre las ruinas un brazalete aritmano que aún funciona: el Códice. Con él se puede escribir en el idioma de las máquinas."
+		},
+		{
+			"title": "Quince minutos",
+			"text": "Bajo la montaña duerme la Cámara de Pruebas, la última máquina con energía. Su núcleo, al despertar, solo resiste quince minutos. Quien llegue al Archivo antes de que se apague recuperará el saber de Aritma."
+		}
+	],
+	"menu": [
+		"CONTINUAR",
+		"NUEVA PARTIDA",
+		"AJUSTES",
+		"CRÉDITOS",
+		"SALIR"
+	],
+	"pause_options": [
+		"REANUDAR",
+		"LIBRO DE REGLAS",
+		"AJUSTES",
+		"GUARDAR",
+		"SALIR AL TÍTULO"
+	],
+	"pause_help": [
+		"Vuelve a la expedición.",
+		"Todas las reglas que descubriste.",
+		"Efectos, sonido, texto y pantalla.",
+		"Guarda tu avance.",
+		"Volver a la pantalla de título."
+	],
+	"settings_rows": [
+		{
+			"key": "quality",
+			"label": "EFECTOS",
+			"type": "choice",
+			"options": [
+				"BAJOS",
+				"ALTOS"
+			],
+			"help": "Bajos: luces sin sombras y menos partículas (computadores con gráficos integrados)."
+		},
+		{
+			"key": "music",
+			"label": "MÚSICA",
+			"type": "bar",
+			"max": 10,
+			"help": "Volumen de la música."
+		},
+		{
+			"key": "sfx",
+			"label": "EFECTOS DE SONIDO",
+			"type": "bar",
+			"max": 10,
+			"help": "Volumen de los sonidos."
+		},
+		{
+			"key": "text",
+			"label": "VELOCIDAD DEL TEXTO",
+			"type": "choice",
+			"options": [
+				"LENTA",
+				"NORMAL",
+				"RÁPIDA"
+			],
+			"help": "Qué tan rápido aparecen los diálogos."
+		},
+		{
+			"key": "full",
+			"label": "PANTALLA COMPLETA",
+			"type": "toggle",
+			"options": [
+				"NO",
+				"SÍ"
+			],
+			"help": "También con F11."
+		},
+		{
+			"key": "",
+			"label": "VOLVER",
+			"type": "back",
+			"help": ""
+		}
+	],
+	"talk": {
+		"orun": [
+			"ORUN: Así que tú eres la que encontró el Códice. Lo veo brillar en tu brazo.",
+			"ORUN: Detrás de esa fachada está el templo de Aritma. Sus salas son máquinas que solo obedecen a programas.",
+			"ORUN: Cuando entres, el núcleo despertará y resistirá quince minutos. Ni la pausa lo detiene.",
+			"ORUN: La puerta no tiene cerradura. Obedece a quien le hable en su idioma: usa el atril que está a su derecha.",
+			"ORUN: Cada máquina prueba tu programa con casos que no ves. No sirve hacer la cuenta a mano: tiene que funcionar siempre.",
+			"ORUN: Y aprende a moverte: corre con SHIFT y salta con ESPACIO. Los aritmanos no construían pasillos para los lentos."
+		]
+	},
+	"messages": {
+		"subtitle": "La Cámara de los Aritmanos",
+		"press_start": "Presiona {accept} para comenzar",
+		"intro_keys": "{accept}: continuar   {cancel}: saltar historia",
+		"menu_blurb": [
+			"Entra al templo de Aritma y supera",
+			"sus salas-máquina en 15 minutos."
+		],
+		"saved_game": "PARTIDA GUARDADA",
+		"saved_place": "Lugar: {place}",
+		"saved_time": "Tiempo restante: {time}",
+		"objective_town": "Habla con Orun y abre la puerta del templo desde su atril",
+		"prompt_talk": "Hablar",
+		"prompt_read": "Leer la inscripción",
+		"hud_keys": "[{attack}] golpear   [{flag}] bandera   [{book}] reglas   [{pause}] pausa",
+		"hud_stamina": "ALIENTO",
+		"pause_title": "PAUSA",
+		"pause_kicker": "EXPEDICIÓN DETENIDA",
+		"pause_energy": "ENERGÍA DEL NÚCLEO",
+		"pause_time_note": "El tiempo no se detiene en la pausa.",
+		"pause_progress": "PROGRESO · CÁMARA {n} DE {total}",
+		"pause_town": "Pueblo de Raíz",
+		"pause_keys": "{ui_up}/{ui_down} elegir   {accept} aceptar   {pause} volver",
+		"pause_dormant": "El núcleo duerme hasta que entres a la Cámara.",
+		"saved": "Partida guardada.",
+		"settings_title": "AJUSTES",
+		"settings_keys": "{ui_up}/{ui_down} elegir   {ui_left}/{ui_right} cambiar   {cancel} volver",
+		"fps": "{fps} FPS",
+		"town_arrival": [
+			"Raíz, al atardecer. Al norte, la fachada del templo de Aritma, sellada desde el Sol Negro.",
+			"Orun te espera junto al camino. Párate frente a él y presiona E para hablar."
+		],
+		"codex_keys": "F5 o EJECUTAR: correr el programa   ·   ESC: cerrar el Códice (el tiempo sigue)   ·   Tu código se guarda al cerrar",
+		"codex_too_long": "El programa tiene {n} líneas y esta sala admite {max}. Usa un bucle.",
+		"prompt_codex": "Usar el Códice en la terminal",
+		"gate_sealed": "La puerta de la montaña está sellada. Junto a ella hay una terminal aritmana.",
+		"gate_terminal_title": "PUERTA DE LA MONTAÑA",
+		"gate_opened_log": "La puerta de la montaña se abrió.",
+		"gate_not_opened_log": "El programa terminó, pero la puerta sigue cerrada.",
+		"help_door_open": "abre la puerta",
+		"help_door_close": "cierra la puerta",
+		"help_door_state": "True si está abierta",
+		"objective_town_open": "La puerta está abierta: entra al templo",
+		"chamber_banner": "SALA {n} · {name}",
+		"player_reset": "La Cámara te devuelve al último punto seguro.",
+		"prompt_take_cube": "Tomar el cubo",
+		"prompt_drop_cube": "Soltar el cubo",
+		"objective_won": "El Archivo está abierto",
+		"ending_won_title": "El Archivo de Aritma",
+		"ending_won": [
+			"Los estantes se iluminan uno por uno. Tablillas de bronce, planos de máquinas, programas enteros: todo lo que el Sol Negro hizo olvidar.",
+			"Tala sube con el núcleo apagándose en sus manos. Arriba, en Raíz, Orun ya está esperando.",
+			"—Lo sabía —dice—. No era magia. Era pensar despacio."
+		],
+		"ending_time": "Superaste la Cámara de Pruebas en {time}",
+		"ending_lost_title": "El núcleo se apagó",
+		"ending_lost": [
+			"Pasaron los 15 minutos. El zumbido del núcleo se apaga y la Cámara vuelve a sellarse.",
+			"Las reglas siguen ahí, escritas en las paredes. La próxima vez ya sabrás dónde mirar."
+		],
+		"ending_continue": "Pulsa Enter para volver al título",
+		"book_title": "LIBRO DE REGLAS DEL CÓDICE",
+		"book_town_title": "Raíz y los controles",
+		"book_town": [
+			"Muévete con {move_up} {move_left} {move_down} {move_right}. Corre con {run} (gasta aliento) y salta con {jump}: corriendo, el salto llega más lejos.",
+			"{interact} usa lo que tienes delante: personas, inscripciones y los atriles de las máquinas.",
+			"En el atril de una máquina se abre el Códice: escribe el programa en Python y pulsa {run_code} para verla trabajar. {cancel} cierra el Códice.",
+			"{book} abre este libro y {pause} pausa el juego. La pausa detiene el reloj y a los guardianes; en el libro los guardianes se detienen, pero el reloj sigue.",
+			"Golpea con {attack} (el garrote). Cada vez que una máquina rechaza tu código, despiertan guardianes: te quitan medio corazón por golpe y no puedes usar la máquina hasta vencerlos.",
+			"Los guardianes se distinguen por el aro de color bajo sus pies: DORADO, el caballero (golpea de cerca); MORADO, el hechicero (lanza orbes de lejos: elimínalo primero, el garrote también deshace sus orbes); ROJO, el rúnico (explota).",
+			"El guardián rúnico (la calavera con aura roja) no golpea: se carga y explota. Aléjate del círculo rojo o véncelo antes (2 golpes). Si te alcanza, aparecen teclas al azar: pulsa solo esas, en orden, antes de que se vacíe la barra (de 5 a 8 segundos), o perderás 2 corazones.",
+			"El guardián rúnico (la calavera con aura roja) no golpea: se carga y explota. Aléjate del círculo rojo o véncelo antes (2 golpes). Si te alcanza, aparecen teclas al azar: pulsa solo esas, en orden, antes de que se vacíe la barra (de 5 a 8 segundos), o perderás 2 corazones.",
+			"Desde que entras al templo tienes 15 minutos.",
+			"Tienes 5 corazones: al resolver una sala recuperas uno. Si caes a un foso pierdes 7 segundos; si te quedas sin corazones pierdes 1 minuto (y si te quedaba menos, se acaba el juego)."
+		],
+		"book_hint": "[{ui_left}] [{ui_right}] cambiar de página      [{book}] cerrar",
+		"prompt_machine": "Programar la máquina",
+		"objective_filter_tunnel": "Cruza el pasillo: los fosos solo se saltan corriendo (SHIFT + ESPACIO)",
+		"objective_filter_machine": "Programa la Criba: solo las esferas PARES al cáliz",
+		"objective_filter_done": "La Criba aceptó tu programa: cruza el sello de la salida",
+		"filter_already": "La Criba ya está en paz: el sello de la salida está abierto.",
+		"criba_status": "La Criba ejecuta tu programa · ronda {round} de {of}",
+		"criba_release_busy": "Ya hay una esfera ({n}) en la compuerta: decide con caliz.recibir() o crisol.desintegrar() antes de soltar otra.",
+		"criba_release_empty": "La tolva está vacía: no quedan esferas por soltar. Revisa tolva.quedan().",
+		"criba_send_empty": "No hay ninguna esfera en la compuerta: primero usa tolva.soltar().",
+		"criba_wrong_even": "Ronda {round}: la esfera {n} es PAR y cayó en el crisol. La Criba se trabó y mezcló esferas nuevas.",
+		"criba_wrong_odd": "Ronda {round}: la esfera {n} es IMPAR y cayó en el cáliz. La Criba se trabó y mezcló esferas nuevas.",
+		"criba_left_over": "Ronda {round}: tu programa terminó y quedaron {n} esferas sin clasificar. La Criba se trabó.",
+		"criba_solved": "¡Las tres rondas, perfectas! El cáliz desborda de luz y la energía corre hacia el sello.",
+		"ending_trial_title": "Sala 1 superada",
+		"ending_trial": [
+			"La Criba aceptó tu programa y el sello de la salida se abrió.",
+			"(Versión de prueba: aquí termina por ahora. La Sala 2, Las Raíces Gemelas, llega en la siguiente fase.)"
+		],
+		"criba_round_error": "Ronda {round} (oculta, con otras esferas): {error}",
+		"temple_start": [
+			"El núcleo del templo despertó: ¡tienes 15 minutos!"
+		],
+		"player_fell": "¡Caíste al foso! El templo te devuelve al último punto seguro.",
+		"gate_title": "La Puerta del Templo",
+		"objective_roots_corridor": "Cruza las prensas: espera su ritmo",
+		"objective_roots_machine": "Programa el Mural: escribe factorizar(b, c)",
+		"objective_roots_done": "El Mural aceptó tu función: sal por la reja del este",
+		"roots_already": "El Mural ya está en paz: la reja del este está abierta.",
+		"player_crushed": "¡La prensa te atrapó! El templo te devuelve al último punto seguro.",
+		"mural_status": "El Mural prueba tu función · polinomio {row} de {of}",
+		"mural_no_function": "No encontré la función factorizar(b, c). Defínela con def factorizar(b, c): y que devuelva [p, q].",
+		"mural_row_slow": "recalentado",
+		"mural_row_error": "error",
+		"mural_too_slow": "factorizar({b}, {c}) se pasó de {max} pasos: el Mural se recalentó y cambió sus polinomios. Busca una forma con menos pasos.",
+		"mural_error": "factorizar({b}, {c}) falló: {error}. El Mural cambió sus polinomios.",
+		"mural_bad_shape": "factorizar({b}, {c}) devolvió {got}, pero debe devolver una lista de dos enteros, como [-10, -10]. El Mural cambió sus polinomios.",
+		"mural_wrong": "factorizar({b}, {c}) devolvió {got}, que da {expands}, no {want}. El Mural cambió sus polinomios.",
+		"mural_solved": "¡Los cinco polinomios encajan! Los engranajes giran juntos y la reja del este se levanta.",
+		"alarm_wake": "¡ERROR! Los guardianes de la tumba despiertan: véncelos para volver a usar la máquina.",
+		"alarm_machine_locked": "La máquina está bloqueada: primero vence a los guardianes.",
+		"alarm_cleared": "Los guardianes cayeron. La máquina vuelve a aceptar código.",
+		"hud_alarm": "ALARMA {n}  ·  {k}",
+		"player_no_lives": "¡Te quedaste sin corazones! El núcleo se cobra {s} segundos y vuelves a la entrada de la sala.",
+		"ending_no_lives_title": "Tala cayó en la tumba",
+		"ending_no_lives": [
+			"Sin corazones y sin un minuto de energía, el núcleo ya no puede devolverte a la entrada.",
+			"Los guardianes vuelven a sus pedestales. La próxima vez, piensa el código antes de ejecutarlo."
+		],
+		"keys_title": "¡RUNA DE EXPLOSIÓN!",
+		"keys_hint": "Pulsa las teclas en orden antes de que se vacíe la barra (las demás teclas no cuentan)",
+		"keys_won": "¡La esquivaste!",
+		"keys_lost": "La runa te alcanzó: −{n} corazones",
+		"keys_ready": "¡Prepárate! Lee las teclas...",
+		"objective_vortex_tunnel": "Llega a la sala del Vórtice",
+		"objective_vortex_machine": "Enciende el Faro: programa vecinas(x, y)",
+		"objective_vortex_board": "Destapa todas las baldosas que no son mina (E destapa, Q bandera)",
+		"objective_vortex_done": "El tablero está limpio: cruza el sello del norte",
+		"beacon_around_ints": "alrededor(x, y) necesita dos números enteros.",
+		"beacon_status": "El Faro prueba vecinas(x, y) en las esquinas, los bordes y el centro",
+		"beacon_no_function": "No encontré la función vecinas(x, y). Defínela con def vecinas(x, y): y que devuelva una lista de casillas.",
+		"beacon_bad_shape": "vecinas({x}, {y}) devolvió {got}, pero debe devolver una lista de casillas, como [[1, 0], [0, 1], [1, 1]].",
+		"beacon_repeated": "vecinas({x}, {y}) repitió la casilla {cell}.",
+		"beacon_itself": "vecinas({x}, {y}) incluyó a la misma casilla {cell}: solo van las de alrededor.",
+		"beacon_outside": "vecinas({x}, {y}) devolvió {cell}, que está fuera del tablero (x e y van de 0 a 7).",
+		"beacon_not_neighbor": "vecinas({x}, {y}) devolvió {cell}, que no está junto a ({x}, {y}).",
+		"beacon_missing": "A vecinas({x}, {y}) le faltó la casilla {cell}.",
+		"beacon_error": "vecinas({x}, {y}) falló: {error}",
+		"beacon_solved": "¡Las 64 baldosas responden! El Faro se enciende y el tablero se ilumina: párate sobre una baldosa, E la destapa y Q le pone una bandera.",
+		"beacon_already": "El Faro ya está encendido. El peligro está en el tablero.",
+		"prompt_board": "Destapar     [{flag}] Bandera",
+		"hud_board": "Minas: {mines}  ·  Banderas: {flags}  ·  Faltan: {left}",
+		"board_boom": "¡Era una mina! Pierdes {n} corazones y el Vórtice reordena sus minas.",
+		"board_cleared": "¡El Vórtice está limpio! Las minas se apagan y el sello del norte se levanta.",
+		"objective_balance_tunnel": "Cruza las prensas rápidas: espera su ritmo",
+		"objective_balance_machine": "Programa la Balanza: reparte las pesas en dos sumas iguales",
+		"objective_balance_done": "La Balanza está nivelada: cruza la reja del este",
+		"balance_status": "La Balanza prueba tu programa · juego de pesas {round} de {of}",
+		"balance_bad_index": "poner({i}): no hay una pesa en esa posición. Las posiciones van de 0 a {max}.",
+		"balance_twice": "poner({i}): esa pesa ya estaba puesta en un plato. Cada pesa se pone una sola vez.",
+		"balance_left_out": "Juego {round}: quedaron pesas sin poner en el estante (posiciones {list}). Hay que poner TODAS.",
+		"balance_unequal": "Juego {round}: el plato izquierdo suma {left} y el derecho {right}. La Balanza se inclinó y las pesas cayeron a la lava; llegan pesas nuevas.",
+		"balance_round_error": "Juego {round} (el oculto): {error}",
+		"balance_solved": "¡Los dos juegos quedan nivelados! El brazo de bronce brilla y la reja del este se levanta.",
+		"balance_already": "La Balanza ya está nivelada.",
+		"objective_core_tunnel": "Llega al corazón del templo",
+		"objective_core_machine": "Programa la Consola: un camino hasta el núcleo",
+		"objective_core_bridges": "Usa el atril de la Consola para levantar los puentes y cruza hasta el núcleo",
+		"network_status": "La Consola prueba tu programa en las redes de prueba y en la de la sala",
+		"network_test_label": "Red de prueba {n}",
+		"network_real_label": "La red de la sala",
+		"network_bad_id": "red.vecinos({id}): no existe esa plataforma. Van de 0 a {max}.",
+		"network_twice": "puentes.levantar() solo se puede usar una vez por red.",
+		"network_not_raised": "el programa terminó sin llamar a puentes.levantar(camino).",
+		"network_not_a_path": "puentes.levantar() necesita una lista de plataformas, como [0, 4, 8, 11].",
+		"network_bad_platform": "el camino tiene una plataforma que no existe.",
+		"network_wrong_start": "el camino debe empezar en red.inicio ({start}).",
+		"network_wrong_end": "el camino debe terminar en red.salida ({goal}).",
+		"network_not_connected": "en el camino hay dos plataformas seguidas que no están conectadas.",
+		"network_too_long": "tu camino usa {len} puentes y el más corto usa {best}: la red no tiene energía para tantos. Busca en anchura.",
+		"network_solved": "¡La Consola aceptó tu programa! La red está lista: usa el atril para levantar los puentes y cruza hasta el núcleo.",
+		"bridges_up": "¡Los puentes se levantan! Ya no se caerán: cruza hasta el núcleo.",
+		"core_taken": "¡Tomaste el núcleo de la Singularidad! La energía vuelve a fluir hacia la superficie.",
+		"prompt_bridges": "Levantar los puentes"
+	},
+	"credits": [
+		"Desarrollador:",
+		"{author} (soyjuza)",
+		"",
+		"Con la colaboración de:",
+		"shun/sara",
+		"",
+		"Proyecto de Ingeniería de Software II · SENA 2026",
+		"Hecho con Godot 4",
+		"",
+		"Gráficos: Ninja Adventure de Pixel-boy (CC0)",
+		"Fuentes: Pixelify Sans y JetBrains Mono (SIL Open Font License)",
+		"",
+		"Presiona ESC para volver"
+	],
+	"guardian_names": {
+		"caballero": [
+			"caballero",
+			"caballeros"
+		],
+		"hechicero": [
+			"hechicero",
+			"hechiceros"
+		],
+		"rúnico": [
+			"rúnico",
+			"rúnicos"
+		]
+	}
+}

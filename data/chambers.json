@@ -1,0 +1,303 @@
+{
+	"town": {
+		"gate_title": "La Puerta del Templo",
+		"gate_code": "# Ordénale a la puerta que se abra.\n",
+		"gate_help": [
+			[
+				"puerta.abrir()",
+				"abre la puerta"
+			],
+			[
+				"puerta.cerrar()",
+				"cierra la puerta"
+			],
+			[
+				"puerta.abierta",
+				"True si está abierta"
+			]
+		]
+	},
+	"chambers": [
+		{
+			"name": "El Filtro de la Dualidad",
+			"kind": "filter",
+			"seed": 0,
+			"fog": 0.01,
+			"file_name": "criba.py",
+			"console_title": "LA CRIBA",
+			"console_idle": "> esperando programa_",
+			"glyph": "n % 2",
+			"chalice_label": "PAR",
+			"crucible_label": "IMPAR",
+			"rounds": [
+				{
+					"count": [
+						9,
+						10
+					],
+					"min": 1,
+					"max": 20
+				},
+				{
+					"count": [
+						6,
+						7
+					],
+					"min": 11,
+					"max": 99
+				},
+				{
+					"count": [
+						12,
+						13
+					],
+					"min": 0,
+					"max": 60,
+					"zero": true
+				}
+			],
+			"playback_speed": [
+				1.0,
+				1.9,
+				2.8
+			],
+			"starter_code": "# Las esferas PARES van al cáliz (izquierda).\n# Las IMPARES, al crisol (derecha).\n# La Criba prueba tu programa con 3 rondas: solo ves la primera.\n\n",
+			"help": [
+				[
+					"tolva.quedan()",
+					"cuántas esferas faltan en la tolva"
+				],
+				[
+					"tolva.soltar()",
+					"deja caer la siguiente a la compuerta y devuelve su número"
+				],
+				[
+					"caliz.recibir()",
+					"la esfera de la compuerta va al cáliz (PAR)"
+				],
+				[
+					"crisol.desintegrar()",
+					"la esfera de la compuerta va al crisol (IMPAR)"
+				],
+				[
+					"n % 2",
+					"el resto de dividir n entre 2"
+				]
+			],
+			"intro": [
+				"INSCRIPCIÓN: La Criba separa la materia en dos esencias. Solo lo PAR puede llegar al Cáliz; lo IMPAR se deshace en el Crisol.",
+				"Usa el atril (E) y programa la Criba. Ella pondrá a prueba tu programa con tres rondas de esferas: solo la primera se ve en el tubo.",
+				"Si una sola esfera cae del lado equivocado, la Criba se traba y mezcla esferas nuevas.",
+				"INSCRIPCIÓN: Dos guardianes de piedra vigilan la Criba. Cada vez que la Criba rechace tu código —aunque sea por un «;» mal puesto— despertarán más. Golpéalos con el garrote (J o clic)."
+			],
+			"tunnel_intro": [
+				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
+			],
+			"max_lines": 0
+		},
+		{
+			"name": "Las Raíces Gemelas",
+			"kind": "roots",
+			"seed": 0,
+			"file_name": "raices.py",
+			"max_steps": 12000,
+			"cases": [
+				"square",
+				"mixed",
+				"zero",
+				"both_positive",
+				"near"
+			],
+			"press_periods": [
+				2.4,
+				2.0,
+				1.6
+			],
+			"mural_title": "x² + bx + c = (x + p)(x + q)",
+			"hidden_label": "? ? ?",
+			"starter_code": "# El Mural llama a factorizar(b, c) con cinco polinomios x² + bx + c.\n# Devuelve [p, q] tales que (x + p)(x + q) = x² + bx + c.\n# Las raíces están entre -60 y 60. Cada polinomio tiene un límite de 12 000 pasos.\n\ndef factorizar(b, c):\n    \n",
+			"help": [
+				[
+					"def factorizar(b, c):",
+					"el Mural la llama con b y c"
+				],
+				[
+					"return [p, q]",
+					"devuelve los dos números"
+				],
+				[
+					"p + q == b",
+					"la suma tiene que dar b"
+				],
+				[
+					"p * q == c",
+					"el producto tiene que dar c"
+				],
+				[
+					"abs(n)",
+					"valor absoluto de n"
+				]
+			],
+			"intro": [
+				"INSCRIPCIÓN: El Mural de las Raíces separa cada polinomio x² + bx + c en sus dos factores gemelos (x + p)(x + q).",
+				"Escribe la función factorizar(b, c) y haz que devuelva [p, q]. El Mural la pondrá a prueba con cinco polinomios: solo ves el primero.",
+				"Las raíces gemelas siempre están entre −60 y 60. Cada polinomio tiene un límite de 12 000 pasos: si tu programa los gasta, el Mural se recalienta. Ejemplo: x² − 20x + 100 = (x − 10)(x − 10), así que factorizar(-20, 100) devuelve [-10, -10].",
+				"INSCRIPCIÓN: Dos caballeros de piedra vigilan el Mural. Cada vez que el Mural rechace tu código —aunque sea por un error de escritura— despertarán más guardianes."
+			],
+			"tunnel_intro": [
+				"INSCRIPCIÓN: Las prensas del pasillo se cierran con su propio ritmo. La lámpara roja avisa justo antes de cerrar."
+			]
+		},
+		{
+			"name": "El Vórtice de Celdas",
+			"kind": "vortex",
+			"seed": 0,
+			"file_name": "faro.py",
+			"board": {
+				"cols": 8,
+				"rows": 8,
+				"mines": 10
+			},
+			"starter_code": "# El Faro enciende el tablero si vecinas(x, y) funciona.\n# Devuelve la lista de casillas que rodean a (x, y), sin salirse del tablero de 8 x 8.\n# Ejemplo: vecinas(0, 0) -> [[1, 0], [0, 1], [1, 1]] (el orden no importa).\n#\n# Pista: alrededor(x, y) ya te da las 8 casillas de alrededor, pero algunas se salen\n# del tablero. Quédate solo con las que tienen x e y entre 0 y 7.\n\ndef vecinas(x, y):\n    \n",
+			"help": [
+				[
+					"def vecinas(x, y):",
+					"devuelve una lista de casillas [cx, cy]"
+				],
+				[
+					"alrededor(x, y)",
+					"las 8 casillas de alrededor (algunas se salen)"
+				],
+				[
+					"c[0] / c[1]",
+					"la x y la y de la casilla c"
+				],
+				[
+					"Tablero",
+					"8 x 8: x e y van de 0 a 7"
+				],
+				[
+					"lista.append(c)",
+					"agrega la casilla c a la lista"
+				]
+			],
+			"intro": [
+				"INSCRIPCIÓN: El Vórtice guarda diez minas bajo sus baldosas. Todas se ven iguales: solo los números dicen dónde está el peligro.",
+				"Primero enciende el Faro: escribe vecinas(x, y), que devuelva las casillas que rodean a (x, y) sin salirse del tablero de 8 x 8. alrededor(x, y) ya te da las 8 de alrededor: quédate con las que están dentro.",
+				"Encendido el tablero, párate sobre una baldosa: E la destapa y Q le pone o quita una bandera. Cada número dice cuántas minas la rodean. Destapa todas las que no son mina.",
+				"La primera baldosa nunca es mina y el tablero siempre se resuelve pensando, sin adivinar. Si destapas una mina pierdes 2 corazones y el tablero vuelve a empezar, con las minas en otro lugar."
+			],
+			"tunnel_intro": [
+				"INSCRIPCIÓN: Más allá, el Vórtice de Celdas. Aquí no hay trampas en el camino: el peligro está en el piso de la sala."
+			]
+		},
+		{
+			"name": "La Balanza de los Aritmanos",
+			"kind": "balance",
+			"seed": 0,
+			"file_name": "balanza.py",
+			"rounds": [
+				7,
+				8
+			],
+			"greedy": true,
+			"press_periods": [
+				2.0,
+				1.7,
+				1.4
+			],
+			"starter_code": "# Reparte TODAS las pesas entre los dos platos para que sumen lo mismo.\n# Cada pesa se pone por su posición (0, 1, 2...): plato_izq.poner(0).\n# La Balanza prueba tu programa con dos juegos de pesas: el que ves y uno oculto.\n#\n# Pista: recorre las pesas en orden y pon cada una en el plato que pese MENOS en ese\n# momento (si pesan igual, en el izquierdo). plato_izq.peso() dice cuánto lleva.\n\n",
+			"help": [
+				[
+					"pesas.lista()",
+					"lista con el valor de cada pesa"
+				],
+				[
+					"pesas.cantidad()",
+					"cuántas pesas hay"
+				],
+				[
+					"plato_izq.poner(i)",
+					"pone la pesa de la posición i en el plato izquierdo"
+				],
+				[
+					"plato_der.poner(i)",
+					"pone la pesa de la posición i en el plato derecho"
+				],
+				[
+					"plato_izq.peso()",
+					"cuánto suma ese plato ahora"
+				],
+				[
+					"for i in range(pesas.cantidad()):",
+					"recorre las pesas: i = 0, 1, 2..."
+				]
+			],
+			"intro": [
+				"INSCRIPCIÓN: El peso del conocimiento no está en acumular, sino en hallar el justo equilibrio.",
+				"Programa la Balanza: reparte TODAS las pesas entre el plato izquierdo y el derecho para que los dos sumen lo mismo. Cada pesa se pone por su posición en el estante (el número cian de abajo): plato_izq.poner(0).",
+				"Pista: pon cada pesa, en orden, en el plato que pese menos en ese momento. La Balanza prueba tu programa con dos juegos de pesas, el que ves y uno oculto. Si no queda nivelada, las pesas caen a la lava y llegan otras.",
+				"INSCRIPCIÓN: Los caballeros de piedra también vigilan la Balanza. Cada error del código los despierta."
+			],
+			"tunnel_intro": [
+				"INSCRIPCIÓN: Las prensas de este pasillo son más rápidas. Mira la lámpara roja y corre en el momento justo."
+			]
+		},
+		{
+			"name": "La Singularidad del Cero",
+			"kind": "core",
+			"seed": 0,
+			"file_name": "red.py",
+			"network": {
+				"reach": 100.0,
+				"keep": 0.6,
+				"min_len": 3,
+				"max_len": 5,
+				"tests": 2,
+				"shortest": false
+			},
+			"bridges": {
+				"first_delay": 0.8,
+				"interval": 0.35,
+				"life": 0
+			},
+			"starter_code": "# Busca un camino de red.inicio a red.salida y pásalo a puentes.levantar(camino).\n# El camino es una lista de plataformas: [red.inicio, ..., red.salida].\n# La consola lo prueba en dos redes de prueba y en la de esta sala.\n#\n# Pista: red.mas_cercano(id) te dice a qué plataforma saltar desde id para acercarte\n# al núcleo. Empieza en red.inicio y, mientras no llegues a red.salida, salta y anota\n# cada plataforma en el camino.\n\n",
+			"help": [
+				[
+					"red.inicio / red.salida",
+					"plataforma de partida y la del núcleo"
+				],
+				[
+					"red.vecinos(id)",
+					"lista de plataformas conectadas con id"
+				],
+				[
+					"puentes.levantar(camino)",
+					"levanta los puentes de ese camino (una vez)"
+				],
+				[
+					"red.mas_cercano(id)",
+					"el vecino de id más cercano al núcleo"
+				],
+				[
+					"camino.append(x)",
+					"agrega x al final del camino"
+				],
+				[
+					"while actual != red.salida:",
+					"repite hasta llegar al núcleo"
+				]
+			],
+			"intro": [
+				"INSCRIPCIÓN: Quien domine el flujo de las funciones encontrará la salida hacia la superficie.",
+				"El núcleo flota al otro lado del abismo, sobre la última plataforma. Las plataformas están unidas por hilos de luz, pero no se pueden pisar: hacen falta puentes.",
+				"Programa la Consola: busca un camino de red.inicio a red.salida y pásalo a puentes.levantar(camino). Sirve cualquier camino que llegue al núcleo. Pista: red.mas_cercano(id) dice a qué plataforma saltar desde id para acercarte al núcleo. La consola prueba tu programa en dos redes de prueba y en la de esta sala.",
+				"Cuando la consola acepte tu programa, usa su atril para levantar los puentes: aparecen uno tras otro y ya no se caen. Camina por ellos hasta el núcleo.",
+				"INSCRIPCIÓN: Los últimos guardianes vigilan la Consola. No pueden cruzar el abismo, pero cada error del código los despierta."
+			],
+			"tunnel_intro": [
+				"INSCRIPCIÓN: Más allá, la Singularidad del Cero: el corazón del templo."
+			]
+		}
+	]
+}

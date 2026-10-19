@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://src/enemies/rune_orb.gd" id="1_orb"]
+[ext_resource type="Texture2D" path="res://assets/pack/fx/Projectile/EnergyBall.png" id="2_ball"]
+[ext_resource type="Texture2D" path="res://assets/efectos/luz_suave.tres" id="3_light"]
+
+[node name="Orbe" type="Node2D"]
+script = ExtResource("1_orb")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("2_ball")
+hframes = 4
+
+[node name="Luz" type="PointLight2D" parent="."]
+color = Color(0.75, 0.4, 1, 1)
+energy = 0.9
+texture = ExtResource("3_light")
+texture_scale = 0.2
+metadata/casts_shadow = false

@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/chambers/balance_machine.gd" id="1_bal"]
+[ext_resource type="Texture2D" path="res://assets/efectos/luz_suave.tres" id="2_luz"]
+[ext_resource type="PackedScene" path="res://scenes/maquinas/atril.tscn" id="3_atril"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bal"]
+size = Vector2(216, 14)
+
+[node name="Balanza" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_bal")
+
+[node name="Cuerpo" type="StaticBody2D" parent="."]
+
+[node name="Forma" type="CollisionShape2D" parent="Cuerpo"]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_bal")
+
+[node name="Luz" type="PointLight2D" parent="."]
+position = Vector2(0, -40)
+color = Color(1, 0.48, 0.2, 1)
+energy = 0.9
+texture = ExtResource("2_luz")
+texture_scale = 1.2
+metadata/casts_shadow = false
+
+[node name="Atril" parent="." instance=ExtResource("3_atril")]
+position = Vector2(0, 26)
