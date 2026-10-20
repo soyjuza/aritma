@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src/world/heart_potion.gd" id="1_pocion"]
+[ext_resource type="Texture2D" path="res://assets/pack/items/Potion/LifePot.png" id="2_frasco"]
+[ext_resource type="Texture2D" path="res://assets/efectos/luz_suave.tres" id="3_luz"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_toque"]
+radius = 8.0
+
+[node name="Pocion" type="Area2D"]
+z_index = 2
+script = ExtResource("1_pocion")
+
+[node name="Frasco" type="Sprite2D" parent="."]
+position = Vector2(0, -4)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("2_frasco")
+
+[node name="Forma" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_toque")
+
+[node name="Luz" type="PointLight2D" parent="."]
+color = Color(1, 0.4, 0.5, 1)
+energy = 1.1
+texture = ExtResource("3_luz")
+texture_scale = 0.4
+metadata/casts_shadow = false

@@ -9,6 +9,8 @@ var index := 0
 var solved := false
 var alarm: AlarmDirector
 
+var _restoring := false     # cargando una partida: la sala se abre sin temblor ni sonido
+
 
 func _wire_common() -> void:
 	super()
@@ -26,9 +28,10 @@ func open_exit() -> void:
 		return
 	solved = true
 	alarm.calm()
-	_game.health.heal(int(_game.combat("heal_on_solve", 0)))    # 0: resolver no cura
-	_game.bus.publish(GameEvents.CHAMBER_CLEARED, {"index": index})
-	_game.rig.shake(3.0)
+	if not _restoring:
+		_game.health.heal(int(_game.combat("heal_on_solve", 0)))    # 0: resolver no cura
+		_game.bus.publish(GameEvents.CHAMBER_CLEARED, {"index": index})
+		_game.rig.shake(3.0)
 	for grate in nodes_of(Grate):
 		grate.open()
 
@@ -51,6 +54,48 @@ func room_entrance() -> Vector2:
 	if has_node("Zonas/EntradaSala/Punto"):
 		return (get_node("Zonas/EntradaSala/Punto") as Marker2D).global_position
 	return spawn
+
+
+## Lo que la partida guardada recuerda de la sala: si se resolvió y el código de su máquina.
+func save_state() -> Dictionary:
+	var out := {"solved": solved}
+	var machines := nodes_of(CodeMachine)
+	if not machines.is_empty():
+		out["code"] = machines[0].session.code
+		out["machine_solved"] = machines[0].is_solved
+	return out
+
+
+## Al cargar una partida: Tala aparece en la entrada de la sala (el pasillo ya lo cruzó), con
+## su código en la máquina y, si la había resuelto, con la sala resuelta.
+func resume_from_save(state: Dictionary) -> void:
+	for machine in nodes_of(CodeMachine):
+		machine.session.code = String(state.get("code", machine.session.code))
+		machine.show_code(machine.session.code)
+	var zone := get_node_or_null("Zonas/EntradaSala") as TriggerZone
+	if zone:
+		zone._fired = true
+	checkpoint = room_entrance()
+	_game.player.place(checkpoint, Vector2.UP)
+	if bool(state.get("solved", false)):
+		if "_in_hall" in self:
+			set("_in_hall", true)
+		_restoring = true
+		restore_solved()
+		_restoring = false
+		return
+	if has_method("_on_hall_entered"):
+		call("_on_hall_entered")
+	if bool(state.get("machine_solved", false)):
+		for machine in nodes_of(CodeMachine):
+			machine.mark_solved()
+
+
+## Deja la sala resuelta, como estaba al guardar. Las salas sin máquina la redefinen.
+func restore_solved() -> void:
+	for machine in nodes_of(CodeMachine):
+		machine.mark_solved()
+	open_exit()
 
 
 func restart_after_death() -> void:

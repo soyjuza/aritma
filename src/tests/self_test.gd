@@ -34,6 +34,7 @@ func run() -> void:
 	_test_path_rules()
 	_test_boss_quiz()
 	await _test_core()
+	await _test_save_and_load()
 	await _test_game_over_without_lives()
 	print("SELFTEST ", "OK" if _failures == 0 else "FALLO (%d)" % _failures)
 	game.get_tree().quit(0 if _failures == 0 else 1)
@@ -628,7 +629,7 @@ func _test_boss(lvl: ThroneLevel) -> void:
 	game.health.halves = 4
 	game.player.place(lvl.room_entrance() + Vector2(0, 20), Vector2.UP)
 	await _walk_up_until(func(): return lvl._in_hall, 3.0)
-	_check(boss.is_awake() and game.health.halves == 8, "Jefe: al entrar a la sala despierta y Tala recupera 2 corazones (la única curación)")
+	_check(boss.is_awake() and game.health.halves == 8, "Jefe: al entrar a la sala despierta y Tala recupera 2 corazones")
 	var t := 0.0
 	while boss.state == "appear" and t < 4.0:
 		await _wait(0.2)
@@ -675,6 +676,16 @@ func _test_boss(lvl: ThroneLevel) -> void:
 	quiz.choose(int(quiz.quiz.answer))
 	await _wait(QuizState.RESULT_TIME + 1.6)
 	_check(not lvl.alarm.fighting() and boss.can_be_hit(), "Jefe: si acierta, el escudo cae sin guardianes")
+	var potions := game.get_tree().get_nodes_in_group("potions")
+	_check(potions.size() == 2, "Jefe: cada vez que cae el escudo aparece una poción")
+	var potion: HeartPotion = potions[0]
+	game.health.refill()
+	game.player.place(potion.global_position, Vector2.UP)
+	await _wait(0.2)
+	_check(is_instance_valid(potion) and not potion.is_queued_for_deletion(), "Poción: con los corazones llenos se queda en el piso")
+	game.health.halves = 4
+	await _wait(0.2)
+	_check(game.health.halves == 6 and not is_instance_valid(potion), "Poción: al tocarla Tala recupera un corazón")
 	# El tiempo se acaba: cuenta como error (la tercera ola es de 6)
 	for i in boss.phase_hp():
 		boss.take_hit(1, Vector2.UP)
@@ -687,8 +698,10 @@ func _test_boss(lvl: ThroneLevel) -> void:
 		await _wait(0.5)
 		waited += 0.5
 	_check(waited >= 15.0 and lvl.alarm.fighting() and lvl.alarm.alive_count() == 6, "Jefe: sin responder, a los 15 s llama a 6 guardianes")
-	await _clear_guardians(lvl)
+	# Tala cae en plena pelea: la pelea empieza de nuevo, con el jefe a toda vida
+	lvl.restart_after_death()
 	await _wait(0.5)
+	_check(boss.hp == boss.max_hp and boss.phase == 0 and not lvl.alarm.fighting() and boss.can_be_hit() and game.get_tree().get_nodes_in_group("potions").is_empty(), "Jefe: si Tala cae, el jefe recupera toda la vida y vuelve a la fase 1")
 	game.health.refill()
 	while boss.hp > 0:
 		if game.machine.current is QuizState:
@@ -853,6 +866,43 @@ func _test_mural() -> void:
 	_check(game.level is VortexLevel and game.chamber_index == 2, "Sala 2: se cruza la reja del este y se llega a la Sala 3 (Factory: VortexBuilder)")
 
 
+## Guardar y cargar: Tala vuelve a la entrada de la sala donde guardó, con su código en la
+## máquina y, si la sala estaba resuelta, resuelta (la reja abierta).
+func _test_save_and_load() -> void:
+	game.saves.path = "user://save_prueba.cfg"
+	game.load_chamber(0)
+	var filter := game.level as FilterLevel
+	filter.machine.session.code = "print(1)\n"
+	filter.machine.mark_solved()
+	await _wait(0.3)
+	game.save_game()
+	game.load_game()
+	await _wait(0.3)
+	filter = game.level as FilterLevel
+	_check(filter != null and filter.solved and filter.machine.is_solved and filter.machine.session.code == "print(1)\n", "Guardar: la Sala 1 resuelta sigue resuelta al cargar, con el código en la máquina")
+	_check(game.player.global_position.distance_to(filter.room_entrance()) < 4.0, "Guardar: al cargar, Tala aparece en la entrada de la sala")
+	game.dialog.close()
+	game.load_chamber(2)
+	var vortex := game.level as VortexLevel
+	vortex.restore_solved()
+	await _wait(0.3)
+	game.save_game()
+	game.load_game()
+	await _wait(0.3)
+	game.dialog.close()
+	vortex = game.level as VortexLevel
+	_check(vortex != null and vortex.solved and vortex.board.is_cleared(), "Guardar: el buscaminas limpio sigue limpio al cargar")
+	game.load_chamber(3)
+	game.save_game()
+	game.load_game()
+	await _wait(0.3)
+	var figures := game.level as FigureLevel
+	_check(figures != null and not figures.solved and figures._in_hall and game.dialog.is_open(), "Guardar: una sala sin resolver empieza en la entrada, con su presentación")
+	game.dialog.close()
+	game.saves.clear()
+	game.saves.path = SaveRepository.PATH
+
+
 ## Un evento del ratón en la ventana: moverlo (move) o apretar/soltar el botón izquierdo.
 func _mouse(at: Vector2, pressed: bool, move := false) -> void:
 	var event: InputEventMouse
@@ -960,8 +1010,34 @@ func _test_figures() -> void:
 		var puzzle := lvl.table.puzzle()
 		for i in puzzle.pieces.size():
 			puzzle.lift(i)
-		_solve_figure(puzzle)
-		state.check_solved(game.ui)
+		if n == 0:
+			_solve_figure(puzzle)
+			state.check_solved(game.ui)
+		else:
+			# La Casa, como la juega una persona: R sobre la pieza hasta que quede bien girada
+			# y arrastrarla con el ratón a su lugar
+			for i in puzzle.pieces.size():
+				var half_cell := Vector2.ONE * PuzzleState.CELL / 2.0
+				for turn in 4:
+					if puzzle.cells_of(i) == puzzle.solution[i].cells:
+						break
+					_mouse(state._piece_origin(game.ui, i) + Vector2(puzzle.cells_of(i)[0]) * PuzzleState.CELL + half_cell, false, true)
+					await _wait(0.05)
+					_key("rotate", true)
+					await _wait(0.05)
+					_key("rotate", false)
+					await _wait(0.05)
+				var grab := Vector2(puzzle.cells_of(i)[0]) * PuzzleState.CELL + half_cell
+				var start := state._piece_origin(game.ui, i) + grab
+				var goal := state._board_origin(game.ui) + Vector2(puzzle.solution[i].at) * PuzzleState.CELL + grab
+				_mouse(start, false, true)
+				_mouse(start, true)
+				await _wait(0.05)
+				_mouse(goal, false, true)
+				await _wait(0.05)
+				_mouse(goal, false)
+				await _wait(0.05)
+			_check(puzzle.is_solved(), "Mesa: La Casa se llena con R y el ratón, como la juega una persona")
 		await _wait(PuzzleState.SOLVED_PAUSE + 0.4)
 		if n == 0:
 			_check(lvl.table.current == 1 and game.machine.current is PuzzleState, "Mesa: al llenar la primera figura llega la segunda")

@@ -1,5 +1,6 @@
 @tool
 ## El tablero del Vórtice (Sala 3): un buscaminas de baldosas de piedra en el piso de la sala.
+## Al limpiarlo, las minas quedan desactivadas (en verde) y el borde brilla.
 ## Todas las baldosas se ven iguales y se puede caminar sobre ellas sin que pase nada; la que
 ## pisa Tala se marca con un recuadro brillante. E la destapa y Q le pone o quita la bandera.
 ## Las minas se reparten DESPUÉS del primer destape (la primera nunca es mina) y solo si el
@@ -23,6 +24,7 @@ const OPEN_DARK := Color("6d665c")
 const CYAN := Color("3fe0ff")
 const GOLD := Color("ffc857")
 const RED := Color("ff5a4e")
+const GREEN := Color("6be38b")
 ## Colores de los números, como en el buscaminas clásico.
 const NUMBER_COLORS := [Color.WHITE, Color("2f5cff"), Color("1f8a2e"), Color("e0302a"), Color("1a237e"), Color("8b1a1a"), Color("00838f"), Color("222222"), Color("707070")]
 
@@ -42,6 +44,7 @@ var revealed: Dictionary = {}    # {Vector2i: número de minas alrededor}
 var flags: Dictionary = {}       # {Vector2i: true}
 var boom_cell := Vector2i(-1, -1)
 var highlight := Vector2i(-1, -1)
+var defused := false              # tablero limpio: las minas quedan apagadas (en verde)
 
 var _generator := MinefieldGenerator.new("king")
 var _previous: Dictionary = {}   # el patrón del tablero anterior (el nuevo debe ser distinto)
@@ -89,6 +92,7 @@ func reveal(c: Vector2i) -> Result:
 		return Result.MINE
 	_flood(c)
 	if is_cleared():
+		defused = true
 		cleared.emit()
 	return Result.SAFE
 
@@ -117,6 +121,18 @@ func reset() -> void:
 	revealed.clear()
 	flags.clear()
 	boom_cell = Vector2i(-1, -1)
+	defused = false
+
+
+## El tablero ya resuelto (al cargar una partida): minas con bandera y todo lo demás destapado.
+func show_solved() -> void:
+	powered = true
+	if mines.is_empty():
+		_place_mines(Vector2i(0, 0))
+	for c in cells():
+		if not mines.has(c):
+			revealed[c] = count_around(c)
+	defused = true
 
 
 func neighbors(c: Vector2i) -> Array[Vector2i]:
@@ -168,6 +184,10 @@ func _draw() -> void:
 	var size := Vector2(cols, rows) * CELL
 	draw_rect(Rect2(Vector2(-3, -3), size + Vector2(6, 6)), OUTLINE)
 	draw_rect(Rect2(Vector2(-2, -2), size + Vector2(4, 4)), CYAN.lerp(SLAB_DARK, 1.0 - _power * 0.6), false, 1.0)
+	if defused:
+		var glow := 0.55 + 0.45 * sin(_time * 4.0)
+		draw_rect(Rect2(Vector2(-4, -4), size + Vector2(8, 8)), Color(GREEN, glow), false, 2.0)
+		draw_rect(Rect2(Vector2(-7, -7), size + Vector2(14, 14)), Color(GREEN, glow * 0.35), false, 2.0)
 	for c in cells():
 		_draw_cell(c)
 	if powered and highlight != Vector2i(-1, -1):
@@ -184,6 +204,14 @@ func _draw_cell(c: Vector2i) -> void:
 		var n: int = revealed[c]
 		if n > 0:
 			_draw_text(str(n), r.get_center(), NUMBER_COLORS[n])
+		return
+	if defused and mines.has(c):
+		# Mina desactivada: losa verde con la mina apagada y una marca de "seguro"
+		draw_rect(r, OUTLINE)
+		draw_rect(r.grow(-1), GREEN.darkened(0.45))
+		draw_circle(r.get_center(), 4.0, GREEN.darkened(0.7))
+		draw_rect(Rect2(r.get_center() - Vector2(3, 0.5), Vector2(6, 1)), GREEN)
+		draw_rect(r.grow(-1), Color(GREEN, 0.15 + 0.15 * sin(_time * 4.0 + c.x + c.y)))
 		return
 	if c == boom_cell:
 		draw_rect(r, RED.darkened(0.3))

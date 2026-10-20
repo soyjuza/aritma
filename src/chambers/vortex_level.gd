@@ -106,6 +106,14 @@ func _on_exploded(cell: Vector2i) -> void:
 	_busy = false
 
 
+## Cargando una partida con el tablero ya limpio: el Faro encendido y el tablero destapado.
+func restore_solved() -> void:
+	machine.mark_solved()
+	board.show_solved()
+	objective_key = "objective_vortex_done"
+	open_exit()
+
+
 func restart_after_death() -> void:
 	board.reset()
 	super()
@@ -113,5 +121,6 @@ func restart_after_death() -> void:
 
 func _on_cleared() -> void:
 	objective_key = "objective_vortex_done"
+	_game.notify([_game.data.message("board_cleared_banner")], 7.0, true)
 	_game.dialog.say([_game.data.message("board_cleared")])
 	open_exit()

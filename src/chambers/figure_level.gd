@@ -49,6 +49,12 @@ func _open_table() -> void:
 	_game.machine.change("puzzle", {"table": table})
 
 
+## Cargando una partida con la Mesa ya resuelta: las figuras quedan llenas.
+func restore_solved() -> void:
+	while not table.advance():
+		pass
+
+
 func _on_solved() -> void:
 	objective_key = "objective_figures_done"
 	open_exit()

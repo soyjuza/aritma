@@ -160,6 +160,18 @@ func _vortex_room() -> void:
 	game.player.place(lvl.board.cell_center(Vector2i(3, 6)), Vector2.UP)
 	await _wait(1.0)
 	await _shot("33_tablero_encendido")
+	# Lo limpia como una persona: parada en cada baldosa segura, E
+	for c in lvl.board.cells():
+		if lvl.board.mines.is_empty() or not (lvl.board.mines.has(c) or lvl.board.revealed.has(c)):
+			game.player.place(lvl.board.cell_center(c), Vector2.UP)
+			lvl.handle_action(["interact"])
+	await _wait(0.6)
+	await _shot("34_tablero_limpio")
+	await _wait(2.0)
+	game.dialog.close()
+	game.player.place(lvl.board.cell_center(Vector2i(3, 0)) + Vector2(0, -10), Vector2.UP)
+	await _wait(1.0)
+	await _shot("35_tablero_limpio_reja")
 
 
 ## La Sala 4: la Mesa en la sala, el rompecabezas vacío, a medias, lleno y la segunda figura.
@@ -188,6 +200,19 @@ func _figures_room() -> void:
 	await _shot("44_figura_llena")
 	await _wait(1.5)
 	await _shot("45_segunda_figura")
+	# La segunda figura llega con las piezas giradas: se giran hasta quedar como en el dibujo
+	puzzle = lvl.table.puzzle()
+	for i in puzzle.pieces.size():
+		for k in 4:
+			if puzzle.cells_of(i) == puzzle.solution[i].cells:
+				break
+			puzzle.rotate(i)
+		puzzle.place(i, puzzle.solution[i].at)
+		await _wait(0.3)
+		await _shot("45_%d_casa_pieza_%d" % [i + 1, i + 1])
+	(game.machine.current as PuzzleState).check_solved(game.ui)
+	await _wait(0.5)
+	await _shot("45_9_casa_resuelta")
 	game.machine.change("play")
 	await _wait(0.6)
 	await _shot("46_mesa_una_lista")
@@ -263,7 +288,15 @@ func _boss_fight() -> void:
 	await _shot("j6b_problema_mal")
 	await _wait(2.6)
 	await _shot("j6c_guardianes")
+	var potion_shot := false
 	while lvl.boss.hp > 0:
+		var potions := game.get_tree().get_nodes_in_group("potions")
+		if not potion_shot and not potions.is_empty():
+			potion_shot = true
+			await _wait(0.6)
+			game.player.place((potions[0] as Node2D).global_position + Vector2(-40, 20), Vector2.RIGHT)
+			await _wait(0.5)
+			await _shot("j6f_pocion")
 		if game.machine.current is QuizState:
 			quiz = game.machine.current as QuizState
 			await _wait(0.5)

@@ -58,22 +58,30 @@ func draw(ui: UIKit, info: Dictionary) -> void:
 		ui.text_right(String(info.fps), s.x - 24, s.y - 40, 15, UIKit.MUTED)
 
 
-## Aviso urgente arriba al centro (se desvanece en el último segundo).
-func draw_notice(ui: UIKit, text: String, left: float) -> void:
+## Aviso arriba al centro (se desvanece en el último segundo). Urgente: rojo; buena noticia
+## (good): verde, más grande y con el borde latiendo.
+func draw_notice(ui: UIKit, text: String, left: float, good := false) -> void:
 	if text == "" or left <= 0.0:
 		return
 	var s := ui.size()
 	var alpha := clampf(left, 0.0, 1.0)
-	var rows: Array = ui.wrap(text, minf(720.0, s.x - 520.0), 22, "bold")
-	var h := rows.size() * (ui.line_height(22, "bold") + 2) + 26
+	var size := 30 if good else 22
+	var rows: Array = ui.wrap(text, minf(720.0, s.x - 520.0), size, "bold")
+	var h := rows.size() * (ui.line_height(size, "bold") + 2) + 26
 	var w := minf(780.0, s.x - 460.0)
 	var r := Rect2((s.x - w) / 2.0, 104, w, h)
-	ui.rect(r, Color(0.09, 0.03, 0.02, 0.86 * alpha))
-	ui.frame(r, Color(UIKit.ALERT, alpha), 2.0)
+	if good:
+		var pulse := 0.6 + 0.4 * sin(ui.time * 5.0)
+		ui.rect(r, Color(0.02, 0.09, 0.04, 0.9 * alpha))
+		ui.frame(r.grow(3), Color(UIKit.GOOD, 0.4 * pulse * alpha), 2.0)
+		ui.frame(r, Color(UIKit.GOOD, alpha), 3.0)
+	else:
+		ui.rect(r, Color(0.09, 0.03, 0.02, 0.86 * alpha))
+		ui.frame(r, Color(UIKit.ALERT, alpha), 2.0)
 	var y := r.position.y + 13
 	for row in rows:
-		ui.text_centered(String(row), y, 22, Color(UIKit.TEXT, alpha), "bold")
-		y += ui.line_height(22, "bold") + 2
+		ui.text_centered(String(row), y, size, Color(UIKit.TEXT, alpha), "bold")
+		y += ui.line_height(size, "bold") + 2
 
 
 ## Corazones bajo el reloj, en mitades (el cuadro 0 es vacío, el 2 medio y el 4 lleno).

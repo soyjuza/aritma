@@ -18,6 +18,7 @@ extends CharacterBody2D
 
 signal defeated
 signal shielded
+signal shield_down     # el escudo cayó (por acertar o por vencer la ola)
 
 const ORB := preload("res://scenes/enemigos/orbe.tscn")
 const RED := Color("ff3b2f")
@@ -95,11 +96,14 @@ func appear() -> void:
 		change("appear")
 
 
-## Tala cayó vencida: vuelve a su lugar, con la vida del comienzo de la fase en la que iba.
+## Tala cayó vencida: vuelve a su lugar con toda la vida y la pelea empieza desde la fase 1.
 func reset_for_retry() -> void:
 	if state == "hidden" or state == "dying":
 		return
-	hp = max_hp - phase * phase_hp()
+	hp = max_hp
+	phase = 0
+	awaiting_answer = false
+	_wave_ring = -1.0
 	position = home
 	velocity = Vector2.ZERO
 	change("wait")
@@ -226,6 +230,7 @@ func _physics_process(delta: float) -> void:
 			move_and_slide()
 			if _t > 1.0 and not awaiting_answer and (alarm == null or not alarm.fighting()):
 				change("chase")
+				shield_down.emit()
 		"dying":
 			modulate.a = 1.0 - clampf((_t - 1.0) / 1.0, 0.0, 1.0)
 			if randf() < 0.15:

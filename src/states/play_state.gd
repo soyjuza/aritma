@@ -80,7 +80,7 @@ func draw(ui: UIKit) -> void:
 			info.prompt_key = own.key
 	info.extra = game.level.hud_line()
 	_hud.draw(ui, info)
-	_hud.draw_notice(ui, game.notice, game.notice_left)
+	_hud.draw_notice(ui, game.notice, game.notice_left, game.notice_good)
 	game.dialog.draw(ui)
 
 

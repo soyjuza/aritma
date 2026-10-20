@@ -18,6 +18,7 @@ var _grab := Vector2.ZERO             # dónde se tomó, respecto de la esquina 
 var _order: Array = []                # orden de las piezas en la bandeja
 var _solved_at := -1.0                # ui.time en que se llenó la figura (-1: todavía no)
 var _mouse := Vector2.ZERO            # el ratón, en coordenadas de la pantalla de la interfaz
+var _rotated := false                 # ya giró alguna pieza: el aviso de girar deja de latir
 
 
 func enter(params: Dictionary = {}) -> void:
@@ -155,6 +156,7 @@ func check_solved(ui: UIKit) -> void:
 func _rotate(_ui: UIKit, i: int) -> void:
 	if i < 0:
 		return
+	_rotated = true
 	var puzzle := _puzzle()
 	if puzzle.is_placed(i):
 		puzzle.lift(i)
@@ -185,7 +187,9 @@ func draw(ui: UIKit) -> void:
 	var puzzle := _puzzle()
 	ui.panel(p)
 	ui.text_centered(game.data.message("figures_title", {"title": puzzle.title, "n": table.current + 1, "of": table.puzzles.size()}), p.position.y + 22, 30, UIKit.GOLD, "title")
-	ui.text_centered(game.data.message("figures_hint"), p.position.y + 66, 19, UIKit.MUTED)
+	ui.text_centered(game.data.message("figures_hint"), p.position.y + 62, 18, UIKit.MUTED)
+	if _solved_at < 0.0:
+		_draw_rotate_hint(ui, p)
 	# La figura: casillas vacías con borde dorado
 	var origin := _board_origin(ui)
 	for c in puzzle.target:
@@ -234,3 +238,17 @@ func _draw_shadow(ui: UIKit, i: int) -> void:
 		var r := Rect2(_board_origin(ui) + Vector2(c + at) * CELL, Vector2(CELL, CELL)).grow(-2)
 		ui.rect(r, Color(UIKit.GOOD, 0.25))
 		ui.frame(r, Color(UIKit.GOOD, 0.8), 2.0)
+
+
+## "R o clic derecho = GIRAR" en grande bajo las piezas; late hasta que se gira una pieza.
+func _draw_rotate_hint(ui: UIKit, p: Rect2) -> void:
+	var text: String = game.data.message("figures_rotate")
+	var w := ui.measure("R", 24, "bold") + 18 + ui.measure(text, 24, "bold") + 40
+	var r := Rect2(p.position.x + 860 - w / 2.0, p.end.y - 98, w, 44)    # bajo la bandeja
+	var pulse := 1.0 if _rotated else 0.6 + 0.4 * sin(ui.time * 6.0)
+	ui.rect(r, Color(0.08, 0.06, 0.02, 0.92))
+	ui.frame(r, Color(UIKit.GOLD, pulse), 2.0 if _rotated else 3.0)
+	var kw := ui.measure("R", 24, "bold") + 18
+	ui.rect(Rect2(r.position + Vector2(10, 8), Vector2(kw, 28)), UIKit.GOLD)
+	ui.text("R", r.position + Vector2(19, 9), 24, Color("0b0f14"), "bold", false)
+	ui.text(text, r.position + Vector2(kw + 22, 9), 24, UIKit.GOLD, "bold")

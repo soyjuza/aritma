@@ -4,9 +4,12 @@
 ## salas (QuizState, con BossQuiz). Si Tala falla o se le acaba el tiempo, el jefe llama una ola
 ## de guardianes (el Director de Alarma de la sala, con los puntos «Guardianes/Caidas»); si
 ## acierta, el escudo cae sin pelear. Vencerlo gana el juego.
-## Al aparecer el jefe, Tala recupera corazones: es la única curación del juego.
+## Al aparecer el jefe, Tala recupera corazones, y cada vez que cae el escudo aparece una
+## poción (HeartPotion) que cura un corazón. Si Tala cae, la pelea empieza de nuevo.
 class_name ThroneLevel
 extends ChamberLevel
+
+const POTION := preload("res://scenes/objetos/pocion.tscn")
 
 ## Dónde puede caer el pisotón del jefe (el piso de la sala, sin los muros).
 @export var arena := Rect2(48, 56, 400, 250)
@@ -24,6 +27,7 @@ func wire() -> void:
 	boss.arena = Rect2(to_global(arena.position), arena.size)
 	boss.defeated.connect(_on_boss_defeated)
 	boss.shielded.connect(_ask_question)
+	boss.shield_down.connect(_drop_potion)
 	_rng.randomize()
 	alarm.cleared_key = "boss_shield_down"
 	$Zonas/EntradaSala.crossed.connect(_on_hall_entered)
@@ -66,9 +70,44 @@ func _physics_process(_delta: float) -> void:
 		_game.follow_player()
 
 
+## Una poción en un lugar al azar de la sala, en piso libre (no sobre una columna) y lejos del
+## jefe y de Tala (hay que ir por ella).
+func _drop_potion() -> void:
+	var area := Rect2(to_global(arena.position), arena.size).grow(-24)
+	var spot := area.get_center()
+	for attempt in 60:
+		spot = Vector2(_rng.randf_range(area.position.x, area.end.x), _rng.randf_range(area.position.y, area.end.y))
+		if _floor_free(spot) and spot.distance_to(boss.global_position) > 70.0 and spot.distance_to(_game.player.global_position) > 60.0:
+			break
+	var potion: HeartPotion = POTION.instantiate()
+	potion.position = actors.to_local(spot)
+	potion.taken.connect(_on_potion_taken.bind(potion))
+	actors.add_child(potion)
+	_game.notify([_game.data.message("boss_potion")], 3.0)
+
+
+## ¿No hay nada sólido (columnas, muros) a menos de 14 px de ese punto?
+func _floor_free(spot: Vector2) -> bool:
+	var circle := CircleShape2D.new()
+	circle.radius = 14.0
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = circle
+	query.transform = Transform2D(0.0, spot)
+	query.exclude = [_game.player.get_rid(), boss.get_rid()]
+	return get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty()
+
+
+func _on_potion_taken(potion: HeartPotion) -> void:
+	if _game.health.halves >= _game.health.max_halves:
+		return    # con los corazones llenos, la poción se queda para después
+	_game.health.heal(int(_game.combat("potion_heal", 2)))
+	potion.queue_free()
+
+
 func restart_after_death() -> void:
 	super()
 	boss.reset_for_retry()
+	get_tree().call_group("potions", "queue_free")
 
 
 func _on_boss_defeated() -> void:

@@ -27,6 +27,7 @@ var chamber_index := -1
 var show_fps := true
 var notice := ""
 var notice_left := 0.0
+var notice_good := false     # true: buena noticia (franja verde y más grande)
 var penalty_text := ""        # "−7 s" que flota junto al reloj tras una caída
 var penalty_left := 0.0
 
@@ -254,9 +255,10 @@ func talk(key: String) -> void:
 
 
 ## Aviso urgente: una franja arriba que se lee mientras se juega (no frena los controles).
-func notify(lines: Array, seconds := 5.0) -> void:
+func notify(lines: Array, seconds := 5.0, good := false) -> void:
 	notice = " ".join(lines)
 	notice_left = seconds
+	notice_good = good
 
 
 func start_new_game() -> void:
@@ -276,7 +278,8 @@ func open_codex(session: CodexSession) -> void:
 
 
 func save_game() -> void:
-	saves.save({"chamber": chamber_index, "time_left": timer.remaining, "hearts": health.halves})
+	var room: Dictionary = level.save_state() if level is ChamberLevel else {}
+	saves.save({"chamber": chamber_index, "time_left": timer.remaining, "hearts": health.halves, "room": room})
 
 
 func load_game() -> void:
@@ -285,6 +288,7 @@ func load_game() -> void:
 	var index := int(snap.get("chamber", -1))
 	if index >= 0 and index < data.chamber_count():
 		load_chamber(index)
+		level.resume_from_save(snap.get("room", {}))
 		timer.start()
 	timer.remaining = float(snap.get("time_left", timer.limit))
 	health.halves = clampi(int(snap.get("hearts", health.max_halves)), 1, health.max_halves)

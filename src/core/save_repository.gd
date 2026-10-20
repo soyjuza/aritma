@@ -1,24 +1,26 @@
-## Guarda y carga la partida (sala actual, tiempo restante, caídas).
+## Guarda y carga la partida (sala actual, tiempo restante, corazones y el estado de la sala).
 class_name SaveRepository
 extends RefCounted
 
 const PATH := "user://save.cfg"
 
+var path := PATH     # las pruebas usan otro archivo para no pisar la partida del jugador
+
 
 func exists() -> bool:
-	return FileAccess.file_exists(PATH)
+	return FileAccess.file_exists(path)
 
 
 func save(snapshot: Dictionary) -> void:
 	var file := ConfigFile.new()
 	for key in snapshot.keys():
 		file.set_value("game", key, snapshot[key])
-	file.save(PATH)
+	file.save(path)
 
 
 func load_snapshot() -> Dictionary:
 	var file := ConfigFile.new()
-	if file.load(PATH) != OK:
+	if file.load(path) != OK:
 		return {}
 	var out := {}
 	for key in file.get_section_keys("game"):
@@ -28,4 +30,4 @@ func load_snapshot() -> Dictionary:
 
 func clear() -> void:
 	if exists():
-		DirAccess.remove_absolute(PATH)
+		DirAccess.remove_absolute(path)
