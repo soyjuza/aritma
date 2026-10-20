@@ -1,12 +1,12 @@
 [gd_scene load_steps=30 format=4]
 
-[ext_resource type="Script" path="res://src/chambers/balance_level.gd" id="1_df7ix"]
+[ext_resource type="Script" path="res://src/chambers/figure_level.gd" id="1_df7ix"]
 [ext_resource type="TileSet" uid="uid://bdqhxdehwjdgo" path="res://assets/tiles/suelo.tres" id="2_4ovi7"]
 [ext_resource type="TileSet" uid="uid://cm47d5bxbxffg" path="res://assets/tiles/muros.tres" id="3_b45vb"]
 [ext_resource type="PackedScene" path="res://scenes/objetos/letrero.tscn" id="4_yft3i"]
 [ext_resource type="PackedScene" path="res://scenes/objetos/brasero.tscn" id="6_bpiv4"]
 [ext_resource type="PackedScene" path="res://scenes/objetos/columna.tscn" id="7_ois2n"]
-[ext_resource type="PackedScene" path="res://scenes/maquinas/balanza.tscn" id="8_sg7yf"]
+[ext_resource type="PackedScene" path="res://scenes/maquinas/mesa_figuras.tscn" id="8_sg7yf"]
 [ext_resource type="PackedScene" path="res://scenes/objetos/antorcha.tscn" id="10_4vpxj"]
 [ext_resource type="PackedScene" path="res://scenes/objetos/prensa.tscn" id="11_8f7e2"]
 [ext_resource type="Script" uid="uid://dvy8qcgramsui" path="res://src/world/checkpoint_zone.gd" id="13_7eyg4"]
@@ -61,9 +61,9 @@ particles_anim_h_frames = 6
 particles_anim_v_frames = 1
 particles_anim_loop = false
 
-[node name="Sala4Balanza" type="Node2D"]
+[node name="Sala4Figuras" type="Node2D"]
 script = ExtResource("1_df7ix")
-objective_key = "objective_balance_tunnel"
+objective_key = "objective_figures_tunnel"
 spawn_facing = Vector2(0, -1)
 dark = true
 bounds = Rect2i(0, 0, 33, 47)
@@ -108,7 +108,7 @@ position = Vector2(120, 256)
 [node name="Columna2" parent="Actores" instance=ExtResource("7_ois2n")]
 position = Vector2(376, 256)
 
-[node name="Balanza" parent="Actores" instance=ExtResource("8_sg7yf")]
+[node name="MesaFiguras" parent="Actores" instance=ExtResource("8_sg7yf")]
 position = Vector2(248, 184)
 
 [node name="Letrero2" parent="Actores" instance=ExtResource("4_yft3i")]

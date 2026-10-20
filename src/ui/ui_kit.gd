@@ -35,7 +35,10 @@ func _init(canvas: CanvasItem) -> void:
 static func _variation(path: String, weight: int) -> FontVariation:
 	var font := FontVariation.new()
 	font.base_font = load(path)
-	font.variation_opentype = {TextServerManager.get_primary_interface().name_to_tag("wght"): weight}
+	var ts := TextServerManager.get_primary_interface()
+	font.variation_opentype = {ts.name_to_tag("wght"): weight}
+	# Sin ligaduras: en Pixelify Sans la «fi» sale como una sola letra rara («Agura»)
+	font.opentype_features = {ts.name_to_tag("liga"): 0}
 	return font
 
 

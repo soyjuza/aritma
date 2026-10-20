@@ -1,6 +1,6 @@
-## PATRÓN COMMAND — Cada polinomio probado es una orden: se anota al correr el programa (al
+## PATRÓN COMMAND — Cada ecuación probada es una orden: se anota al correr el programa (al
 ## instante) y el Mural (el invocador) la ejecuta después con su animación: se enciende la
-## placa, gira el engranaje y aparece la factorización del jugador.
+## placa, gira el engranaje y aparece la x que despejó el jugador.
 class_name RootsCommand
 extends RefCounted
 

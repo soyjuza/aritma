@@ -1,7 +1,7 @@
-## Sala 2 — Las Raíces Gemelas (escena: scenes/niveles/sala_2_raices.tscn).
+## Sala 2 — El Mural de la Incógnita (escena: scenes/niveles/sala_2_raices.tscn).
 ## Se entra por un pasillo con tres prensas de piedra que se cierran con ritmos distintos.
-## En la sala, el Mural de las Raíces: hay que escribir factorizar(b, c), que el Mural prueba
-## con cinco polinomios (solo uno a la vista) y con un límite de pasos por polinomio.
+## En la sala, el Mural: hay que escribir despejar(a, b, c), que devuelve la x de ax + b = c.
+## El Mural la prueba con tres ecuaciones (solo una a la vista).
 class_name RootsLevel
 extends ChamberLevel
 

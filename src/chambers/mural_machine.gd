@@ -1,7 +1,7 @@
 @tool
-## El Mural de las Raíces (Sala 2): un panel de piedra y bronce con cinco filas. Cada fila tiene
-## un engranaje, la placa con su polinomio (solo la primera se ve antes de ejecutar), la placa
-## donde aparece la factorización del programa y una lámpara. Es el invocador del patrón
+## El Mural de la Incógnita (Sala 2): un panel de piedra y bronce con tres filas. Cada fila tiene
+## un engranaje, la placa con su ecuación ax + b = c (solo la primera se ve antes de ejecutar),
+## la placa donde aparece la x que despejó el programa y una lámpara. Es el invocador del patrón
 ## Command: perform() prueba las filas una por una (RootsCommand).
 class_name MuralMachine
 extends CodeMachine
@@ -51,7 +51,7 @@ func setup(kit: TileKit, bus: EventBus, data: Dictionary, text: Callable, open_c
 	max_steps = int(data.get("max_steps", 12000))
 	view_focus = Vector2(0, -60)
 	session.title = String(data.get("name", ""))
-	session.file_name = String(data.get("file_name", "raices.py"))
+	session.file_name = String(data.get("file_name", "incognita.py"))
 	session.code = String(data.get("starter_code", ""))
 	session.help = data.get("help", [])
 	session.max_steps = max_steps
@@ -60,13 +60,13 @@ func setup(kit: TileKit, bus: EventBus, data: Dictionary, text: Callable, open_c
 	new_trial()
 
 
-## Polinomios nuevos (al empezar y después de cada fallo).
+## Ecuaciones nuevas (al empezar y después de cada fallo).
 func new_trial() -> void:
 	trial = RootsTrial.new(_data.get("cases", []), _rng)
 	_rows.clear()
 	for i in trial.cases.size():
 		var c: Dictionary = trial.cases[i]
-		_rows.append({"poly": RootsTrial.polynomial(c.b, c.c), "result": "", "color": Color("8d97a8"), "lamp": Color("2a3036"), "angle": 0.0, "revealed": i == 0})
+		_rows.append({"poly": RootsTrial.equation(c.a, c.b, c.c), "result": "", "color": Color("8d97a8"), "lamp": Color("2a3036"), "angle": 0.0, "revealed": i == 0})
 	_active = -1
 
 
@@ -84,7 +84,7 @@ func evaluate(source: String, sandbox: ScriptSandbox) -> CodeMachine.Report:
 		report.ok = false
 		report.error = program.error_text()
 		return report
-	var fn = program.context.globals.get("factorizar")
+	var fn = program.context.globals.get("despejar")
 	if not fn is ScriptCallable:
 		report.ok = false
 		report.error = _text.call("mural_no_function", {})
@@ -93,7 +93,7 @@ func evaluate(source: String, sandbox: ScriptSandbox) -> CodeMachine.Report:
 	for i in trial.cases.size():
 		var c: Dictionary = trial.cases[i]
 		program.context.max_steps = max_steps
-		var answer := sandbox.call_function(program, "factorizar", [c.b, c.c])
+		var answer := sandbox.call_function(program, "despejar", [c.a, c.b, c.c])
 		var steps: int = program.context.steps
 		var verdict := RootsTrial.Verdict.ERROR
 		var shown := ""
@@ -101,20 +101,18 @@ func evaluate(source: String, sandbox: ScriptSandbox) -> CodeMachine.Report:
 			var slow: bool = steps > max_steps
 			verdict = RootsTrial.Verdict.TOO_SLOW if slow else RootsTrial.Verdict.ERROR
 			shown = _text.call("mural_row_slow" if slow else "mural_row_error", {})
-			report.message = _text.call("mural_too_slow" if slow else "mural_error", {"b": c.b, "c": c.c, "max": max_steps, "error": answer[1]})
+			report.message = _text.call("mural_too_slow" if slow else "mural_error", {"a": c.a, "b": c.b, "c": c.c, "max": max_steps, "error": answer[1]})
 		else:
 			verdict = RootsTrial.judge(c, answer[1])
 			match verdict:
 				RootsTrial.Verdict.RIGHT:
-					shown = RootsTrial.factors(answer[1][0], answer[1][1])
+					shown = RootsTrial.answer(answer[1])
 				RootsTrial.Verdict.BAD_SHAPE:
-					shown = str(answer[1])
-					report.message = _text.call("mural_bad_shape", {"b": c.b, "c": c.c, "got": ScriptContext.to_text(answer[1])})
+					shown = ScriptContext.to_text(answer[1])
+					report.message = _text.call("mural_bad_shape", {"a": c.a, "b": c.b, "c": c.c, "got": shown})
 				_:
-					var p: int = answer[1][0]
-					var q: int = answer[1][1]
-					shown = RootsTrial.factors(p, q)
-					report.message = _text.call("mural_wrong", {"b": c.b, "c": c.c, "got": shown, "expands": RootsTrial.polynomial(p + q, p * q), "want": RootsTrial.polynomial(c.b, c.c)})
+					shown = RootsTrial.answer(answer[1])
+					report.message = _text.call("mural_wrong", {"a": c.a, "b": c.b, "c": c.c, "got": ScriptContext.to_text(answer[1]), "eq": RootsTrial.equation(c.a, c.b, c.c), "want": c.x})
 		report.commands.append(RootsCommand.new(i, verdict, shown, steps))
 		if verdict != RootsTrial.Verdict.RIGHT:
 			report.success = false
@@ -142,7 +140,7 @@ func perform(report: CodeMachine.Report) -> void:
 		new_trial()
 
 
-## Prueba una fila: se revela el polinomio, gira el engranaje y aparece el resultado.
+## Prueba una fila: se revela la ecuación, gira el engranaje y aparece el resultado.
 func test_row(index: int, verdict: RootsTrial.Verdict, shown: String, _steps: int) -> void:
 	_active = index
 	var row: Dictionary = _rows[index]
@@ -192,14 +190,14 @@ func _draw() -> void:
 	draw_rect(panel, STONE)
 	draw_rect(Rect2(LEFT, TOP, W, 3), STONE_LIGHT)
 	draw_rect(Rect2(LEFT - 3, TOP - 6, W + 6, 4), BRONZE)
-	var title := String(_data.get("mural_title", "x² + bx + c = (x + p)(x + q)"))
+	var title := String(_data.get("mural_title", "ax + b = c   →   x = ?"))
 	_text_center(title, Vector2(0, TOP + 13), 8, GOLD)
 	for i in _rows.size():
 		var row: Dictionary = _rows[i]
 		var y := TOP + 18 + i * ROW_H
 		draw_rect(Rect2(LEFT + 4, y + 1, W - 8, ROW_H - 2), STONE_DARK if i != _active else STONE_DARK.lerp(CYAN, 0.12))
 		_gear(_gear_center(i), row.angle, row.lamp)
-		# Placa del polinomio
+		# Placa de la ecuación
 		draw_rect(Rect2(LEFT + 26, y + 3, 78, ROW_H - 6), PLAQUE)
 		var poly: String = row.poly if row.revealed else String(_data.get("hidden_label", "? ? ?"))
 		_text_center(poly, Vector2(LEFT + 65, y + 12.5), 8, Color("e9f7ff") if row.revealed else Color("5a6672"))
@@ -213,9 +211,9 @@ func _draw() -> void:
 		draw_circle(Vector2(LEFT + W - 8, y + ROW_H / 2.0), 2.5, row.lamp)
 
 
-## En el editor no hay polinomios todavía: filas vacías para ver el tamaño del Mural.
+## En el editor no hay ecuaciones todavía: filas vacías para ver el tamaño del Mural.
 func _preview_rows() -> void:
-	for i in 5:
+	for i in 3:
 		_rows.append({"poly": "", "result": "", "color": Color("8d97a8"), "lamp": Color("2a3036"), "angle": 0.0, "revealed": false})
 
 

@@ -1,72 +1,53 @@
-## Reglas del Mural de las Raíces (Sala 2, Las Raíces Gemelas), sin nada visible.
-## Cada caso es un polinomio x² + bx + c con raíces enteras. El programa del jugador define
-## factorizar(b, c), que debe devolver [p, q] tales que (x + p)(x + q) = x² + bx + c
-## (es decir, p + q = b y p · q = c). El orden de p y q no importa.
-## Cada llamada tiene un límite de pasos: probar todas las parejas es demasiado lento.
+## Reglas del Mural de la Incógnita (Sala 2), sin nada visible.
+## Cada caso es una ecuación ax + b = c con una solución entera. El programa del jugador define
+## despejar(a, b, c), que debe devolver x = (c − b) / a. Se acepta un entero o un decimal
+## (15 / 3 da 5.0 y también vale).
 class_name RootsTrial
 extends RefCounted
 
 enum Verdict { RIGHT, WRONG, BAD_SHAPE, TOO_SLOW, ERROR }
 
-var cases: Array = []     # [{b, c, roots: [p, q]}], el primero es el visible
+var cases: Array = []     # [{a, b, c, x}], el primero es el visible
 
 
-## kinds: la lista "cases" de chambers.json; cada tipo dice cómo elegir las raíces.
+## kinds: la lista "cases" de chambers.json; cada tipo dice cómo elegir los números.
 func _init(kinds: Array, rng: RandomNumberGenerator) -> void:
 	for kind in kinds:
 		cases.append(make_case(String(kind), rng))
 
 
 static func make_case(kind: String, rng: RandomNumberGenerator) -> Dictionary:
-	var p := 0
-	var q := 0
+	var a := rng.randi_range(2, 9)
+	var x := rng.randi_range(2, 12)
+	var b := rng.randi_range(1, 15)
 	match kind:
-		"square":            # (x − r)²: el del mural
-			p = -rng.randi_range(6, 15)
-			q = p
-		"mixed":             # una raíz positiva y otra negativa: c negativo
-			p = rng.randi_range(20, 60)
-			q = -rng.randi_range(20, 60)
-		"zero":              # c = 0: una de las raíces es 0
-			p = 0
-			q = rng.randi_range(5, 40) * (1 if rng.randf() < 0.5 else -1)
-		"both_positive":     # (x + p)(x + q) con p y q grandes: b y c positivos
-			p = rng.randi_range(25, 55)
-			q = rng.randi_range(25, 55)
-		"near":              # raíces grandes y casi opuestas: b chico, c grande y negativo
-			p = rng.randi_range(40, 55)
-			q = -(p - 1) if rng.randf() < 0.5 else -(p + 1)
-		_:
-			p = rng.randi_range(-9, 9)
-			q = rng.randi_range(-9, 9)
-	return {"b": p + q, "c": p * q, "roots": [p, q]}
+		"plus":              # 3x + 5 = 20: el del mural
+			pass
+		"minus":             # 2x − 4 = 10: b negativo
+			b = -b
+		"negative":          # la x da negativa: 4x + 9 = −7
+			x = -rng.randi_range(1, 9)
+			b = b * (1 if rng.randf() < 0.5 else -1)
+	return {"a": a, "b": b, "c": a * x + b, "x": x}
 
 
-## "x² − 20x + 100" (con los signos bien puestos y sin términos en cero).
-static func polynomial(b: int, c: int) -> String:
-	var text := "x²"
+## "3x + 5 = 20" (con los signos bien puestos).
+static func equation(a: int, b: int, c: int) -> String:
+	var text := "%dx" % a
 	if b != 0:
-		text += (" − " if b < 0 else " + ") + ("" if absi(b) == 1 else str(absi(b))) + "x"
-	if c != 0:
-		text += (" − " if c < 0 else " + ") + str(absi(c))
-	return text
+		text += (" − " if b < 0 else " + ") + str(absi(b))
+	return text + " = " + str(c).replace("-", "−")
 
 
-## "(x − 10)(x − 10)" a partir de [p, q].
-static func factors(p: int, q: int) -> String:
-	return "(%s)(%s)" % [_term(p), _term(q)]
+## "x = 5" (o "x = 2.5" si el programa devolvió un decimal que no es entero).
+static func answer(value) -> String:
+	if typeof(value) == TYPE_FLOAT and is_equal_approx(value, round(value)):
+		value = int(round(value))
+	return "x = " + str(value).replace("-", "−")
 
 
-static func _term(k: int) -> String:
-	if k == 0:
-		return "x"
-	return "x %s %d" % ["−" if k < 0 else "+", absi(k)]
-
-
-## Revisa lo que devolvió factorizar(b, c). value: lo que devolvió (o null).
+## Revisa lo que devolvió despejar(a, b, c). value: lo que devolvió (o null).
 static func judge(case: Dictionary, value) -> Verdict:
-	if typeof(value) != TYPE_ARRAY or value.size() != 2 or typeof(value[0]) != TYPE_INT or typeof(value[1]) != TYPE_INT:
+	if not typeof(value) in [TYPE_INT, TYPE_FLOAT]:
 		return Verdict.BAD_SHAPE
-	var p: int = value[0]
-	var q: int = value[1]
-	return Verdict.RIGHT if p + q == int(case.b) and p * q == int(case.c) else Verdict.WRONG
+	return Verdict.RIGHT if is_equal_approx(float(value), float(case.x)) else Verdict.WRONG

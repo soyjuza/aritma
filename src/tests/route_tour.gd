@@ -25,6 +25,16 @@ func run(arg: String) -> void:
 		await _roots_room()
 		game.get_tree().quit()
 		return
+	var rooms := {"sala3": [2, _vortex_room], "sala4": [3, _figures_room], "sala5": [4, _path_room]}
+	if parts.size() > 1 and rooms.has(parts[1]):
+		game.machine.change("play", {"mode": "new"})
+		await _wait(0.5)
+		game.dialog.close()
+		game.load_chamber(rooms[parts[1]][0])
+		game.timer.start()
+		await rooms[parts[1]][1].call()
+		game.get_tree().quit()
+		return
 	if parts.size() > 1 and parts[1] == "jefe":
 		game.machine.change("play", {"mode": "new"})
 		await _wait(0.5)
@@ -117,7 +127,7 @@ func _roots_room() -> void:
 	while game.rig.is_gliding():
 		await _wait(0.1)
 	await _wait(0.4)
-	game.codex.editor.text = "def factorizar(b, c):\n    for p in range(-abs(c), abs(c) + 1):\n        q = b - p\n        if p * q == c:\n            return [p, q]\n"
+	game.codex.editor.text = "def despejar(a, b, c):\n    return (c - b) / a\n"
 	await _shot("24_codice_mural")
 	game.machine.current.run()
 	await _wait(1.6)
@@ -126,6 +136,92 @@ func _roots_room() -> void:
 		await _wait(0.3)
 	await _wait(1.0)
 	await _shot("26_mural_resuelto")
+
+
+## La Sala 3: el Faro apagado, el Códice con luces.encender() y la sala encendida.
+func _vortex_room() -> void:
+	var lvl := game.level as VortexLevel
+	game.player.place(lvl.get_node("Zonas/EntradaSala").point(), Vector2.UP)
+	lvl._on_hall_entered()
+	await _wait(1.0)
+	game.dialog.close()
+	await _shot("30_vortice_apagado")
+	game.player.place(lvl.machine.global_position + Vector2(0, 30), Vector2.UP)
+	game.open_codex(lvl.machine.session)
+	while game.rig.is_gliding():
+		await _wait(0.1)
+	await _wait(0.4)
+	game.codex.editor.text = lvl.machine.session.code + "luces.encender()\n"
+	await _shot("31_codice_luces")
+	game.machine.current.run()
+	await _wait(2.5)
+	await _shot("32_faro_encendido")
+	game.dialog.close()
+	game.player.place(lvl.board.cell_center(Vector2i(3, 6)), Vector2.UP)
+	await _wait(1.0)
+	await _shot("33_tablero_encendido")
+
+
+## La Sala 4: la Mesa en la sala, el rompecabezas vacío, a medias, lleno y la segunda figura.
+func _figures_room() -> void:
+	var lvl := game.level as FigureLevel
+	game.player.place(lvl.get_node("Zonas/EntradaSala").point(), Vector2.UP)
+	lvl._on_hall_entered()
+	await _wait(1.0)
+	await _shot("39_intro_mesa")
+	game.dialog.close()
+	await _shot("40_sala_mesa")
+	game.player.place(lvl.table.global_position + Vector2(0, 46), Vector2.UP)
+	await _wait(0.6)
+	await _shot("41_mesa_cerca")
+	lvl._open_table()
+	await _wait(0.4)
+	await _shot("42_rompecabezas")
+	var puzzle := lvl.table.puzzle()
+	for i in 2:
+		puzzle.place(i, puzzle.solution[i].at)
+	await _wait(0.3)
+	await _shot("43_rompecabezas_medio")
+	puzzle.place(2, puzzle.solution[2].at)
+	(game.machine.current as PuzzleState).check_solved(game.ui)
+	await _wait(0.5)
+	await _shot("44_figura_llena")
+	await _wait(1.5)
+	await _shot("45_segunda_figura")
+	game.machine.change("play")
+	await _wait(0.6)
+	await _shot("46_mesa_una_lista")
+
+
+## La Sala 5: el sendero con la regla, una losa rota y Tala cruzando hasta el núcleo.
+func _path_room() -> void:
+	var lvl := game.level as CoreLevel
+	game.player.place(lvl.get_node("Zonas/EntradaSala").point(), Vector2.UP)
+	lvl.set_checkpoint(lvl.room_entrance())
+	lvl._on_hall_entered()
+	await _wait(1.0)
+	await _shot("50_regla_dialogo")
+	game.dialog.close()
+	await _wait(0.3)
+	await _shot("51_sendero")
+	var stones := lvl.stones
+	for k in 3:
+		game.player.global_position = stones.cell_center_global(stones.path[k])
+		await _wait(0.4)
+	await _shot("52_cruzando")
+	var bad := Vector2i(-1, -1)
+	for x in stones.cols:
+		if not stones.is_safe(Vector2i(x, stones.rows - 1)):
+			bad = Vector2i(x, stones.rows - 1)
+	game.player.global_position = stones.cell_center_global(bad)
+	await _wait(0.35)
+	await _shot("53_losa_rompiendose")
+	await _wait(2.0)
+	await _shot("54_aviso_losa")
+	for k in stones.path.size() - 1:
+		game.player.global_position = stones.cell_center_global(stones.path[k])
+		await _wait(0.25)
+	await _shot("55_junto_al_nucleo")
 
 
 ## El jefe final (Sala 6): el pasillo, la entrada a la sala y cada parte de la pelea.
@@ -155,10 +251,28 @@ func _boss_fight() -> void:
 	game.health.refill()
 	for i in lvl.boss.phase_hp():
 		lvl.boss.take_hit(1, Vector2.UP)
-	await _wait(2.5)
+	await _wait(0.5)
 	await _shot("j6_escudo")
+	while not game.machine.current is QuizState:
+		await _wait(0.1)
+	await _wait(0.6)
+	await _shot("j6a_problema")
+	var quiz := game.machine.current as QuizState
+	quiz.choose((int(quiz.quiz.answer) + 1) % quiz.quiz.options.size())
+	await _wait(0.4)
+	await _shot("j6b_problema_mal")
+	await _wait(2.6)
+	await _shot("j6c_guardianes")
 	while lvl.boss.hp > 0:
-		if lvl.boss.can_be_hit():
+		if game.machine.current is QuizState:
+			quiz = game.machine.current as QuizState
+			await _wait(0.5)
+			await _shot("j6d_problema_%d" % lvl.boss.phase)
+			quiz.choose(int(quiz.quiz.answer))
+			await _wait(0.4)
+			await _shot("j6e_problema_bien_%d" % lvl.boss.phase)
+			await _wait(1.5)
+		elif lvl.boss.can_be_hit():
 			lvl.boss.take_hit(1, Vector2.UP)
 		else:
 			for g in lvl.nodes_of(Guardian):

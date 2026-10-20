@@ -96,52 +96,50 @@
 			"max_lines": 0
 		},
 		{
-			"name": "Las Raíces Gemelas",
+			"name": "El Mural de la Incógnita",
 			"kind": "roots",
 			"seed": 0,
-			"file_name": "raices.py",
-			"max_steps": 12000,
+			"file_name": "incognita.py",
+			"max_steps": 2000,
 			"cases": [
-				"square",
-				"mixed",
-				"zero",
-				"both_positive",
-				"near"
+				"plus",
+				"minus",
+				"negative"
 			],
 			"press_periods": [
 				2.4,
 				2.0,
 				1.6
 			],
-			"mural_title": "x² + bx + c = (x + p)(x + q)",
+			"mural_title": "ax + b = c   →   x = ?",
 			"hidden_label": "? ? ?",
-			"starter_code": "# El Mural llama a factorizar(b, c) con cinco polinomios x² + bx + c.\n# Devuelve [p, q] tales que (x + p)(x + q) = x² + bx + c.\n# Las raíces están entre -60 y 60. Cada polinomio tiene un límite de 12 000 pasos.\n\ndef factorizar(b, c):\n    \n",
+			"starter_code": "# El Mural llama a despejar(a, b, c) con tres ecuaciones ax + b = c.\n# Devuelve el valor de x.\n# Ejemplo: 3x + 5 = 20  ->  3x = 20 - 5  ->  x = 15 / 3 = 5\n\ndef despejar(a, b, c):\n    \n",
 			"help": [
 				[
-					"def factorizar(b, c):",
-					"el Mural la llama con b y c"
+					"def despejar(a, b, c):",
+					"el Mural la llama con a, b y c"
 				],
 				[
-					"return [p, q]",
-					"devuelve los dos números"
+					"return ...",
+					"devuelve el valor de x"
 				],
 				[
-					"p + q == b",
-					"la suma tiene que dar b"
+					"c - b",
+					"pasa b al otro lado (restando)"
 				],
 				[
-					"p * q == c",
-					"el producto tiene que dar c"
+					"(c - b) / a",
+					"y luego divide entre a"
 				],
 				[
-					"abs(n)",
-					"valor absoluto de n"
+					"3x + 5 = 20",
+					"a = 3, b = 5, c = 20  ->  x = 5"
 				]
 			],
 			"intro": [
-				"INSCRIPCIÓN: El Mural de las Raíces separa cada polinomio x² + bx + c en sus dos factores gemelos (x + p)(x + q).",
-				"Escribe la función factorizar(b, c) y haz que devuelva [p, q]. El Mural la pondrá a prueba con cinco polinomios: solo ves el primero.",
-				"Las raíces gemelas siempre están entre −60 y 60. Cada polinomio tiene un límite de 12 000 pasos: si tu programa los gasta, el Mural se recalienta. Ejemplo: x² − 20x + 100 = (x − 10)(x − 10), así que factorizar(-20, 100) devuelve [-10, -10].",
+				"INSCRIPCIÓN: El Mural de la Incógnita guarda ecuaciones de la forma ax + b = c. Quien despeje la x abrirá la reja.",
+				"Escribe la función despejar(a, b, c) y haz que devuelva el valor de x. El Mural la probará con tres ecuaciones: solo ves la primera.",
+				"Recuerda cómo se despeja: lo que suma pasa restando y lo que multiplica pasa dividiendo. Ejemplo: 3x + 5 = 20 → 3x = 15 → x = 5, así que despejar(3, 5, 20) devuelve 5.",
 				"INSCRIPCIÓN: Dos caballeros de piedra vigilan el Mural. Cada vez que el Mural rechace tu código —aunque sea por un error de escritura— despertarán más guardianes."
 			],
 			"tunnel_intro": [
@@ -158,32 +156,28 @@
 				"rows": 8,
 				"mines": 10
 			},
-			"starter_code": "# El Faro enciende el tablero si dentro(x, y) funciona.\n# dentro(x, y) devuelve True si la casilla (x, y) está dentro del tablero de 8 x 8\n# y False si se sale. x e y van de 0 a 7.\n# Ejemplo: dentro(3, 5) -> True    dentro(8, 2) -> False    dentro(0, -1) -> False\n\ndef dentro(x, y):\n    \n",
+			"starter_code": "# La sala está a oscuras: enciende las luces del Faro.\n# Es como la puerta del pueblo: puerta.abrir()\n\n",
 			"help": [
 				[
-					"def dentro(x, y):",
-					"devuelve True o False"
+					"luces.encender()",
+					"enciende el Faro y el tablero"
 				],
 				[
-					"return ...",
-					"devuelve el resultado de la función"
+					"luces.apagar()",
+					"apaga las luces"
 				],
 				[
-					"0 <= x < 8",
-					"True si x está entre 0 y 7"
+					"luces.encendidas",
+					"True si están encendidas"
 				],
 				[
-					"a and b",
-					"True solo si las dos cosas son True"
-				],
-				[
-					"Tablero",
-					"8 x 8: x e y van de 0 a 7"
+					"E / Q",
+					"sobre una baldosa: destapar / bandera"
 				]
 			],
 			"intro": [
 				"INSCRIPCIÓN: El Vórtice guarda diez minas bajo sus baldosas. Todas se ven iguales: solo los números dicen dónde está el peligro.",
-				"Primero enciende el Faro: escribe dentro(x, y), que devuelva True si la casilla (x, y) está dentro del tablero de 8 x 8 y False si se sale. Con esa regla el Faro sabe qué baldosas rodean a cada una.",
+				"Primero enciende el Faro: usa su atril (E) y ordénale a las luces que se enciendan con luces.encender(), como abriste la puerta del pueblo.",
 				"Encendido el tablero, párate sobre una baldosa: E la destapa y Q le pone o quita una bandera. Cada número dice cuántas minas la rodean. Destapa todas las que no son mina.",
 				"La primera baldosa nunca es mina y el tablero siempre se resuelve pensando, sin adivinar. Si destapas una mina pierdes 2 corazones y el tablero vuelve a empezar, con las minas en otro lugar."
 			],
@@ -192,48 +186,40 @@
 			]
 		},
 		{
-			"name": "La Balanza de los Aritmanos",
-			"kind": "balance",
+			"name": "La Mesa de las Figuras",
+			"kind": "figures",
 			"seed": 0,
-			"file_name": "balanza.py",
-			"rounds": [
-				7,
-				8
+			"puzzles": [
+				{
+					"title": "El Rectángulo",
+					"rows": [
+						"AAAB",
+						"ACBB",
+						"CCCB"
+					],
+					"turned": false
+				},
+				{
+					"title": "La Casa",
+					"rows": [
+						"..A..",
+						".AAA.",
+						"BBCDD",
+						"BCCCD",
+						"BEEED"
+					],
+					"turned": true
+				}
 			],
-			"greedy": true,
 			"press_periods": [
 				2.0,
 				1.7,
 				1.4
 			],
-			"starter_code": "# Reparte TODAS las pesas entre los dos platos para que sumen lo mismo.\n# Cada pesa se pone por su posición (0, 1, 2...): plato_izq.poner(0).\n# La Balanza prueba tu programa con dos juegos de pesas: el que ves y uno oculto.\n#\n# Pista: plato_liviano() te da el plato que pesa MENOS en ese momento.\n# Recorre las pesas en orden y pon cada una en ese plato.\n\n",
-			"help": [
-				[
-					"for i in range(pesas.cantidad()):",
-					"recorre las pesas: i = 0, 1, 2..."
-				],
-				[
-					"plato_liviano()",
-					"el plato que pesa menos ahora"
-				],
-				[
-					"plato_liviano().poner(i)",
-					"pone la pesa i en el plato más liviano"
-				],
-				[
-					"plato_izq.poner(i)",
-					"pone la pesa i en el plato izquierdo"
-				],
-				[
-					"plato_izq.peso()",
-					"cuánto suma ese plato ahora"
-				]
-			],
 			"intro": [
-				"INSCRIPCIÓN: El peso del conocimiento no está en acumular, sino en hallar el justo equilibrio.",
-				"Programa la Balanza: reparte TODAS las pesas entre el plato izquierdo y el derecho para que los dos sumen lo mismo. Cada pesa se pone por su posición en el estante (el número cian de abajo): plato_izq.poner(0).",
-				"Pista: plato_liviano() te da el plato que pesa menos en ese momento; pon cada pesa, en orden, en ese plato. La Balanza prueba tu programa con dos juegos de pesas, el que ves y uno oculto. Si no queda nivelada, las pesas caen a la lava y llegan otras.",
-				"INSCRIPCIÓN: Los caballeros de piedra también vigilan la Balanza. Cada error del código los despierta."
+				"INSCRIPCIÓN: Los aritmanos medían el mundo con figuras. Quien sepa juntar las partes verá el todo.",
+				"Usa el atril de la Mesa (E): aparece una figura grande y varias piezas más pequeñas. Arrástralas con el ratón hasta llenar la figura: todas deben caber, sin sobrar ni faltar casillas.",
+				"R o el clic derecho giran una pieza. Una pieza puesta se puede volver a levantar. Son dos figuras: la segunda llega con las piezas giradas."
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Las prensas de este pasillo son más rápidas. Mira la lámpara roja y corre en el momento justo."
@@ -243,49 +229,27 @@
 			"name": "La Singularidad del Cero",
 			"kind": "core",
 			"seed": 0,
-			"file_name": "red.py",
-			"network": {
-				"reach": 100.0,
-				"keep": 0.6,
-				"min_len": 3,
-				"max_len": 5,
-				"tests": 2,
-				"shortest": false
-			},
-			"bridges": {
-				"first_delay": 0.8,
-				"interval": 0.35,
-				"life": 0
-			},
-			"starter_code": "# Levanta los puentes desde red.inicio hasta red.salida, uno por uno.\n# puentes.levantar(id) tiende un puente desde la última plataforma hasta id.\n# red.mas_cercano(id) te dice a qué plataforma saltar desde id para acercarte al núcleo.\n# La consola prueba tu programa en dos redes de prueba y en la de esta sala.\n#\n# Pista: empieza en red.inicio y, MIENTRAS no llegues a red.salida, salta al más cercano\n# y levanta su puente.\n\nactual = red.inicio\n",
-			"help": [
-				[
-					"red.inicio / red.salida",
-					"plataforma de partida y la del núcleo"
-				],
-				[
-					"red.mas_cercano(id)",
-					"el vecino de id más cercano al núcleo"
-				],
-				[
-					"puentes.levantar(id)",
-					"tiende un puente hasta la plataforma id"
-				],
-				[
-					"while actual != red.salida:",
-					"repite hasta llegar al núcleo"
-				],
-				[
-					"actual = ...",
-					"cambia la plataforma en la que vas"
-				]
+			"rules": [
+				{
+					"multiple": 3,
+					"text": "múltiplos de 3"
+				},
+				{
+					"multiple": 4,
+					"text": "múltiplos de 4"
+				}
 			],
+			"path": {
+				"cols": 9,
+				"rows": 5,
+				"extra_safe": 3,
+				"top": 60
+			},
 			"intro": [
-				"INSCRIPCIÓN: Quien domine el flujo de las funciones encontrará la salida hacia la superficie.",
-				"El núcleo flota al otro lado del abismo, sobre la última plataforma. Las plataformas están unidas por hilos de luz, pero no se pueden pisar: hacen falta puentes.",
-				"Programa la Consola: empieza en red.inicio y, mientras no llegues a red.salida, salta a red.mas_cercano(actual) y levanta su puente con puentes.levantar(actual). La consola prueba tu programa en dos redes de prueba y en la de esta sala.",
-				"Cuando la consola acepte tu programa, usa su atril para levantar los puentes: aparecen uno tras otro y ya no se caen. Camina por ellos hasta el núcleo.",
-				"INSCRIPCIÓN: Los últimos guardianes vigilan la Consola. No pueden cruzar el abismo, pero cada error del código los despierta."
+				"INSCRIPCIÓN: Quien sepa leer los números encontrará la salida hacia la superficie.",
+				"El núcleo brilla al otro lado del abismo, sobre la losa dorada. Para llegar hay un sendero de losas flotantes, cada una con un número grabado.",
+				"INSCRIPCIÓN: Solo los {regla} te sostienen. Cualquier otra losa se desmorona bajo tus pies.",
+				"Piensa antes de pisar: busca un camino de losas buenas desde el borde hasta la losa dorada. Si caes pierdes 7 segundos, y la losa que pisaste queda rota."
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Más allá, la Singularidad del Cero: el corazón del templo."
@@ -294,11 +258,20 @@
 		{
 			"name": "El Trono del Cero",
 			"kind": "throne",
+			"quiz": {
+				"seconds": 15,
+				"kinds": [
+					"paridad",
+					"multiplo",
+					"despejar"
+				]
+			},
 			"intro": [
 				"Una sombra roja baja del techo y abre las alas sobre el trono: el Guardián del Cero.",
 				"EL GUARDIÁN DEL CERO: «Tomaste el núcleo, pero no saldrás con él mientras yo exista».",
 				"Golpéalo con J o clic. Cuando el círculo rojo marque su pisotón, sal corriendo o salta con ESPACIO. Los orbes se esquivan o se deshacen con el garrote.",
-				"Al perder un tercio de la vida se cubre con un escudo y llama a sus guardianes: vence a todos para romperlo. Al entrar recuperas 2 corazones: es la única curación del templo."
+				"Cada vez que pierda una cuarta parte de su vida se cubrirá con un escudo y te pondrá a prueba con un problema: tienes 15 segundos (1 a 4 o clic). Si aciertas, el escudo cae; si fallas, llamará a sus guardianes.",
+				"Al entrar recuperas 2 corazones: es la única curación del templo."
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Aquí termina el templo. Quien llegue al trono deberá vencer a su último guardián."

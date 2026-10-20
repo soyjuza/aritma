@@ -1,15 +1,16 @@
 ## El jefe final: el Guardián del Cero (escena: scenes/enemigos/jefe_cero.tscn), un tengu
 ## rojo y alado que sella el núcleo de la Sala 5. Aparece en la antesala cuando Tala toca el
 ## núcleo, y el sello no se rompe hasta vencerlo.
-## Pelea en 3 fases (la vida se reparte en partes iguales):
+## Pelea en 4 fases (la vida se reparte en partes iguales):
 ## - Persigue a Tala despacio y la ataca de dos maneras, que se avisan antes:
-##   · Ráfaga: abre las alas y lanza un abanico de orbes rojos (3, 5 y 7 según la fase). Se
+##   · Ráfaga: abre las alas y lanza un abanico de orbes rojos (3, 5, 6 y 7 según la fase). Se
 ##     esquivan corriendo y el garrote los deshace.
 ##   · Pisotón: salta, un círculo rojo marca dónde cae y al caer quita un corazón a quien esté
 ##     dentro sin estar saltando. Después queda cansado un momento: es el mejor momento para
 ##     pegarle.
-## - Al cambiar de fase se cubre con un escudo y llama a una ola de guardianes (el Director de
-##   Alarma de la sala). El escudo cae cuando no queda ninguno.
+## - Al cambiar de fase se cubre con un escudo y pone a prueba a Tala con un problema (la sala
+##   abre QuizState). Si acierta, el escudo cae; si falla o se acaba el tiempo, llama a una ola
+##   de guardianes (summon) y el escudo cae cuando no queda ninguno.
 ## Contexto del patrón State en versión simple: cada estado es una función (_state_...) y
 ## change() cambia de una a otra.
 class_name ZeroBoss
@@ -29,18 +30,21 @@ const SHEETS := {
 	"appear": [preload("res://assets/pack/actors/TenguRed/Trans.png"), 11, 7.0],
 }
 
-@export var max_hp := 12
+@export var max_hp := 16
 @export var speed := 30.0
-@export var orbs_per_phase: Array[int] = [3, 5, 7]
-@export var waves_per_phase: Array[int] = [0, 2, 3]   # ola del Director al empezar cada fase
+@export var orbs_per_phase: Array[int] = [3, 5, 6, 7]
+## Nivel de alarma de la ola si falla el problema de cada fase (con "waves" de config.json:
+## nivel 4 = 4 guardianes, 5 = 5, 6 = 6).
+@export var waves_on_fail: Array[int] = [0, 4, 5, 6]
 @export var slam_radius := 42.0
 @export var slam_damage := 2                          # mitades de corazón
 @export var touch_damage := 1
 @export var wake_distance := 150.0                    # más lejos que esto, espera en su lugar
 
 var radius := 11.0
-var hp := 12
+var hp := 16
 var phase := 0
+var awaiting_answer := false   # con el escudo puesto, esperando la respuesta del problema
 var state := "hidden"
 var alarm: AlarmDirector
 var bus: EventBus
@@ -99,6 +103,14 @@ func reset_for_retry() -> void:
 	position = home
 	velocity = Vector2.ZERO
 	change("wait")
+
+
+## La respuesta al problema del escudo: si falló, llama a su ola de guardianes (más grande en
+## cada fase); si acertó, el escudo cae sin pelear.
+func answered(right: bool) -> void:
+	awaiting_answer = false
+	if not right and alarm and waves_on_fail[phase] > 0:
+		alarm.summon(waves_on_fail[phase])
 
 
 func is_awake() -> bool:
@@ -168,11 +180,10 @@ func change(next: String) -> void:
 			_play("hit")
 		"shield":
 			_play("idle")
-			shielded.emit()
+			awaiting_answer = true
 			if bus:
 				bus.publish(GameEvents.BOSS_SHIELD)
-			if alarm and waves_per_phase[phase] > 0:
-				alarm.summon(waves_per_phase[phase])
+			shielded.emit()
 		"dying":
 			_play("hit")
 			body_shape.set_deferred("disabled", true)
@@ -213,7 +224,7 @@ func _physics_process(delta: float) -> void:
 		"shield":
 			velocity = (home - position) * 2.0
 			move_and_slide()
-			if _t > 1.0 and (alarm == null or not alarm.fighting()):
+			if _t > 1.0 and not awaiting_answer and (alarm == null or not alarm.fighting()):
 				change("chase")
 		"dying":
 			modulate.a = 1.0 - clampf((_t - 1.0) / 1.0, 0.0, 1.0)

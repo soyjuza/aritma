@@ -3,15 +3,15 @@
 ## Patrones de diseño (lo que pide la guía de la actividad)
 | Tipo | Patrón | Dónde | Para qué |
 |---|---|---|---|
-| Creacional | **Factory Method** | `ChamberBuilder` → `FilterBuilder`, `RootsBuilder`, `VortexBuilder`, `BalanceBuilder`, `CoreBuilder`, `ThroneBuilder`; `ChamberRegistry` | Cada creador instancia la escena de su sala según el `kind` de `chambers.json`. Para agregar una sala se crea una escena y un creador nuevos, sin tocar los demás. |
+| Creacional | **Factory Method** | `ChamberBuilder` → `FilterBuilder`, `RootsBuilder`, `VortexBuilder`, `FigureBuilder`, `CoreBuilder`, `ThroneBuilder`; `ChamberRegistry` | Cada creador instancia la escena de su sala según el `kind` de `chambers.json`. Para agregar una sala se crea una escena y un creador nuevos, sin tocar los demás. |
 | Creacional | **Factory** | `AlarmDirector` (instancia `centinela.tscn`, `hechicero.tscn`, `runico.tscn`); `OrbShot` (instancia `orbe.tscn`) | Crea los guardianes de cada ola y los orbes del hechicero. |
 | Estructural | **Facade** | `TileKit`, `AudioService` | Ocultan cómo se arman las partículas y el sonido con el pack de arte. |
-| Estructural | **Adapter** | `DoorAdapter`, `FilterAdapter`, `BalanceAdapter`, `NetworkAdapter` | Pasan los objetos del juego al lenguaje del Códice (`puerta.abrir()`, `tolva.soltar()`, `plato_izq.poner(i)`, `red.vecinos(id)`). |
-| Comportamiento | **State** | `StateMachine` + `GameState` (título, juego, pausa, Códice, reto de teclas…); `MoveState` (quieta, caminar, correr, saltar, golpear, caer); `GuardianState` (dormido, despertando, cayendo, persiguiendo, preparando, golpeando, aturdido, vencido) | Fases del juego, movimiento de Tala y comportamiento de los guardianes. |
+| Estructural | **Adapter** | `DoorAdapter`, `FilterAdapter`, `LightsAdapter` | Pasan los objetos del juego al lenguaje del Códice (`puerta.abrir()`, `tolva.soltar()`, `luces.encender()`). |
+| Comportamiento | **State** | `StateMachine` + `GameState` (título, juego, pausa, Códice, reto de teclas, rompecabezas de figuras…); `MoveState` (quieta, caminar, correr, saltar, golpear, caer); `GuardianState` (dormido, despertando, cayendo, persiguiendo, preparando, golpeando, aturdido, vencido) | Fases del juego, movimiento de Tala y comportamiento de los guardianes. |
 | Comportamiento | **Observer** | `EventBus` + `SoundObserver`, `CameraShakeObserver`, `AlarmDirector` (escucha `MACHINE_FAILED`); `PlayerHealth` publica golpes y caídas; señales de los nodos (`used`, `crossed`, `fell`, `solved`, `defeated`) | El sonido, la cámara y la alarma reaccionan a los eventos sin que quien los emite sepa de ellos. |
 | Comportamiento | **Strategy** | `QualityProfile` → `HighQuality`, `LowQuality`; `GuardianAttack` → `MeleeStrike` (caballero), `OrbShot` (hechicero), `RuneBlast` (rúnico) | Calidad de efectos; cómo ataca cada tipo de guardián. |
 | Comportamiento | **Command** | `FilterCommand`, `RootsCommand` | El programa del jugador deja órdenes que la máquina ejecuta y anima una por una. |
-| Comportamiento | **Template Method** | `CodeMachine` → `GateMachine`, `CribaMachine`, `MuralMachine`, `BeaconMachine`, `BalanceMachine`, `NetworkConsole` | Pasos fijos para correr el código. Cada máquina redefine `evaluate()` y `perform()`. |
+| Comportamiento | **Template Method** | `CodeMachine` → `GateMachine`, `CribaMachine`, `MuralMachine`, `BeaconMachine` | Pasos fijos para correr el código. Cada máquina redefine `evaluate()` y `perform()`. |
 | Comportamiento | **Interpreter** | `src/script_lang/` (Lexer, Parser, nodos, ScriptSandbox) | Ejecuta el código estilo Python que escribe el jugador. |
 
 ## SOLID y bajo acoplamiento
@@ -60,7 +60,7 @@ classDiagram
     ChamberLevel <|-- FilterLevel
     ChamberLevel <|-- RootsLevel
     ChamberLevel <|-- VortexLevel
-    ChamberLevel <|-- BalanceLevel
+    ChamberLevel <|-- FigureLevel
     ChamberLevel <|-- CoreLevel
     ChamberLevel <|-- ThroneLevel
     Game --> Level
@@ -76,11 +76,11 @@ classDiagram
     FilterBuilder ..> FilterLevel : instancia sala_1_filtro.tscn
     RootsBuilder ..> RootsLevel : instancia sala_2_raices.tscn
     ChamberBuilder <|-- VortexBuilder
-    ChamberBuilder <|-- BalanceBuilder
+    ChamberBuilder <|-- FigureBuilder
     ChamberBuilder <|-- CoreBuilder
     ChamberBuilder <|-- ThroneBuilder
     VortexBuilder ..> VortexLevel : sala_3_vortice.tscn
-    BalanceBuilder ..> BalanceLevel : sala_4_balanza.tscn
+    FigureBuilder ..> FigureLevel : sala_4_figuras.tscn
     CoreBuilder ..> CoreLevel : sala_5_singularidad.tscn
     ThroneBuilder ..> ThroneLevel : sala_6_trono.tscn
 
@@ -102,20 +102,17 @@ classDiagram
     CribaMachine ..> FilterAdapter
     CodexState ..> ScriptSandbox
     CodeMachine <|-- BeaconMachine
-    CodeMachine <|-- BalanceMachine
-    CodeMachine <|-- NetworkConsole
+    BeaconMachine ..> LightsAdapter
     VortexLevel o-- BeaconMachine
     VortexLevel o-- MineBoard
     MineBoard ..> MinefieldGenerator : sin adivinar
-    BalanceLevel o-- BalanceMachine
-    BalanceMachine ..> BalanceRules
-    BalanceMachine ..> BalanceAdapter
-    CoreLevel o-- NetworkConsole
-    CoreLevel o-- SkyNetwork
+    FigureLevel o-- FigureTable
+    FigureTable o-- FigurePuzzle
+    FigureLevel ..> PuzzleState : abre
+    PuzzleState ..> FigurePuzzle
+    CoreLevel o-- NumberPath
     ThroneLevel o-- ZeroBoss
     ZeroBoss ..> AlarmDirector : summon(ola)
-    NetworkConsole ..> NetworkRules
-    NetworkConsole ..> NetworkAdapter
 
     class TriggerZone { +crossed }
     TriggerZone <|-- CheckpointZone

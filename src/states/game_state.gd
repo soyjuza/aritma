@@ -31,6 +31,12 @@ func handle_key(_event: InputEventKey) -> bool:
 	return false
 
 
+## El ratón: botones (al presionar y al soltar) y movimiento. Devuelve true si el estado lo
+## usó; así el rompecabezas de la Sala 4 arrastra piezas sin que Tala ataque.
+func handle_mouse(_event: InputEventMouse) -> bool:
+	return false
+
+
 func update(_delta: float) -> void:
 	pass
 

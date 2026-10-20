@@ -101,6 +101,10 @@
 		],
 		"flag": [
 			"key:Q"
+		],
+		"rotate": [
+			"key:R",
+			"mouse:2"
 		]
 	},
 	"quality_presets": {
@@ -171,7 +175,11 @@
 		"tile_flagged": "accept",
 		"mine_exploded": "explosion",
 		"board_powered": "powerup",
-		"bridges_raised": "powerup",
+		"stone_broken": "impact",
+		"piece_picked": "move",
+		"piece_placed": "accept",
+		"piece_rotated": "move",
+		"puzzle_solved": "powerup",
 		"core_taken": "success",
 		"boss_appeared": "spirit",
 		"boss_slam": "explosion",

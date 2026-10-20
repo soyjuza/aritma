@@ -14,9 +14,9 @@ construía por código al ejecutar el juego.
 | Carpeta | Qué hay |
 |---|---|
 | `main.tscn` | Escena principal: `Main` (game.gd), `Camara`, `Tala` y la `Interfaz`. |
-| `scenes/niveles/` | `pueblo.tscn` y las 6 salas: `sala_1_filtro`, `sala_2_raices`, `sala_3_vortice`, `sala_4_balanza`, `sala_5_singularidad`, `sala_6_trono` (el jefe final). |
+| `scenes/niveles/` | `pueblo.tscn` y las 6 salas: `sala_1_filtro`, `sala_2_raices`, `sala_3_vortice`, `sala_4_figuras`, `sala_5_singularidad`, `sala_6_trono` (el jefe final). |
 | `scenes/objetos/` | Piezas reutilizables: antorcha, brasero, columna, letrero, estatua, árboles, prensa. |
-| `scenes/maquinas/` | Atril, Criba (Sala 1), Mural (Sala 2), Faro (Sala 3), Balanza (Sala 4), Consola de la Red (Sala 5) y el atril de la puerta del templo. |
+| `scenes/maquinas/` | Atril, Criba (Sala 1), Mural (Sala 2), Faro (Sala 3), Mesa de las Figuras (Sala 4) y el atril de la puerta del templo. |
 | `scenes/personajes/` | Tala (jugadora, con su garrote) y Orun. |
 | `scenes/enemigos/` | Los guardianes de la tumba: `centinela.tscn` (caballero dorado, golpea de cerca), `hechicero.tscn` (lanza orbes de lejos, `orbe.tscn`) y `runico.tscn` (explota). `scenes/objetos/estatua_guardian.tscn` es el mismo guardián dormido sobre su pedestal. |
 | `assets/tiles/` | TileSets: `suelo.tres` (se pisa) y `muros.tres` (todo lo que se pinta ahí es sólido y hace sombra). |
@@ -42,13 +42,13 @@ El script del nivel no dibuja nada. Al cargarse, conecta lo que hay en la escena
 puntos seguros, fosos, máquinas).
 
 ## Las 6 salas (15 minutos en total)
-| Sala | Máquina | Qué hay que programar | Después |
+| Sala | Máquina | Qué hay que hacer | Después |
 |---|---|---|---|
 | 1. El Filtro de la Dualidad | Criba | Separar esferas pares e impares (3 rondas) | — |
-| 2. Las Raíces Gemelas | Mural | `factorizar(b, c)`: raíces entre −60 y 60, máx. 12 000 pasos | — |
-| 3. El Vórtice de Celdas | Faro | `dentro(x, y)`: True si la casilla está dentro del tablero de 8×8 (enciende el tablero) | Buscaminas: E destapa, Q bandera; 10 minas; siempre se resuelve sin adivinar; una mina = −2 corazones y tablero nuevo. Sin guardianes. |
-| 4. La Balanza | Balanza | Repartir todas las pesas en dos sumas iguales con `plato_liviano().poner(i)` en un `for` (2 juegos: uno oculto) | — |
-| 5. La Singularidad del Cero | Consola | Un `while` que salta a `red.mas_cercano(actual)` y levanta cada puente con `puentes.levantar(actual)` (2 redes de prueba + la de la sala) | El atril levanta los puentes (quedan para siempre). Caer al abismo = −7 s. Tomar el núcleo lleva a la Sala 6. |
+| 2. El Mural de la Incógnita | Mural | `despejar(a, b, c)`: devolver la x de ax + b = c, o sea `(c - b) / a` (3 ecuaciones: solo se ve la primera) | — |
+| 3. El Vórtice de Celdas | Faro | `luces.encender()` (como `puerta.abrir()` en el pueblo): enciende la sala y el tablero | Buscaminas: E destapa, Q bandera; 10 minas; siempre se resuelve sin adivinar; una mina = −2 corazones y tablero nuevo. Sin guardianes. |
+| 4. La Mesa de las Figuras | Mesa | Sin código: llenar una figura grande con piezas más pequeñas (se arrastran con el ratón; R o clic derecho las gira). Dos figuras: un rectángulo y una casa con las piezas giradas | — |
+| 5. La Singularidad del Cero | — | Sin código: cruzar el abismo por losas numeradas pisando solo las que cumplen la regla (múltiplos de 3 o de 4, al azar) | Una losa mala se rompe y Tala cae (−7 s); la losa queda rota. Tomar el núcleo lleva a la Sala 6. |
 | 6. El Trono del Cero | — | Nada: es el **jefe final**, el Guardián del Cero (tengu rojo) | 3 fases. Ráfaga de orbes (3, 5, 7), pisotón con círculo rojo (salir o saltar con ESPACIO; −1 corazón) y, al cambiar de fase, escudo + ola de guardianes. Al entrar se recuperan 2 corazones. Vencerlo gana. |
 
 ## Guardianes, corazones y castigos de tiempo
@@ -74,5 +74,5 @@ puntos seguros, fosos, máquinas).
 ## Pruebas automáticas
 ```
 godot --path . -- --selftest                       # 136 pruebas de reglas y del recorrido completo
-godot --path . -- --recorrido=/carpeta[:sala2|:jefe]  # capturas del camino del jugador
+godot --path . -- --recorrido=/carpeta[:sala2|:sala3|:sala4|:sala5|:jefe]  # capturas del camino del jugador
 ```

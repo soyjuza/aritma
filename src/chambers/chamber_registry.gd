@@ -22,6 +22,6 @@ static func _register_defaults() -> void:
 	register("filter", FilterBuilder.new())
 	register("roots", RootsBuilder.new())
 	register("vortex", VortexBuilder.new())
-	register("balance", BalanceBuilder.new())
+	register("figures", FigureBuilder.new())
 	register("core", CoreBuilder.new())
 	register("throne", ThroneBuilder.new())

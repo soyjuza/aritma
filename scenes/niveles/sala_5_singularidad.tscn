@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=4]
+[gd_scene load_steps=27 format=4]
 
 [ext_resource type="Script" path="res://src/chambers/core_level.gd" id="1_ure31"]
 [ext_resource type="TileSet" path="res://assets/tiles/suelo.tres" id="2_8nyps"]
@@ -14,8 +14,7 @@
 [ext_resource type="Texture2D" path="res://assets/pack/backgrounds/Tilesets/Interior/TilesetInteriorFloor.png" id="16_wvutv"]
 [ext_resource type="Texture2D" path="res://assets/pack/fx/Smoke/Smoke/SpriteSheet.png" id="17_g1tjx"]
 [ext_resource type="Texture2D" path="res://assets/efectos/luz_suave.tres" id="18_eucke"]
-[ext_resource type="Script" path="res://src/chambers/sky_network.gd" id="40_red"]
-[ext_resource type="PackedScene" path="res://scenes/maquinas/consola_red.tscn" id="41_consola"]
+[ext_resource type="Script" path="res://src/chambers/number_path.gd" id="40_red"]
 [ext_resource type="PackedScene" path="res://scenes/objetos/estatua_guardian.tscn" id="42_estatua"]
 [ext_resource type="PackedScene" path="res://scenes/objetos/letrero.tscn" id="43_letrero"]
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xcbdf"]
@@ -77,7 +76,7 @@ z_index = -20
 tile_map_data = PackedByteArray("AAAMACsAAAAFAAoAAAASACsAAAAJAAoAAAANACsAAAAGAAoAAAAOACsAAAAIAAoAAAAPACsAAAAGAAoAAAAQACsAAAAIAAoAAAARACsAAAAGAAoAAAAMABUAAAAHAAoAAAASABUAAAAHAAoAAAAMABYAAAAFAAkAAAASABYAAAAJAAkAAAAMABcAAAAFAAcAAAASABcAAAAJAAcAAAAMABgAAAAFAAkAAAASABgAAAAJAAkAAAAMABkAAAAFAAcAAAASABkAAAAJAAcAAAAMABoAAAAFAAgAAAASABoAAAAJAAgAAAAMABsAAAAFAAcAAAASABsAAAAJAAcAAAAMABwAAAAFAAkAAAASABwAAAAJAAkAAAAMAB0AAAAFAAcAAAASAB0AAAAJAAcAAAAMAB4AAAAFAAkAAAASAB4AAAAJAAkAAAAMAB8AAAAFAAcAAAASAB8AAAAJAAcAAAAMACAAAAAFAAgAAAASACAAAAAJAAgAAAAMACEAAAAFAAcAAAASACEAAAAJAAcAAAAMACIAAAAFAAkAAAASACIAAAAJAAkAAAAMACMAAAAFAAcAAAASACMAAAAJAAcAAAAMACQAAAAFAAkAAAASACQAAAAJAAkAAAAMACUAAAAFAAcAAAASACUAAAAJAAcAAAAMACYAAAAFAAgAAAASACYAAAAJAAgAAAAMACcAAAAFAAcAAAASACcAAAAJAAcAAAAMACgAAAAFAAkAAAASACgAAAAJAAkAAAAMACkAAAAFAAcAAAASACkAAAAJAAcAAAAMACoAAAAFAAkAAAASACoAAAAJAAkAAAABAAIAAAAFAAYAAAAdAAIAAAAJAAYAAAABABUAAAAFAAoAAAAdABUAAAAJAAoAAAACAAIAAAAGAAYAAAACABUAAAAGAAoAAAADAAIAAAAIAAYAAAADABUAAAAIAAoAAAAEAAIAAAAGAAYAAAAEABUAAAAGAAoAAAAFAAIAAAAIAAYAAAAFABUAAAAIAAoAAAAGAAIAAAAGAAYAAAAGABUAAAAGAAoAAAAHAAIAAAAHAAYAAAAHABUAAAAHAAoAAAAIAAIAAAAGAAYAAAAIABUAAAAGAAoAAAAJAAIAAAAIAAYAAAAJABUAAAAIAAoAAAAKAAIAAAAGAAYAAAAKABUAAAAGAAoAAAALAAIAAAAIAAYAAAALABUAAAAIAAoAAAAMAAIAAAAGAAYAAAANAAIAAAAHAAYAAAAOAAIAAAAGAAYAAAARAAIAAAAIAAYAAAASAAIAAAAGAAYAAAATAAIAAAAHAAYAAAATABUAAAAHAAoAAAAUAAIAAAAGAAYAAAAUABUAAAAGAAoAAAAVAAIAAAAIAAYAAAAVABUAAAAIAAoAAAAWAAIAAAAGAAYAAAAWABUAAAAGAAoAAAAXAAIAAAAIAAYAAAAXABUAAAAIAAoAAAAYAAIAAAAGAAYAAAAYABUAAAAGAAoAAAAZAAIAAAAHAAYAAAAZABUAAAAHAAoAAAAaAAIAAAAGAAYAAAAaABUAAAAGAAoAAAAbAAIAAAAIAAYAAAAbABUAAAAIAAoAAAAcAAIAAAAGAAYAAAAcABUAAAAGAAoAAAABAAMAAAAFAAcAAAAdAAMAAAAJAAcAAAABAAQAAAAFAAkAAAAdAAQAAAAJAAkAAAABAAUAAAAFAAcAAAAdAAUAAAAJAAcAAAABAAYAAAAFAAkAAAAdAAYAAAAJAAkAAAABAAcAAAAFAAcAAAAdAAcAAAAJAAcAAAABAAgAAAAFAAgAAAAdAAgAAAAJAAgAAAABAAkAAAAFAAcAAAAdAAkAAAAJAAcAAAABAAoAAAAFAAkAAAAdAAoAAAAJAAkAAAABAAsAAAAFAAcAAAAdAAsAAAAJAAcAAAABAAwAAAAFAAkAAAAdAAwAAAAJAAkAAAABAA0AAAAFAAcAAAAdAA0AAAAJAAcAAAABAA4AAAAFAAgAAAAdAA4AAAAJAAgAAAABAA8AAAAFAAcAAAAdAA8AAAAJAAcAAAABABAAAAAFAAkAAAAdABAAAAAJAAkAAAABABEAAAAFAAcAAAAdABEAAAAJAAcAAAABABIAAAAFAAkAAAAdABIAAAAJAAkAAAABABMAAAAFAAcAAAAdABMAAAAJAAcAAAABABQAAAAFAAgAAAAdABQAAAAJAAgAAAAOAP//AAAFAAYAAAARAP//AAAJAAYAAAAPAP//AAAGAAYAAAAQAP//AAAIAAYAAAAOAAAAAAAFAAcAAAARAAAAAAAJAAcAAAAOAAEAAAAFAAkAAAARAAEAAAAJAAkAAAA=")
 tile_set = ExtResource("3_t3h0o")
 
-[node name="Red" type="Node2D" parent="."]
+[node name="Sendero" type="Node2D" parent="."]
 z_index = -5
 script = ExtResource("40_red")
 
@@ -93,64 +92,21 @@ script = ExtResource("40_red")
 
 
 
-[node name="P0" type="Marker2D" parent="Red"]
-position = Vector2(248, 222)
-
-[node name="P1" type="Marker2D" parent="Red"]
-position = Vector2(60, 214)
-
-[node name="P2" type="Marker2D" parent="Red"]
-position = Vector2(156, 212)
-
-[node name="P3" type="Marker2D" parent="Red"]
-position = Vector2(342, 212)
-
-[node name="P4" type="Marker2D" parent="Red"]
-position = Vector2(436, 214)
-
-[node name="P5" type="Marker2D" parent="Red"]
-position = Vector2(104, 166)
-
-[node name="P6" type="Marker2D" parent="Red"]
-position = Vector2(204, 164)
-
-[node name="P7" type="Marker2D" parent="Red"]
-position = Vector2(296, 164)
-
-[node name="P8" type="Marker2D" parent="Red"]
-position = Vector2(394, 166)
-
-[node name="P9" type="Marker2D" parent="Red"]
-position = Vector2(56, 120)
-
-[node name="P10" type="Marker2D" parent="Red"]
-position = Vector2(152, 116)
-
-[node name="P11" type="Marker2D" parent="Red"]
-position = Vector2(250, 118)
-
-[node name="P12" type="Marker2D" parent="Red"]
-position = Vector2(348, 116)
-
-[node name="P13" type="Marker2D" parent="Red"]
-position = Vector2(440, 120)
-
-[node name="P14" type="Marker2D" parent="Red"]
-position = Vector2(176, 76)
-
-[node name="P15" type="Marker2D" parent="Red"]
-position = Vector2(336, 76)
-
-[node name="P16" type="Marker2D" parent="Red"]
-position = Vector2(256, 66)
-
-[node name="BarreraAbismo" type="StaticBody2D" parent="Red"]
+[node name="BarreraAbismo" type="StaticBody2D" parent="Sendero"]
 collision_layer = 8
 collision_mask = 0
 
-[node name="Forma" type="CollisionShape2D" parent="Red/BarreraAbismo"]
+[node name="Forma" type="CollisionShape2D" parent="Sendero/BarreraAbismo"]
 position = Vector2(248, 146)
 shape = SubResource("RectangleShape2D_abismo")
+
+[node name="Luz" type="PointLight2D" parent="Sendero"]
+position = Vector2(248, 146)
+color = Color(0.86, 0.84, 1, 1)
+energy = 0.9
+texture = ExtResource("18_eucke")
+texture_scale = 3.2
+metadata/casts_shadow = false
 
 [node name="Actores" type="Node2D" parent="."]
 y_sort_enabled = true
@@ -165,9 +121,6 @@ position = Vector2(72, 296)
 
 [node name="Brasero4" type="Node2D" parent="Actores" instance=ExtResource("6_8g4yu")]
 position = Vector2(424, 296)
-
-[node name="Consola" parent="Actores" instance=ExtResource("41_consola")]
-position = Vector2(110, 262)
 
 [node name="EstatuaGuardian" parent="Actores" instance=ExtResource("42_estatua")]
 position = Vector2(184, 270)

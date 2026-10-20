@@ -1,6 +1,6 @@
 ## Sala 3 — El Vórtice de Celdas (escena: scenes/niveles/sala_3_vortice.tscn).
 ## Un pasillo sin trampas lleva a la sala del tablero. El Faro enciende el tablero cuando el
-## jugador programa vecinas(x, y). Encendido, es un buscaminas que se juega caminando: E destapa
+## jugador ordena luces.encender(). Encendido, es un buscaminas que se juega caminando: E destapa
 ## la baldosa que pisa Tala y Q le pone o quita la bandera. Destapar una mina cuesta 2 corazones
 ## y devuelve a Tala a la entrada con un tablero nuevo. Esta sala no tiene guardianes.
 class_name VortexLevel
@@ -41,6 +41,8 @@ func _open_machine() -> void:
 
 func _on_powered() -> void:
 	board.power_on()
+	# Se encienden las luces: la sala entera se aclara
+	create_tween().tween_property($Ambiente, "color", Color(0.62, 0.6, 0.74), 1.2)
 	objective_key = "objective_vortex_board"
 	_game.bus.publish(GameEvents.BOARD_POWERED)
 

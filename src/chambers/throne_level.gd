@@ -1,7 +1,9 @@
 ## Sala 6 — El Trono del Cero (escena: scenes/niveles/sala_6_trono.tscn). El jefe final.
 ## Sin máquina ni código: al entrar a la sala, el Guardián del Cero (ZeroBoss) despierta y hay
-## que vencerlo. Al cambiar de fase llama olas de guardianes (el Director de Alarma de la sala,
-## con los puntos «Guardianes/Caidas»). Vencerlo gana el juego.
+## que vencerlo. Al cambiar de fase se cubre con un escudo y pone un problema de repaso de las
+## salas (QuizState, con BossQuiz). Si Tala falla o se le acaba el tiempo, el jefe llama una ola
+## de guardianes (el Director de Alarma de la sala, con los puntos «Guardianes/Caidas»); si
+## acierta, el escudo cae sin pelear. Vencerlo gana el juego.
 ## Al aparecer el jefe, Tala recupera corazones: es la única curación del juego.
 class_name ThroneLevel
 extends ChamberLevel
@@ -11,6 +13,7 @@ extends ChamberLevel
 
 var _in_hall := false
 var _framing := false       # la cámara muestra al jefe mientras se lee la presentación
+var _rng := RandomNumberGenerator.new()
 
 @onready var boss: ZeroBoss = $Actores/JefeCero
 
@@ -20,7 +23,8 @@ func wire() -> void:
 	boss.hold_while = _game.dialog.is_open
 	boss.arena = Rect2(to_global(arena.position), arena.size)
 	boss.defeated.connect(_on_boss_defeated)
-	boss.shielded.connect(func(): _game.notify([_game.data.message("boss_shield")], 4.0))
+	boss.shielded.connect(_ask_question)
+	_rng.randomize()
 	alarm.cleared_key = "boss_shield_down"
 	$Zonas/EntradaSala.crossed.connect(_on_hall_entered)
 
@@ -37,6 +41,23 @@ func _on_hall_entered() -> void:
 	_framing = true
 	_game.rig.frame(boss.global_position + Vector2(0, 20), 1.0, 0.8)
 	_game.dialog.say(data.get("intro", []))
+
+
+## El escudo: un problema de repaso (el de la fase que empieza, según chambers.json "quiz").
+func _ask_question() -> void:
+	# Primero se ve el escudo; la prueba sale cuando Tala está jugando (no en otro reto)
+	await get_tree().create_timer(0.8).timeout
+	while not _game.machine.current is PlayState:
+		await get_tree().process_frame
+	var settings: Dictionary = data.get("quiz", {})
+	var kinds: Array = settings.get("kinds", ["paridad", "multiplo", "despejar"])
+	var kind := String(kinds[clampi(boss.phase - 1, 0, kinds.size() - 1)])
+	_game.machine.change("quiz", {"quiz": BossQuiz.make(kind, _rng), "seconds": float(settings.get("seconds", 15)), "on_done": _on_answered})
+
+
+func _on_answered(right: bool) -> void:
+	boss.answered(right)
+	_game.notify([_game.data.message("boss_quiz_right" if right else "boss_quiz_wrong")], 4.0)
 
 
 func _physics_process(_delta: float) -> void:

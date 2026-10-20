@@ -1,4 +1,4 @@
-## PATRÓN FACTORY METHOD — Creador concreto de la Sala 2: Las Raíces Gemelas.
+## PATRÓN FACTORY METHOD — Creador concreto de la Sala 2: El Mural de la Incógnita.
 class_name RootsBuilder
 extends ChamberBuilder
 

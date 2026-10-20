@@ -5,7 +5,7 @@
 class_name Game
 extends Node2D
 
-const ACTIONS := ["move_up", "move_down", "move_left", "move_right", "run", "jump", "interact", "book", "pause", "accept", "cancel", "ui_up", "ui_down", "ui_left", "ui_right", "fullscreen", "run_code", "attack", "flag"]
+const ACTIONS := ["move_up", "move_down", "move_left", "move_right", "run", "jump", "interact", "book", "pause", "accept", "cancel", "ui_up", "ui_down", "ui_left", "ui_right", "fullscreen", "run_code", "attack", "flag", "rotate"]
 
 ## La escena del pueblo (el primer nivel). Las salas las crean sus fábricas (ChamberRegistry).
 @export var town_scene: PackedScene
@@ -89,6 +89,8 @@ func _create_states() -> StateMachine:
 	m.add("end", EndState.new(self))
 	m.add("book", BookState.new(self))
 	m.add("keys", KeyChallengeState.new(self))
+	m.add("puzzle", PuzzleState.new(self))
+	m.add("quiz", QuizState.new(self))
 	return m
 
 
@@ -108,6 +110,8 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouse and machine.current.handle_mouse(event):
+		return
 	if not event.is_pressed() or event.is_echo():
 		return
 	if event is InputEventKey and machine.current.handle_key(event):
