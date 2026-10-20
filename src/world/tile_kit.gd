@@ -1,15 +1,10 @@
-## PATRÓN FACADE (estructural) — Kit de efectos del pack Ninja Adventure (CC0): oculta cómo
-## se cargan las texturas del pack y cómo se arma una ráfaga de partículas a partir de sus
-## tiras de cuadros. Las máquinas piden «chispas aquí» o «humo allá» sin saber de materiales
-## ni de cuadros de animación. (Los tiles, con sus colisiones y sombras, son recursos TileSet
-## en assets/tiles/ y se pintan en el editor.)
+## Patrón Facade: chispas, humo y partículas sin saber cómo se arman.
 class_name TileKit
 extends RefCounted
 
 const TILE := 16
 const PACK := "res://assets/pack/"
 
-## Cuadros de cada tira de efectos del pack (no todas son de cuadros cuadrados).
 const FX_FRAMES := {"Fire": 8, "Spark": 7, "Clouds": 2, "Rock": 5, "RockGray": 5, "Snow": 7, "Leaf": 6, "Grass": 6, "Wood": 6, "Smoke": 6}
 
 var particle_scale := 1.0    # lo fija la calidad (Strategy): menos partículas en "baja"
@@ -23,7 +18,6 @@ func texture(path: String) -> Texture2D:
 	return _textures[path]
 
 
-## Partículas de una hoja de efectos del pack (FX/Particle/*.png: tiras de cuadros).
 func particles(parent: Node, at: Vector2, fx: String, amount := 16, lifetime := 0.8) -> CPUParticles2D:
 	var p := CPUParticles2D.new()
 	p.position = at

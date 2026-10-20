@@ -1,5 +1,4 @@
-## PATRÓN STRATEGY — Efectos bajos: luces sin sombras y la mitad de partículas (para
-## computadores con gráficos integrados).
+## Patrón Strategy: efectos bajos (sin sombras, menos partículas).
 class_name LowQuality
 extends QualityProfile
 

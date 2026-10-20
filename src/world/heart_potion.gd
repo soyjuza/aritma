@@ -1,6 +1,4 @@
-## Poción de corazón (escena: scenes/objetos/pocion.tscn). Aparece en la sala del jefe cada vez
-## que cae su escudo. Flota, brilla y tiene dos flechas que rebotan encima para que se vea de
-## lejos. Al tocarla, Tala recupera vida (si ya tiene todos los corazones, la poción se queda).
+## Poción de la sala del jefe. Cura al tocarla.
 class_name HeartPotion
 extends Area2D
 
@@ -35,17 +33,15 @@ func _try_take(body: Node2D) -> void:
 
 
 func _draw() -> void:
-	# Un anillo que late en el piso
 	var pulse := 0.5 + 0.5 * sin(_time * 5.0)
 	draw_arc(Vector2(0, 3), 7.0 + pulse * 3.0, 0.0, TAU, 24, Color(PINK, 0.35 + 0.4 * pulse), 1.0)
-	# Tres flechas (arriba, izquierda y derecha) que rebotan apuntando a la poción
+	# Flechas
 	var bounce := absf(sin(_time * 4.0)) * 4.0
 	_arrow(Vector2(0, -15.0 - bounce), Vector2.DOWN)
 	_arrow(Vector2(-11.0 - bounce, -4.0), Vector2.RIGHT)
 	_arrow(Vector2(11.0 + bounce, -4.0), Vector2.LEFT)
 
 
-## Una flecha con la punta en «tip», apuntando hacia «dir».
 func _arrow(tip: Vector2, dir: Vector2) -> void:
 	var side := Vector2(-dir.y, dir.x)
 	draw_colored_polygon(PackedVector2Array([tip, tip - dir * 4.5 + side * 3.5, tip - dir * 4.5 - side * 3.5]), GOLD)

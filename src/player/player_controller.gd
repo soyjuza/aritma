@@ -1,11 +1,8 @@
-## Tala, vista desde arriba (escena: scenes/personajes/tala.tscn): cuerpo físico,
-## animaciones en cuatro direcciones, sombra, aliento y qué tiene delante para usar con E. Contexto del patrón State de movimiento:
-## cada paso de física delega en el estado actual (quieta, caminar, correr, saltar, golpear,
-## caer). También recibe los golpes de los guardianes (corazones en PlayerHealth).
+## Tala: movimiento con estados (State), golpes y vida.
 class_name PlayerController
 extends CharacterBody2D
 
-const REACH := 14.0          # distancia (px) a la que alcanza a usar algo delante
+const REACH := 14.0
 
 var walk_speed := 72.0
 var run_speed := 124.0
@@ -19,20 +16,20 @@ var jump_cooldown := 0.15
 var facing := Vector2.DOWN
 var stamina := 3.5
 var controls_enabled := true
-var airborne := false        # en el aire: los fosos no la tumban
+var airborne := false    # en el aire los fosos no la tumban
 var falling := false
-var hop_height := 0.0        # altura del salto (solo visual: el cuerpo sigue en el suelo)
+var hop_height := 0.0
 var state_name := "idle"
-var dead := false            # sin corazones: tendida en el suelo hasta que el juego la levante
+var dead := false
 
-# Combate (valores de la sección "combat" de config.json)
+# Combate (config.json, "combat")
 var health: PlayerHealth
 var combat: Dictionary = {}
 var attack_time := 0.28
 var attack_cooldown := 0.12
 var attack_reach := 20.0
 var attack_arc := deg_to_rad(75.0)
-var invulnerable := 0.0      # segundos sin recibir daño tras un golpe (parpadea)
+var invulnerable := 0.0
 
 var _bus: EventBus
 var _states: Dictionary = {}
@@ -44,15 +41,15 @@ var _hurt_flash := 0.0
 
 @onready var _sprite: AnimatedSprite2D = $Sprite
 @onready var _shadow: Sprite2D = $Sombra
-@onready var _lamp: PointLight2D = $Lampara     # luz del Códice: ilumina un poco en el templo
-@onready var _club: Sprite2D = $Garrote         # el garrote: solo se ve mientras golpea
+@onready var _lamp: PointLight2D = $Lampara
+@onready var _club: Sprite2D = $Garrote
 
 
 func _ready() -> void:
 	add_to_group("player")
 
 
-## Le da el canal de eventos y los valores de movimiento de config.json.
+## Recibe el bus y los valores de movimiento de config.json.
 func setup(bus: EventBus, movement: Dictionary) -> void:
 	_bus = bus
 	for key in movement.keys():
@@ -82,7 +79,7 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		_update_sprite()
 		return
-	if not _state is RunState:
+	if _state.regenerates_stamina():
 		stamina = minf(stamina_max, stamina + stamina_regen * delta)
 		if stamina > stamina_max * 0.3:
 			_run_locked = false
@@ -104,7 +101,7 @@ func change(next: String) -> void:
 func _update_sprite() -> void:
 	_sprite.position = Vector2(0, -8 - hop_height)
 	_shadow.scale = Vector2.ONE * (1.0 - hop_height / (jump_height * 3.0))
-	# Tras un golpe: rojo un instante y luego parpadea mientras no puede recibir daño
+	# Después de un golpe parpadea
 	var tint := Color(1.0, 0.45, 0.4) if _hurt_flash > 0.0 else Color.WHITE
 	_sprite.modulate = Color(tint, _sprite.modulate.a)
 	_sprite.visible = dead or invulnerable <= 0.0 or fmod(invulnerable, 0.14) > 0.05
@@ -173,7 +170,7 @@ func landed() -> void:
 	_bus.publish(GameEvents.LAND)
 
 
-## Cae a un foso: se encoge y desaparece (el nivel la devuelve al punto seguro).
+## Cae a un foso.
 func fall() -> void:
 	falling = true
 	change("fall")
@@ -194,7 +191,6 @@ func apply_combat(values: Dictionary) -> void:
 	attack_arc = deg_to_rad(float(values.get("attack_arc_deg", 75.0)))
 
 
-## Empieza un golpe: aparece el garrote y salen los símbolos del arco (GlyphSwing).
 func start_swing() -> void:
 	_club.visible = true
 	update_swing(0.0)
@@ -205,13 +201,11 @@ func start_swing() -> void:
 	_bus.publish(GameEvents.PLAYER_ATTACK)
 
 
-## El garrote barre un arco delante de Tala (k va de 0 a 1 durante el golpe).
 func update_swing(k: float) -> void:
 	var angle := facing.angle() + lerpf(-1.2, 1.2, ease(k, 0.5))
 	var dir := Vector2.from_angle(angle)
 	_club.position = Vector2(0, -7) + dir * 5.0
 	_club.rotation = angle + PI / 2.0
-	# Si mira hacia arriba el garrote va detrás de ella
 	var behind := facing.y < -0.5
 	if behind != (_club.get_index() < _sprite.get_index()):
 		move_child(_club, _sprite.get_index())
@@ -222,8 +216,7 @@ func end_swing() -> void:
 	_attack_wait = attack_cooldown
 
 
-## El instante del impacto: golpea a los guardianes que estén delante, dentro del arco, y
-## deshace los orbes de los hechiceros que alcance.
+## Momento del impacto: golpea guardianes y orbes delante de ella.
 func strike() -> void:
 	for orb in get_tree().get_nodes_in_group("orbs"):
 		var at: Vector2 = orb.global_position - (global_position + Vector2(0, -6))
@@ -237,8 +230,7 @@ func strike() -> void:
 			guardian.take_hit(1, to.normalized() if to.length() > 0.1 else facing)
 
 
-## Un guardián la golpea: pierde corazones, retrocede y queda un momento sin recibir daño.
-## force: el daño llega aunque esté parpadeando (la runa del reto de teclas).
+## Recibe un golpe. force: aunque esté parpadeando.
 func hurt(amount: int, from: Vector2, force := false) -> void:
 	if dead or falling or health == null or (invulnerable > 0.0 and not force):
 		return
@@ -249,12 +241,12 @@ func hurt(amount: int, from: Vector2, force := false) -> void:
 		invulnerable = float(combat.get("invulnerable_sec", 1.0))
 
 
-## Sin corazones: cae al suelo y ya no se mueve (el juego decide qué pasa después).
+## Sin corazones: queda en el suelo.
 func die() -> void:
 	dead = true
 	invulnerable = 0.0
 	_club.visible = false
-	if _state is AttackState:
+	if _state.stops_on_death():
 		change("idle")
 
 
@@ -280,7 +272,7 @@ func place(at: Vector2, face := Vector2.DOWN) -> void:
 	change("idle")
 
 
-## Lo que tiene delante (un Interactable), o null.
+## Lo que tiene delante para usar con E, o null.
 func focused_interactable() -> Interactable:
 	var query := PhysicsPointQueryParameters2D.new()
 	query.collide_with_areas = true

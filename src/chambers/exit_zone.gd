@@ -1,4 +1,4 @@
-## Salida de una sala: avisa cada vez que Tala la cruza (la sala decide si ya puede pasar).
+## Salida de una sala.
 class_name ExitZone
 extends TriggerZone
 

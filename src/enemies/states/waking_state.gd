@@ -1,5 +1,4 @@
-## PATRÓN STATE — La estatua despierta: tiembla, se agrieta, suelta piedras y polvo, recupera
-## el color y baja de un salto del pedestal. Mientras tanto no hace daño ni recibe golpes.
+## Patrón State: la estatua despierta y baja del pedestal.
 class_name WakingState
 extends GuardianState
 
@@ -30,7 +29,6 @@ func physics(delta: float) -> String:
 	t += delta
 	var k := clampf(t / _duration, 0.0, 1.0)
 	if k < 0.7:
-		# Tiembla y se agrieta cada vez más
 		guardian.shake = 0.5 + k * 1.2
 		guardian.cracks = k / 0.7
 	else:
@@ -38,7 +36,6 @@ func physics(delta: float) -> String:
 			_chipped = true
 			guardian.burst(Vector2(0, -12), "RockGray", 12, 0.8)
 			guardian.burst(Vector2(0, -4), "Smoke", 6, 0.9, Vector2(0, -20))
-		# Se le cae la piedra (recupera el color) y salta al piso delante del pedestal
 		var j := (k - 0.7) / 0.3
 		guardian.shake = 0.0
 		guardian.cracks = 1.0 - j

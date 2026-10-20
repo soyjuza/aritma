@@ -1,5 +1,4 @@
-## PATRÓN STATE — Ajustes: gráficos, cámara, mouse, campo de visión, sonido y pantalla.
-## Las filas (nombre, tipo, opciones y ayuda) vienen de texts.json.
+## Patrón State: ajustes. Las filas vienen de texts.json.
 class_name SettingsState
 extends GameState
 
@@ -20,7 +19,7 @@ func enter(params: Dictionary = {}) -> void:
 	_row = 0
 
 
-## Desde la pausa el juego sigue en pausa: el reloj y el mundo quietos.
+## Desde la pausa todo sigue quieto.
 func timer_runs() -> bool:
 	return false
 

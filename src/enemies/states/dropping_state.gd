@@ -1,6 +1,4 @@
-## PATRÓN STATE — Cae del techo: primero caen piedritas y crece una sombra en el suelo (el
-## aviso), después el guardián cae en pose de superhéroe, levanta polvo, se queda agachado
-## un instante y se levanta. Mientras cae y está agachado no hace daño ni recibe golpes.
+## Patrón State: cae del techo. Antes se ve su sombra.
 class_name DroppingState
 extends GuardianState
 
@@ -41,7 +39,6 @@ func exit() -> void:
 func physics(delta: float) -> String:
 	t += delta
 	if t < _warning:
-		# El aviso: piedritas que caen y una sombra que crece
 		var k := t / _warning
 		guardian.shadow.modulate.a = 0.35 + 0.65 * k
 		guardian.shadow_size = 0.5 + 1.1 * k
@@ -49,7 +46,6 @@ func physics(delta: float) -> String:
 		_pebbles -= delta
 		if _pebbles <= 0.0:
 			_pebbles = 0.22
-			# Piedritas que caen justo sobre la sombra
 			var p := guardian.burst(Vector2(randf_range(-5, 5), -34), "RockGray", 2, 0.32, Vector2(0, 300))
 			if p:
 				p.direction = Vector2.DOWN

@@ -264,14 +264,30 @@
 					"paridad",
 					"multiplo",
 					"despejar"
-				]
+				],
+				"problems": {
+					"paridad": {
+						"min_number": 11,
+						"max_number": 99
+					},
+					"multiplo": {
+						"min_divisor": 3,
+						"max_divisor": 6,
+						"min_factor": 3,
+						"max_factor": 12,
+						"options": 4
+					},
+					"despejar": {
+						"options": 4
+					}
+				}
 			},
 			"intro": [
 				"Una sombra roja baja del techo y abre las alas sobre el trono: el Guardián del Cero.",
 				"EL GUARDIÁN DEL CERO: «Tomaste el núcleo, pero no saldrás con él mientras yo exista».",
 				"Golpéalo con J o clic. Cuando el círculo rojo marque su pisotón, sal corriendo o salta con ESPACIO. Los orbes se esquivan o se deshacen con el garrote.",
 				"Cada vez que pierda una cuarta parte de su vida se cubrirá con un escudo y te pondrá a prueba con un problema: tienes 15 segundos (1 a 4 o clic). Si aciertas, el escudo cae; si fallas, llamará a sus guardianes.",
-				"Al entrar recuperas 2 corazones: es la única curación del templo."
+				"Al entrar recuperas 2 corazones, y cada vez que caiga su escudo dejará una poción en el suelo."
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Aquí termina el templo. Quien llegue al trono deberá vencer a su último guardián."

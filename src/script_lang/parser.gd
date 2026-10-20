@@ -1,6 +1,4 @@
-## Analizador sintáctico del lenguaje del Códice: convierte las fichas del Lexer en el
-## árbol de nodos (patrón Interpreter). Descenso recursivo con la precedencia de Python:
-##   or < and < not < comparaciones < | < ^ < & < << >> < + - < * / // % < signo < ** < llamadas
+## Parser: convierte las fichas en el árbol de nodos (Interpreter).
 class_name Parser
 extends RefCounted
 
@@ -14,7 +12,7 @@ var _tokens: Array
 var _pos := 0
 
 
-## Devuelve el bloque raíz del programa, o null si hay un error (ver error y error_line).
+## Devuelve el bloque raíz o null si hay error.
 func parse(tokens: Array) -> ScriptNode:
 	_tokens = tokens
 	_pos = 0
@@ -33,7 +31,7 @@ func parse(tokens: Array) -> ScriptNode:
 func _statement() -> ScriptNode:
 	var t: Lexer.Token = _peek()
 	if t.kind == "INDENT":
-		_fail("Sangría inesperada: esta línea no está dentro de ningún bloque.", t.line)
+		_fail(ScriptMessages.text("sangria_inesperada_esta_linea_no"), t.line)
 		return null
 	if t.kind == "KEYWORD":
 		match t.value:
@@ -58,7 +56,7 @@ func _statement() -> ScriptNode:
 				_end_line()
 				return ScriptNodes.Flow.new(t.value, t.line)
 			"elif", "else":
-				_fail("«%s» sin un if antes." % t.value, t.line)
+				_fail(ScriptMessages.text("sin_if_antes") % t.value, t.line)
 				return null
 	return _simple_statement()
 
@@ -71,7 +69,7 @@ func _simple_statement() -> ScriptNode:
 	var t: Lexer.Token = _peek()
 	if t.is_op("=") or (t.kind == "OP" and AUGMENTED.has(t.value)):
 		if not (expr is ScriptNodes.Name or expr is ScriptNodes.Index or expr is ScriptNodes.Attribute):
-			_fail("A la izquierda de «%s» debe ir un nombre de variable." % t.value, t.line)
+			_fail(ScriptMessages.text("izquierda_debe_ir_nombre_variable") % t.value, t.line)
 			return null
 		_advance()
 		var value := _expression()
@@ -106,11 +104,11 @@ func _for() -> ScriptNode:
 	var line: int = _advance().line
 	var name_token: Lexer.Token = _peek()
 	if name_token.kind != "NAME":
-		_fail("Después de for va el nombre de una variable: for i in range(5):", line)
+		_fail(ScriptMessages.text("despues_for_va_nombre_variable"), line)
 		return null
 	_advance()
 	if not _peek().is_keyword("in"):
-		_fail("Falta «in»: for %s in range(5):" % name_token.value, line)
+		_fail(ScriptMessages.text("falta_in_for_in_range") % name_token.value, line)
 		return null
 	_advance()
 	var iterable := _expression()
@@ -122,23 +120,23 @@ func _def() -> ScriptNode:
 	var line: int = _advance().line
 	var name_token: Lexer.Token = _peek()
 	if name_token.kind != "NAME":
-		_fail("Después de def va el nombre de la función: def clave(n):", line)
+		_fail(ScriptMessages.text("despues_def_va_nombre_funcion"), line)
 		return null
 	_advance()
 	if not _accept_op("("):
-		_fail("Faltan los paréntesis: def %s(n):" % name_token.value, line)
+		_fail(ScriptMessages.text("faltan_los_parentesis_def_n") % name_token.value, line)
 		return null
 	var params: Array = []
 	while not _peek().is_op(")"):
 		var p: Lexer.Token = _advance()
 		if p.kind != "NAME":
-			_fail("Los parámetros deben ser nombres.", line)
+			_fail(ScriptMessages.text("los_parametros_deben_ser_nombres"), line)
 			return null
 		params.append(p.value)
 		if not _accept_op(","):
 			break
 	if not _accept_op(")"):
-		_fail("Falta cerrar el paréntesis en def.", line)
+		_fail(ScriptMessages.text("falta_cerrar_parentesis_def"), line)
 		return null
 	var body := _block_after_colon("def")
 	return ScriptNodes.FunctionDef.new(name_token.value, params, body, line) if body else null
@@ -147,10 +145,10 @@ func _def() -> ScriptNode:
 func _block_after_colon(what: String) -> ScriptNodes.Block:
 	var t: Lexer.Token = _peek()
 	if not _accept_op(":"):
-		_fail("Falta «:» al final de la línea del %s." % what, t.line)
+		_fail(ScriptMessages.text("falta_final_linea") % what, t.line)
 		return null
 	if not _accept_kind("NEWLINE") or not _accept_kind("INDENT"):
-		_fail("Las instrucciones del %s van en las líneas siguientes, con sangría (4 espacios)." % what, t.line)
+		_fail(ScriptMessages.text("las_instrucciones_van_las_lineas") % what, t.line)
 		return null
 	var block := ScriptNodes.Block.new()
 	block.line = t.line
@@ -169,7 +167,7 @@ func _end_line() -> void:
 		return
 	if not (_accept_kind("NEWLINE") or _at("EOF") or _at("DEDENT")):
 		var t: Lexer.Token = _peek()
-		_fail("No esperaba «%s» aquí." % str(t.value), t.line)
+		_fail(ScriptMessages.text("no_esperaba_aqui") % str(t.value), t.line)
 
 
 # ------------------------------------------------------------------ expresiones
@@ -283,21 +281,21 @@ func _postfix() -> ScriptNode:
 				if not _accept_op(","):
 					break
 			if not _accept_op(")"):
-				_fail("Falta cerrar el paréntesis de la llamada.", t.line)
+				_fail(ScriptMessages.text("falta_cerrar_parentesis_llamada"), t.line)
 				return null
 			node = ScriptNodes.Call.new(node, args, t.line)
 		elif t.is_op("."):
 			_advance()
 			var name_token: Lexer.Token = _advance()
 			if name_token.kind != "NAME":
-				_fail("Después del punto va un nombre: puerta.abrir()", t.line)
+				_fail(ScriptMessages.text("despues_punto_va_nombre_puerta"), t.line)
 				return null
 			node = ScriptNodes.Attribute.new(node, name_token.value, t.line)
 		elif t.is_op("["):
 			_advance()
 			var index := _expression()
 			if not _accept_op("]"):
-				_fail("Falta cerrar el corchete ].", t.line)
+				_fail(ScriptMessages.text("falta_cerrar_corchete"), t.line)
 				return null
 			node = ScriptNodes.Index.new(node, index, t.line)
 		else:
@@ -324,7 +322,7 @@ func _atom() -> ScriptNode:
 			if t.value == "(":
 				var inner := _expression()
 				if not _accept_op(")"):
-					_fail("Falta cerrar el paréntesis.", t.line)
+					_fail(ScriptMessages.text("falta_cerrar_parentesis"), t.line)
 				return inner
 			if t.value == "[":
 				var items: Array = []
@@ -333,12 +331,12 @@ func _atom() -> ScriptNode:
 					if not _accept_op(","):
 						break
 				if not _accept_op("]"):
-					_fail("Falta cerrar la lista con ].", t.line)
+					_fail(ScriptMessages.text("falta_cerrar_lista"), t.line)
 				return ScriptNodes.ListLiteral.new(items, t.line)
 	if t.kind == "NEWLINE" or t.kind == "EOF":
-		_fail("La línea está incompleta.", t.line)
+		_fail(ScriptMessages.text("linea_esta_incompleta"), t.line)
 	else:
-		_fail("No esperaba «%s» aquí." % str(t.value), t.line)
+		_fail(ScriptMessages.text("no_esperaba_aqui") % str(t.value), t.line)
 	return ScriptNodes.Literal.new(null, t.line)
 
 

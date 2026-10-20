@@ -1,5 +1,4 @@
-## PATRÓN STRATEGY — Estrategia concreta del hechicero: lanza un orbe que vuela hacia donde
-## estaba Tala. Se esquiva moviéndose, y el garrote lo deshace en el aire.
+## Patrón Strategy: el hechicero lanza un orbe.
 class_name OrbShot
 extends GuardianAttack
 

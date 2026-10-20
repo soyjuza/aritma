@@ -1,16 +1,13 @@
-## PATRÓN COMMAND — Cada paso del programa de la Criba es un objeto: se anota mientras el
-## programa corre (al instante) y después la máquina 3D (el invocador, CribaMachine) los
-## ejecuta uno por uno con su animación. Así se ve, esfera por esfera, lo que ordenó el código.
+## Patrón Command: un paso del programa de la Criba.
 class_name FilterCommand
 extends RefCounted
 
 
-## Ejecuta la orden sobre la máquina (espera a que termine su animación).
 func run(_machine: CribaMachine) -> void:
 	pass
 
 
-## La tolva se llena con las esferas de una ronda.
+## Llena la tolva.
 class RoundStart extends FilterCommand:
 	var index: int
 	var values: Array
@@ -23,7 +20,7 @@ class RoundStart extends FilterCommand:
 		await machine.load_round(index, values)
 
 
-## La siguiente esfera baja por el tubo hasta la compuerta.
+## Baja la siguiente esfera.
 class Release extends FilterCommand:
 	var value: int
 
@@ -34,7 +31,7 @@ class Release extends FilterCommand:
 		await machine.drop_to_gate()
 
 
-## La compuerta se inclina y la esfera rueda al cáliz o al crisol.
+## La esfera va al cáliz o al crisol.
 class Send extends FilterCommand:
 	var value: int
 	var to_chalice: bool
@@ -49,13 +46,12 @@ class Send extends FilterCommand:
 		await machine.send_from_gate(to_chalice, right)
 
 
-## El programa terminó con esferas sin clasificar: la máquina se traba.
+## Quedaron esferas sin clasificar.
 class Jam extends FilterCommand:
 	func run(machine: CribaMachine) -> void:
 		await machine.jam()
 
 
-## Ronda superada.
 class RoundDone extends FilterCommand:
 	var index: int
 

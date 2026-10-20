@@ -1,6 +1,5 @@
 @tool
-## La Puerta de la montaña: su atril corre el programa con el objeto «puerta» (DoorAdapter).
-## Es la primera máquina del juego y la más simple: basta con ordenarle que se abra.
+## Puerta de la montaña: se abre con puerta.abrir().
 class_name GateMachine
 extends CodeMachine
 

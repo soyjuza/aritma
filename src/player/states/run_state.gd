@@ -1,4 +1,4 @@
-## PATRÓN STATE — Correr: gasta aliento y anima más rápido.
+## Patrón State: correr, gasta aliento.
 class_name RunState
 extends GroundState
 
@@ -26,3 +26,7 @@ func animation() -> String:
 
 func animation_speed() -> float:
 	return 1.7
+
+
+func regenerates_stamina() -> bool:
+	return false

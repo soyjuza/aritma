@@ -1,20 +1,16 @@
-## PATRÓN FACTORY METHOD — Creador abstracto de cámaras de desafío.
-## build() es el paso común (crear el nivel y pasarle sus datos de chambers.json); el
-## método fábrica create_level() lo redefine cada creador concreto para decidir qué
-## escena de cámara se instancia. Una cámara nueva es una escena y un creador nuevos, sin
-## tocar los demás.
+## Patrón Factory Method: creador base de las salas.
 class_name ChamberBuilder
 extends RefCounted
 
 
-func build(data: Dictionary) -> Level:
+func build(data: Dictionary) -> ChamberLevel:
 	var chamber := create_level()
 	chamber.data = data
 	chamber.title = String(data.get("name", ""))
 	return chamber
 
 
-## Método fábrica: la cámara concreta de este tipo.
-func create_level() -> Level:
+## Cada creador dice qué sala crea.
+func create_level() -> ChamberLevel:
 	push_error("ChamberBuilder.create_level() debe redefinirse en la subclase")
-	return Level.new()
+	return ChamberLevel.new()

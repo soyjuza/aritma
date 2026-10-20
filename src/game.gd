@@ -1,13 +1,10 @@
-## Raíz de composición del juego (contexto del patrón State). Es el nodo «Main» de main.tscn,
-## que ya trae a la cámara, a Tala y la interfaz como nodos hijos. Crea los servicios,
-## registra los controles, carga los niveles (escenas), aplica el perfil de efectos, conecta
-## los observadores y delega cada fotograma en el estado actual. No contiene reglas del juego.
+## Nodo principal: crea los servicios, carga los niveles y delega en el estado actual.
 class_name Game
 extends Node2D
 
 const ACTIONS := ["move_up", "move_down", "move_left", "move_right", "run", "jump", "interact", "book", "pause", "accept", "cancel", "ui_up", "ui_down", "ui_left", "ui_right", "fullscreen", "run_code", "attack", "flag", "rotate"]
 
-## La escena del pueblo (el primer nivel). Las salas las crean sus fábricas (ChamberRegistry).
+## Primer nivel. Las salas las crean sus fábricas.
 @export var town_scene: PackedScene
 
 var data: DataRepository
@@ -25,18 +22,14 @@ var level: Level
 var quality: QualityProfile
 var chamber_index := -1
 var show_fps := true
-var notice := ""
-var notice_left := 0.0
-var notice_good := false     # true: buena noticia (franja verde y más grande)
-var penalty_text := ""        # "−7 s" que flota junto al reloj tras una caída
-var penalty_left := 0.0
+var notices := NoticeBoard.new()
+var fade: ScreenFade
+var rules: LifeRules
 
 var _observers: Array = []
 var _tool: RefCounted
 var _secret: SecretCodeDetector
-var _fade := 0.0
-var _fade_dir := 0.0
-var _changing := false        # cambiando de sala: no se empieza otro cambio
+var _changing := false    # evita dos cambios de sala a la vez
 
 @onready var rig: CameraRig = $Camara
 @onready var player: PlayerController = $Tala
@@ -47,6 +40,7 @@ var _changing := false        # cambiando de sala: no se empieza otro cambio
 func _ready() -> void:
 	data = DataRepository.new()
 	InputSetup.register(data.setting("controls", {}))
+	InputSetup.mouse_names = data.texts.get("mouse_names", {})
 	bus = EventBus.new()
 	audio = AudioService.new(self)
 	saves = SaveRepository.new()
@@ -55,6 +49,7 @@ func _ready() -> void:
 	health = PlayerHealth.new(bus, int(combat("hearts", 5)))
 	rig.base_zoom = float(data.setting("zoom", 3))
 	overlay.painter = _draw_ui
+	codex.text = data.message
 	ui = UIKit.new(overlay)
 	dialog = DialogBox.new(bus, ui)
 	_secret = SecretCodeDetector.new(String(data.setting("secret_code", "")))
@@ -68,7 +63,8 @@ func _ready() -> void:
 		CameraShakeObserver.new(bus, rig, data.setting("camera_shake", {})),
 	]
 	bus.subscribe(GameEvents.TIME_UP, func(_p): finish(false))
-	bus.subscribe(GameEvents.PLAYER_DIED, func(_p): _on_player_died())
+	fade = ScreenFade.new(get_tree())
+	rules = LifeRules.new(self)
 	machine = _create_states()
 	load_level(town_scene.instantiate())
 	settings.applied.connect(_apply_settings)
@@ -97,14 +93,12 @@ func _create_states() -> StateMachine:
 
 func _process(delta: float) -> void:
 	ui.time += delta
-	notice_left = maxf(0.0, notice_left - delta)
-	penalty_left = maxf(0.0, penalty_left - delta)
-	if _fade_dir != 0.0:
-		_fade = clampf(_fade + _fade_dir * delta * 3.0, 0.0, 1.0)
+	notices.tick(delta)
+	fade.tick(delta)
 	if machine.current.timer_runs():
 		timer.tick(delta)
 	if level:
-		# En pausa (y en el libro) el nivel entero se detiene: guardianes, prensas, Tala
+		# En pausa se detiene todo el nivel
 		level.process_mode = Node.PROCESS_MODE_DISABLED if machine.current.freezes_world() else Node.PROCESS_MODE_INHERIT
 	machine.current.update(delta)
 	overlay.queue_redraw()
@@ -133,8 +127,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _draw_ui() -> void:
 	machine.current.draw(ui)
-	if _fade > 0.0:
-		ui.rect(Rect2(Vector2.ZERO, ui.size()), Color(0, 0, 0, _fade))
+	if fade.amount > 0.0:
+		ui.rect(Rect2(Vector2.ZERO, ui.size()), Color(0, 0, 0, fade.amount))
 
 
 func _apply_settings() -> void:
@@ -153,7 +147,7 @@ func load_level(new_level: Level) -> void:
 	if player.get_parent():
 		player.get_parent().remove_child(player)
 	if level:
-		# Fuera del árbol de una vez: sus áreas (salidas, fosos) ya no pueden ver a Tala
+		# Se saca del árbol para que sus áreas ya no detecten a Tala
 		remove_child(level)
 		level.queue_free()
 	level = new_level
@@ -174,7 +168,7 @@ func _set_camera_limits() -> void:
 	rig.set_bounds(Rect2i(b.position * TileKit.TILE, b.size * TileKit.TILE))
 
 
-## Pasa a la sala "index" con un fundido corto (la anterior se suelta).
+## Pasa a otra sala con un fundido.
 func enter_chamber(index: int) -> void:
 	if index >= data.chamber_count() or _changing:
 		return
@@ -186,8 +180,7 @@ func enter_chamber(index: int) -> void:
 	fade_in()
 
 
-## Tala cruza la puerta del templo: el núcleo despierta, empiezan los 15 minutos y se entra
-## a la Sala 1.
+## Tala entra al templo: empieza el reloj y va a la Sala 1.
 func enter_temple() -> void:
 	if chamber_index >= 0:
 		return
@@ -198,11 +191,10 @@ func enter_temple() -> void:
 	notify(data.messages("temple_start"), 6.0)
 
 
-## Carga directo una sala (al entrar, al continuar una partida guardada).
+## Carga una sala sin fundido.
 func load_chamber(index: int) -> void:
 	var chamber := ChamberRegistry.create(data.chamber_data(index))
-	if chamber is ChamberLevel:
-		chamber.index = index
+	chamber.index = index
 	chamber_index = index
 	load_level(chamber)
 	play_music(chamber.music_key)
@@ -239,26 +231,20 @@ func play_music(key: String) -> void:
 
 
 func fade_in() -> void:
-	_fade = 1.0
-	_fade_dir = -1.0
+	fade.fade_in()
 
 
 func fade_out() -> void:
-	_fade_dir = 1.0
-	while _fade < 1.0:
-		await get_tree().process_frame
-	await get_tree().process_frame
+	await fade.fade_out()
 
 
 func talk(key: String) -> void:
 	dialog.say(data.talk(key))
 
 
-## Aviso urgente: una franja arriba que se lee mientras se juega (no frena los controles).
+## Aviso arriba de la pantalla.
 func notify(lines: Array, seconds := 5.0, good := false) -> void:
-	notice = " ".join(lines)
-	notice_left = seconds
-	notice_good = good
+	notices.notify(lines, seconds, good)
 
 
 func start_new_game() -> void:
@@ -278,7 +264,7 @@ func open_codex(session: CodexSession) -> void:
 
 
 func save_game() -> void:
-	var room: Dictionary = level.save_state() if level is ChamberLevel else {}
+	var room := level.save_state()
 	saves.save({"chamber": chamber_index, "time_left": timer.remaining, "hearts": health.halves, "room": room})
 
 
@@ -294,8 +280,7 @@ func load_game() -> void:
 	health.halves = clampi(int(snap.get("hearts", health.max_halves)), 1, health.max_halves)
 
 
-## Fin de la partida: la Cámara superada o el tiempo agotado. ending: clave del texto final
-## en texts.json ("" = el final de siempre según se ganó o se perdió).
+## Fin de la partida. ending es la clave del texto final.
 func finish(won: bool, ending := "") -> void:
 	timer.stop()
 	Engine.time_scale = 1.0
@@ -305,42 +290,14 @@ func finish(won: bool, ending := "") -> void:
 
 # ---------------------------------------------------------------- vidas y castigos de tiempo
 
-## Un valor de la sección "combat" de config.json.
+## Valor de "combat" en config.json.
 func combat(key: String, fallback):
 	return (data.setting("combat", {}) as Dictionary).get(key, fallback)
 
 
-## Resta segundos al reloj del núcleo (caídas, prensas, quedarse sin corazones). Solo cuenta
-## dentro del templo, con el reloj andando. Si llega a cero, el reloj publica TIME_UP.
+## Resta segundos al reloj.
 func penalize(seconds: float) -> void:
-	if not timer.active or seconds <= 0.0:
-		return
-	timer.remaining = maxf(0.0, timer.remaining - seconds)
-	penalty_text = "−%d s" % int(seconds)
-	penalty_left = 2.2
-	bus.publish(GameEvents.TIME_PENALTY, {"seconds": seconds})
-
-
-## Sin corazones: Tala cae. Si al núcleo le queda un minuto o menos, se acaba el juego; si no,
-## pierde ese minuto y vuelve a la entrada de la sala con los corazones llenos.
-func _on_player_died() -> void:
-	player.die()
-	await get_tree().create_timer(1.6, true, false, true).timeout
-	if machine.current is EndState:
-		return
-	var cost := float(combat("death_penalty_sec", 60))
-	if timer.remaining <= cost:
-		finish(false, "ending_no_lives")
-		return
-	penalize(cost)
-	notify([data.message("player_no_lives", {"s": int(cost)})], 4.0)
-	await fade_out()
-	health.refill()
-	if level is ChamberLevel:
-		level.restart_after_death()
-	else:
-		level.respawn_player()
-	fade_in()
+	rules.penalize(seconds)
 
 
 # ---------------------------------------------------------------- herramientas de prueba

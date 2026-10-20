@@ -1,7 +1,4 @@
-## PATRÓN STATE — La prueba del Guardián del Cero (Sala 6). Al perder una parte de su vida, el
-## jefe se cubre con un escudo y pone un problema (BossQuiz). El mundo queda quieto mientras se
-## responde: teclas 1 a 4 o clic en una opción. Hay un tiempo (15 s, en chambers.json); si se
-## acaba o la respuesta es mala, el jefe llama a sus guardianes. Al terminar avisa con on_done.
+## Patrón State: problema del jefe. Se responde con 1 a 4 o clic.
 class_name QuizState
 extends GameState
 
@@ -11,10 +8,10 @@ const KEYPAD := [KEY_KP_1, KEY_KP_2, KEY_KP_3, KEY_KP_4]
 
 var quiz: Dictionary = {}
 var seconds := 15.0
-var on_done: Callable       # (acertó: bool) -> void
+var on_done: Callable
 
 var _left := 0.0
-var _chosen := -1           # la opción elegida (-1: ninguna todavía)
+var _chosen := -1    # -1: ninguna
 var _finished := false
 var _result_t := 0.0
 var _mouse := Vector2.ZERO
@@ -58,7 +55,7 @@ func handle_mouse(event: InputEventMouse) -> bool:
 	return true
 
 
-## Elige una opción (si todavía se puede).
+## Elige una opción.
 func choose(i: int) -> void:
 	if _finished:
 		return
@@ -134,7 +131,7 @@ func draw(ui: UIKit) -> void:
 		ui.frame(r, border, 3.0)
 		ui.text(str(i + 1), r.position + Vector2(10, 6), 18, UIKit.GOLD, "bold")
 		ui.text_centered(String(options[i]), r.position.y + 22, 34, UIKit.TEXT, "title", r.get_center().x)
-	# La barra de tiempo
+	# Barra de tiempo
 	var bar := Rect2(p.position.x + 60, p.end.y - 66, p.size.x - 120, 12)
 	var frac := clampf(_left / seconds, 0.0, 1.0)
 	ui.rect(bar, Color(1, 1, 1, 0.08))
@@ -146,7 +143,7 @@ func draw(ui: UIKit) -> void:
 		ui.text_centered(game.data.message("quiz_hint", {"s": ceili(_left), "keys": _keys_text()}), p.end.y - 44, 19, UIKit.MUTED)
 
 
-## «1 y 2» o «1, 2, 3 y 4», según cuántas opciones tenga el problema.
+## "1 y 2" o "1, 2, 3 y 4".
 func _keys_text() -> String:
 	var keys: Array = []
 	for i in quiz.get("options", []).size():

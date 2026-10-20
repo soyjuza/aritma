@@ -1,4 +1,4 @@
-## PATRÓN STATE — Menú principal.
+## Patrón State: menú principal.
 class_name MenuState
 extends GameState
 

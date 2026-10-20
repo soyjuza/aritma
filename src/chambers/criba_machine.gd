@@ -1,9 +1,5 @@
 @tool
-## La Criba (Sala 1): un tablero de piedra verde y bronce. A la izquierda, la tolva; por el
-## canal de cristal avanzan las esferas numeradas hasta la compuerta, que las deja caer por la
-## canaleta izquierda al Cáliz de la Paridad (PAR, dorado) o por la derecha al Crisol (IMPAR,
-## rojo). Es el invocador del patrón Command: perform() ejecuta, una por una, las órdenes que
-## dejó el programa (FilterCommand) con su animación.
+## La Criba (Sala 1). Patrón Command: perform() ejecuta las órdenes (FilterCommand).
 class_name CribaMachine
 extends CodeMachine
 
@@ -34,40 +30,19 @@ var _bus: EventBus
 var _data: Dictionary
 var _text: Callable
 var _rng := RandomNumberGenerator.new()
-var _spheres: Array[Sphere] = []
-var _on_gate: Sphere = null
-var _gate_open := 0.0          # -1 a la izquierda (cáliz), 1 a la derecha (crisol)
+var _spheres: Array[CribaSphere] = []
+var _on_gate: CribaSphere = null
+var _gate_open := 0.0    # -1 cáliz, 1 crisol
 var _round_lit: Array = [false, false, false]
 var _round_shown := 0
 var _speed := 1.0
 var _filled := 0
 var _font: Font = load(UIKit.PIXEL_FONT)
 
-# Letreros y luces: nodos de la escena scenes/maquinas/criba.tscn
 @onready var _hopper_label: Label = $Tolva
 @onready var _gate_number: Label = $NumeroCompuerta
 @onready var _chalice_light: PointLight2D = $LuzCaliz
 @onready var _crucible_light: PointLight2D = $LuzCrisol
-
-
-## Una esfera numerada: orbe pálido con el número grabado encima (se dibuja directo, con
-## borde, para que se lea aunque la sala esté oscura).
-class Sphere extends Node2D:
-	var value := 0
-	var tint := Color("e9f7ff")
-	var font: Font
-
-	func _draw() -> void:
-		draw_circle(Vector2.ZERO, 7.5, Color("14181c"))
-		draw_circle(Vector2.ZERO, 6.5, tint)
-		draw_circle(Vector2(-3, -3), 1.5, Color(1, 1, 1, 0.95))
-		# El número se dibuja al doble y a media escala para que quede nítido
-		var text := str(value)
-		var w := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2(0.5, 0.5))
-		draw_string_outline(font, Vector2(-w / 2.0, 7), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, 4, Color(1, 1, 1, 0.9))
-		draw_string(font, Vector2(-w / 2.0, 7), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("101418"))
-		draw_set_transform(Vector2.ZERO)
 
 
 func setup(kit: TileKit, bus: EventBus, data: Dictionary, text: Callable, open_codex: Callable) -> void:
@@ -90,7 +65,6 @@ func setup(kit: TileKit, bus: EventBus, data: Dictionary, text: Callable, open_c
 	session.help = data.get("help", [])
 	session.max_lines = int(data.get("max_lines", 0))
 	session.machine = self
-	# Los letreros del tablero salen de chambers.json
 	$EtiquetaPar.text = String(data.get("chalice_label", "PAR"))
 	$EtiquetaImpar.text = String(data.get("crucible_label", "IMPAR"))
 	$Glifo.text = String(data.get("glyph", "n % 2"))
@@ -99,68 +73,12 @@ func setup(kit: TileKit, bus: EventBus, data: Dictionary, text: Callable, open_c
 
 
 func _draw() -> void:
-	# Tablero de piedra con remates de bronce
-	_box(Rect2(-104, -82, 196, 62), STONE_DARK)
-	_box(Rect2(-100, -78, 188, 54), STONE)
-	draw_rect(Rect2(-100, -78, 188, 3), STONE_LIGHT)
-	draw_rect(Rect2(-104, -24, 196, 4), BRONZE_DARK)
-	draw_rect(Rect2(-104, -84, 196, 3), BRONZE)
-	# Lámparas de las rondas
-	for i in round_count:
-		var c := Vector2(58 + i * 9, -71)
-		draw_circle(c, 3.5, OUTLINE)
-		draw_circle(c, 2.5, GOLD if _round_lit[i] else Color("2a3036"))
-	# Tolva (izquierda)
-	var hopper := PackedVector2Array([Vector2(-102, -64), Vector2(-78, -64), Vector2(-84, -48), Vector2(-96, -48)])
-	draw_colored_polygon(hopper, BRONZE)
-	draw_polyline(hopper + PackedVector2Array([hopper[0]]), OUTLINE, 1.0)
-	# Canal de cristal
-	draw_rect(Rect2(-90, CHANNEL_Y - 8, GATE.x + 98, 16), OUTLINE)
-	draw_rect(Rect2(-89, CHANNEL_Y - 7, GATE.x + 96, 14), Color("1a2b30"))
-	draw_rect(Rect2(-89, CHANNEL_Y - 7, GATE.x + 96, 14), GLASS)
-	draw_rect(Rect2(-89, CHANNEL_Y - 6, GATE.x + 96, 1), Color(1, 1, 1, 0.35))
-	# Compuerta: una paleta de bronce que se inclina
-	var tilt := _gate_open * 0.5
-	var g1 := SPLIT + Vector2(-9, 0).rotated(tilt)
-	var g2 := SPLIT + Vector2(9, 0).rotated(tilt)
-	draw_line(GATE + Vector2(0, 8), SPLIT, OUTLINE, 3.0)
-	draw_line(g1, g2, OUTLINE, 4.0)
-	draw_line(g1, g2, BRONZE, 2.0)
-	# Canaletas hacia el cáliz y el crisol
-	for side in [-1.0, 1.0]:
-		var target: Vector2 = CHALICE if side < 0 else CRUCIBLE
-		var from: Vector2 = SPLIT + Vector2(side * 8, 3)
-		var to: Vector2 = target + Vector2(-side * 4, -12)
-		draw_line(from, to, OUTLINE, 5.0)
-		draw_line(from, to, BRONZE_DARK, 3.0)
-	# Cáliz de la Paridad
-	var cup := CHALICE
-	draw_rect(Rect2(cup.x - 2, cup.y - 2, 4, 8), OUTLINE)
-	draw_rect(Rect2(cup.x - 6, cup.y + 4, 12, 3), OUTLINE)
-	draw_rect(Rect2(cup.x - 5, cup.y + 4, 10, 2), BRONZE)
-	var bowl := PackedVector2Array([Vector2(-10, -14), Vector2(10, -14), Vector2(6, -3), Vector2(-6, -3)])
-	for i in bowl.size():
-		bowl[i] += cup
-	draw_colored_polygon(bowl, GOLD.darkened(0.15))
-	draw_polyline(bowl + PackedVector2Array([bowl[0]]), OUTLINE, 1.0)
-	var fill := clampf(_filled / 12.0, 0.0, 1.0)
-	draw_rect(Rect2(cup.x - 8, cup.y - 13, 16, 2), GOLD.lightened(0.3 * fill))
-	# Crisol: caldero de piedra con brasas
-	var pot := CRUCIBLE
-	draw_rect(Rect2(pot.x - 11, pot.y - 14, 22, 15), OUTLINE)
-	draw_rect(Rect2(pot.x - 10, pot.y - 13, 20, 13), Color("3a3330"))
-	draw_rect(Rect2(pot.x - 8, pot.y - 13, 16, 3), RED.lerp(Color("ffb347"), 0.5 + 0.5 * sin(_time * 7.0)))
-	draw_rect(Rect2(pot.x - 12, pot.y - 15, 24, 2), BRONZE_DARK)
-
-
-func _box(r: Rect2, color: Color) -> void:
-	draw_rect(r.grow(1), OUTLINE)
-	draw_rect(r, color)
+	CribaView.draw_board(self, _gate_open, _round_lit, _filled, _time)
 
 
 # ------------------------------------------------------------------ esferas
 
-## Esferas nuevas para todas las rondas (al empezar y después de cada fallo).
+## Esferas nuevas para todas las rondas.
 func new_rules() -> void:
 	rules = ParityFilter.new(_data.get("rounds", []), _rng)
 	_round_lit.fill(false)
@@ -168,8 +86,7 @@ func new_rules() -> void:
 	_show_round(0, rules.rounds[0])
 
 
-## Pone en el canal (y la tolva) las esferas de la ronda. Antes de ejecutar solo se ve la
-## ronda 1; las otras aparecen cuando la máquina las prueba.
+## Pone las esferas de la ronda en el canal.
 func _show_round(index: int, values: Array) -> void:
 	for s in _spheres:
 		s.queue_free()
@@ -179,7 +96,7 @@ func _show_round(index: int, values: Array) -> void:
 		_on_gate = null
 	_round_shown = index
 	for v in values:
-		var s := Sphere.new()
+		var s := CribaSphere.new()
 		s.value = int(v)
 		s.font = _font
 		s.z_index = 2
@@ -188,7 +105,6 @@ func _show_round(index: int, values: Array) -> void:
 	_layout_spheres(false)
 
 
-## La primera esfera queda junto a la compuerta; las que no caben esperan en la tolva.
 func _slot(i: int) -> Vector2:
 	if i < VISIBLE_SLOTS:
 		return Vector2(GATE.x - 12 - i * SLOT_GAP, CHANNEL_Y)
@@ -267,7 +183,7 @@ func load_round(index: int, values: Array) -> void:
 func drop_to_gate() -> void:
 	if _spheres.is_empty():
 		return
-	var sphere: Sphere = _spheres.pop_front()
+	var sphere: CribaSphere = _spheres.pop_front()
 	_on_gate = sphere
 	sphere.visible = true
 	_gate_number.text = str(sphere.value)
@@ -325,7 +241,7 @@ func round_done(index: int) -> void:
 
 # ------------------------------------------------------------------ efectos
 
-func _absorb(sphere: Sphere, to_chalice: bool) -> void:
+func _absorb(sphere: CribaSphere, to_chalice: bool) -> void:
 	var light := _chalice_light if to_chalice else _crucible_light
 	sphere.tint = GOLD if to_chalice else RED
 	sphere.queue_redraw()
@@ -344,8 +260,8 @@ func _absorb(sphere: Sphere, to_chalice: bool) -> void:
 		get_tree().create_timer(0.8).timeout.connect(sparks.queue_free)
 
 
-## La esfera cayó del lado equivocado: salta en rojo con chispas y la máquina se traba.
-func _wrong(sphere: Sphere, to_chalice: bool) -> void:
+## Esfera en el lado equivocado: la máquina se traba.
+func _wrong(sphere: CribaSphere, to_chalice: bool) -> void:
 	_bus.publish(GameEvents.MACHINE_BAD)
 	sphere.tint = RED
 	sphere.queue_redraw()

@@ -1,10 +1,8 @@
-## PATRÓN STATE — El libro de reglas (TAB o desde la pausa): una página por cada cámara a la
-## que ya se llegó, con las inscripciones tal como están en las paredes. El mundo se congela
-## (los guardianes no atacan mientras se lee); el reloj sigue, salvo si se abrió desde la pausa.
+## Patrón State: libro de reglas de las salas visitadas.
 class_name BookState
 extends GameState
 
-var _pages: Array = []    # [{title, lines}]
+var _pages: Array = []
 var _page := 0
 var _return_to := "play"
 

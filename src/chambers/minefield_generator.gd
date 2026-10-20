@@ -1,7 +1,4 @@
-## Genera campos de trampas con una garantía: el campo siempre se puede resolver a partir de
-## la primera baldosa usando solo las dos reglas básicas del buscaminas, sin adivinar.
-## La vecindad es configurable: "king" (las 8 casillas de alrededor, el buscaminas clásico)
-## o "knight" (las 8 casillas a un salto de caballo de ajedrez).
+## Genera minas que siempre se pueden resolver sin adivinar.
 class_name MinefieldGenerator
 extends RefCounted
 
@@ -20,8 +17,7 @@ func _init(neighborhood := "king") -> void:
 	_rng.randomize()
 
 
-## cells: baldosas del campo. first: la primera baldosa descubierta (ella y sus vecinas quedan libres).
-## Devuelve un Dictionary usado como conjunto: {celda_con_trampa: true}
+## Devuelve {celda_con_mina: true}.
 func generate(cells: Array[Vector2i], mine_count: int, first: Vector2i) -> Dictionary:
 	var field := {}
 	for c in cells:
@@ -53,10 +49,7 @@ func _shuffle(list: Array[Vector2i]) -> void:
 		list[j] = tmp
 
 
-## Simula a un jugador que solo usa lógica:
-##   1) si un número ya tiene todas sus trampas marcadas, sus otras vecinas son seguras;
-##   2) si un número tiene tantas vecinas tapadas como su valor, todas son trampas.
-## Si llega a descubrir todo el campo, el campo se resuelve sin adivinar.
+## Simula a un jugador que solo usa lógica. true si destapa todo.
 func is_solvable(field: Dictionary, mines: Dictionary, first: Vector2i) -> bool:
 	var revealed := {}
 	var flagged := {}

@@ -1,5 +1,4 @@
-## Orbe del hechicero (escena: scenes/enemigos/orbe.tscn): vuela en línea recta, se deshace
-## contra los muros y, si toca a Tala, le quita medio corazón. Un golpe de garrote lo deshace.
+## Orbe del hechicero: quita medio corazón y el garrote lo deshace.
 class_name RuneOrb
 extends Node2D
 
@@ -49,7 +48,6 @@ func _hits_wall() -> bool:
 	return false
 
 
-## Se deshace en chispas (contra un muro, contra Tala o de un garrotazo).
 func shatter() -> void:
 	if is_queued_for_deletion():
 		return

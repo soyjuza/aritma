@@ -1,6 +1,5 @@
-## Pruebas automáticas que juegan de verdad (mueven a Tala con eventos de teclado, no la
-## teletransportan salvo para empezar cada prueba). Ejecutar:
-##   Godot --headless --path . -- --selftest
+## Pruebas que juegan de verdad con eventos de teclado:
+## Godot --headless --path . -- --selftest
 class_name SelfTest
 extends RefCounted
 
@@ -50,12 +49,12 @@ func _wait(seconds: float) -> void:
 	await game.get_tree().create_timer(seconds, true, true).timeout
 
 
-## Espera en tiempo real (aunque el juego vaya en cámara lenta, como en el reto de teclas).
+## Espera en tiempo real.
 func _real_wait(seconds: float) -> void:
 	await game.get_tree().create_timer(seconds, true, false, true).timeout
 
 
-## Pulsa o suelta una tecla como un evento real (cuenta igual que con el teclado).
+## Pulsa o suelta una tecla.
 func _key(action: String, pressed: bool) -> void:
 	var event := InputEventAction.new()
 	event.action = action
@@ -68,7 +67,7 @@ func _release_all() -> void:
 		_key(a, false)
 
 
-## Camina hacia arriba hasta que pase algo (o se acabe el tiempo).
+## Camina hacia arriba hasta que pase algo.
 func _walk_up_until(done: Callable, limit: float, run := false) -> void:
 	_key("move_up", true)
 	if run:
@@ -119,12 +118,12 @@ func _test_town_and_gate() -> void:
 	game.machine.change("play", {"mode": "new"})
 	game.dialog.close()
 	var town := game.level as TownLevel
-	# Hablar con Orun: pararse frente a él
+	# Hablar con Orun
 	game.player.place(town.get_node("Actores/Orun").global_position + Vector2(0, 20), Vector2.UP)
 	await _wait(0.2)
 	var seen := game.player.focused_interactable()
 	_check(seen != null and seen.prompt_key == "prompt_talk", "Pueblo: frente a Orun aparece «Hablar»")
-	# El atril de la puerta
+	# Atril de la puerta
 	game.player.place(town.gate.global_position + Vector2(0, 16), Vector2.UP)
 	await _wait(0.2)
 	seen = game.player.focused_interactable()
@@ -141,7 +140,7 @@ func _test_town_and_gate() -> void:
 	await _wait(0.8)
 	game.dialog.close()
 	_check(town.gate.gate_open and game.machine.current is PlayState, "Códice + Adapter: puerta.abrir() abre la puerta del templo")
-	# Entrar caminando al templo
+	# Entrar al templo
 	game.player.place(town.get_node("Zonas/EntradaTemplo").global_position + Vector2(0, 80), Vector2.UP)
 	await _walk_up_until(func(): return game.level is FilterLevel, 6.0)
 	await _wait(0.8)
@@ -157,7 +156,7 @@ func _test_corridor() -> void:
 	var first: Pit = lvl.get_node("Fosos/Foso1")
 	var pit := Rect2(first.global_position, first.size)
 	var below := Vector2(pit.get_center().x, pit.end.y + 40)
-	# Caminando, el salto no alcanza: cae y vuelve al punto seguro
+	# Caminando no alcanza el salto
 	game.player.place(below, Vector2.UP)
 	await _wait(0.2)
 	var before_fall := game.timer.remaining
@@ -170,7 +169,6 @@ func _test_corridor() -> void:
 	_release_all()
 	await _wait(0.4)
 	_check(game.player.global_position.y > pit.position.y + 8, "Pasillo: caminando, el foso no se cruza (cae y vuelve)")
-	# Lo que corrió el reloj mientras tanto (2,45 s de espera) más los 7 del castigo
 	var lost := before_fall - game.timer.remaining - 2.45
 	_check(lost > 6.5 and lost < 8.0, "Caída: el foso cuesta 7 segundos (perdió %.1f)" % lost)
 	# Corriendo sí
@@ -186,7 +184,6 @@ func _test_corridor() -> void:
 	_release_all()
 	await _wait(0.3)
 	_check(game.player.global_position.y < pit.position.y + 8 and not game.player.falling, "Pasillo: corriendo y saltando se cruza el foso")
-	# Hasta la sala
 	var second: Pit = lvl.get_node("Fosos/Foso2")
 	game.player.place(Vector2(pit.get_center().x, second.global_position.y - 24), Vector2.UP)
 	await _walk_up_until(func(): return lvl._in_hall, 4.0)
@@ -274,9 +271,7 @@ func _test_criba() -> void:
 	_check(game.level is RootsLevel and game.chamber_index == 1, "Sala 1: se cruza la salida caminando y se llega a la Sala 2 (Factory: RootsBuilder)")
 
 
-## El error de la Criba despierta a las estatuas: se pelea con el garrote (teclas de verdad),
-## los centinelas golpean, la máquina queda bloqueada hasta vencerlos, y si Tala se queda sin
-## corazones vuelve a la entrada con un minuto menos y las estatuas en su lugar.
+## Error en la Criba: pelea con las estatuas y muerte en la sala.
 func _test_guardians(lvl: FilterLevel) -> void:
 	var t := 0.0
 	while not game.machine.current is PlayState and t < 3.0:
@@ -287,7 +282,6 @@ func _test_guardians(lvl: FilterLevel) -> void:
 	_check(game.machine.current is PlayState and not game.codex.visible, "Guardianes: el Códice se cierra para pelear")
 	_check(lvl.machine_blocked(), "Guardianes: con guardianes despiertos la Criba no se puede usar")
 	await _wait(1.8)
-	# Quieta junto a un centinela: la golpea
 	var g: Guardian = awake[0]
 	var halves := game.health.halves
 	t = 0.0
@@ -295,7 +289,7 @@ func _test_guardians(lvl: FilterLevel) -> void:
 		await _wait(0.1)
 		t += 0.1
 	_check(game.health.halves == halves - 1, "Guardianes: el golpe de un centinela quita medio corazón")
-	# Tres golpes de garrote lo vencen
+	# Tres golpes lo vencen
 	for i in 6:
 		if not g.is_active():
 			break
@@ -312,7 +306,7 @@ func _test_guardians(lvl: FilterLevel) -> void:
 			other.take_hit(5, Vector2.UP)
 	await _wait(0.4)
 	_check(not lvl.alarm.fighting() and not lvl.machine.locked and not lvl.machine_blocked(), "Guardianes: vencidos todos, la Criba vuelve a aceptar código")
-	# Sin corazones: un minuto menos, corazones llenos, entrada de la sala, estatuas de vuelta
+	# Sin corazones: un minuto menos y vuelve a la entrada
 	var before := game.timer.remaining
 	game.health.damage(game.health.halves)
 	await _wait(2.4)
@@ -322,8 +316,7 @@ func _test_guardians(lvl: FilterLevel) -> void:
 	_check(game.player.global_position.distance_to(lvl.room_entrance()) < 4.0 and dormant.size() == 2 and lvl.alarm.level == 1, "Sin corazones: vuelve a la entrada de la sala, las estatuas a su pedestal y la alarma sigue en 1")
 
 
-## La alarma 3 trae un guardián rúnico: se acerca, se carga, explota y pone el reto de teclas.
-## Acertar las teclas no cuesta nada; equivocarse cuesta 2 corazones.
+## Alarma 3: el rúnico explota y pone el reto de teclas.
 func _test_runic(lvl: FilterLevel) -> void:
 	game.player.place(Vector2(248, 285), Vector2.UP)
 	lvl.alarm.level = 2
@@ -364,8 +357,7 @@ func _test_runic(lvl: FilterLevel) -> void:
 	_check(not lvl.alarm.fighting() and is_equal_approx(Engine.time_scale, 1.0), "Rúnico: se destruye en su explosión y el tiempo vuelve a la normalidad")
 
 
-## Caballeros en formación (rodean a Tala), el hechicero dispara de lejos, el garrote deshace
-## los orbes y la pausa congela todo (guardianes y reloj).
+## Caballeros, hechicero, orbes y pausa.
 func _test_formation_orbs_and_pause(lvl: FilterLevel) -> void:
 	var p := Vector2(248, 285)
 	game.player.place(p, Vector2.UP)
@@ -392,7 +384,7 @@ func _test_formation_orbs_and_pause(lvl: FilterLevel) -> void:
 		t += 0.1
 	game.bus.unsubscribe(GameEvents.ORB_FIRED, on_fire)
 	_check(fired[0], "Hechicero: lanza orbes desde lejos")
-	# Pausa: nada se mueve y el reloj no corre
+	# En pausa nada se mueve
 	game.machine.change("pause")
 	await _wait(0.1)
 	var before_time := game.timer.remaining
@@ -405,7 +397,7 @@ func _test_formation_orbs_and_pause(lvl: FilterLevel) -> void:
 	for orb in game.get_tree().get_nodes_in_group("orbs"):
 		orb.queue_free()
 	await _wait(0.2)
-	# Un orbe que llega quita medio corazón; con un garrotazo a tiempo se deshace
+	# El orbe quita medio corazón y el garrote lo deshace
 	game.player.invulnerable = 0.0
 	var halves := game.health.halves
 	var orb: RuneOrb = OrbShot.ORB.instantiate()
@@ -440,7 +432,7 @@ func _press_key(letter: String) -> void:
 	Input.parse_input_event(up)
 
 
-## Reglas puras: corazones, castigo de tiempo y tamaño de las olas.
+## Corazones, castigo de tiempo y olas.
 func _test_health_and_alarm_rules() -> void:
 	var bus := EventBus.new()
 	var died := [false]
@@ -466,7 +458,7 @@ func _test_health_and_alarm_rules() -> void:
 	alarm.free()
 
 
-## Si se acaban los corazones con un minuto o menos en el reloj, se acaba el juego.
+## Sin corazones y con un minuto o menos se acaba el juego.
 func _test_game_over_without_lives() -> void:
 	game.machine.change("play", {"mode": "new"})
 	await _wait(0.5)
@@ -479,7 +471,7 @@ func _test_game_over_without_lives() -> void:
 	_check(game.machine.current is EndState and game.machine.current._key == "ending_no_lives", "Sin corazones y con menos de 1 minuto: fin del juego")
 
 
-## Vence de un golpe a todos los guardianes que queden (después de que terminen de caer).
+## Vence a todos los guardianes que queden.
 func _clear_guardians(lvl: ChamberLevel) -> void:
 	var t := 0.0
 	while lvl.alarm._pending > 0 and t < 6.0:
@@ -499,8 +491,7 @@ func _clear_guardians(lvl: ChamberLevel) -> void:
 	await _wait(0.3)
 
 
-## Reglas del buscaminas: la primera baldosa nunca es mina, todo tablero se resuelve solo con
-## lógica (sin adivinar), y tras una bomba el patrón nuevo es distinto aunque se empiece igual.
+## Reglas del buscaminas.
 func _test_mine_rules() -> void:
 	var board := MineBoard.new()
 	board.power_on()
@@ -527,7 +518,7 @@ func _test_mine_rules() -> void:
 	_check(first_safe, "Buscaminas: la primera baldosa nunca es mina y abre una zona (120 tableros)")
 	_check(solvable and counts_ok, "Buscaminas: 120 tableros de 8×8 con 10 minas, todos se resuelven solo con lógica")
 	_check(all_different, "Buscaminas: después de cada bomba el patrón nuevo es distinto al anterior")
-	# Banderas: una baldosa con bandera no se destapa
+	# Con bandera no se destapa
 	var flagged := Vector2i(-1, -1)
 	for c in board.cells():
 		if not board.revealed.has(c):
@@ -538,8 +529,7 @@ func _test_mine_rules() -> void:
 	board.free()
 
 
-## La Sala 3 de verdad: el Faro con un programa mal y uno bien, el tablero con E y Q, una bomba
-## (−2 corazones y tablero nuevo) y el tablero limpio que abre la salida. Sin guardianes.
+## La Sala 3 completa.
 func _test_vortex() -> void:
 	var lvl := game.level as VortexLevel
 	if lvl == null:
@@ -561,7 +551,7 @@ func _test_vortex() -> void:
 		await _wait(0.2)
 		t += 0.2
 	_check(not lvl.machine.is_solved and not lvl.board.powered and game.machine.current is CodexState, "Faro: un programa que no enciende las luces no enciende el tablero (y no despierta guardianes)")
-	# Un error de escritura: al salir y volver a la terminal, el error sigue en la consola
+	# El error sigue en la consola al volver
 	game.codex.editor.text = "luces.encender(\n"
 	game.machine.current.run()
 	await _wait(0.3)
@@ -580,7 +570,7 @@ func _test_vortex() -> void:
 	await _wait(0.8)
 	game.dialog.close()
 	_check(lvl.board.powered and game.machine.current is PlayState, "Faro: con luces.encender() el tablero se enciende")
-	# E destapa la baldosa que pisa Tala; Q le pone bandera
+	# E destapa y Q pone bandera
 	var start := Vector2i(3, 6)
 	game.player.place(lvl.board.cell_center(start), Vector2.UP)
 	await _wait(0.2)
@@ -601,7 +591,7 @@ func _test_vortex() -> void:
 	await _wait(0.05)
 	_key("flag", false)
 	await _wait(0.1)
-	# Una bomba: −2 corazones y tablero nuevo
+	# Una bomba: -2 corazones y tablero nuevo
 	game.health.refill()
 	var halves := game.health.halves
 	var old_mines: Dictionary = lvl.board.mines.duplicate()
@@ -613,7 +603,7 @@ func _test_vortex() -> void:
 	_check(game.player.global_position.distance_to(lvl.room_entrance()) < 4.0, "Tablero: después de la bomba, Tala vuelve a la entrada")
 	lvl.board.reveal(start)
 	_check(lvl.board.mines != old_mines, "Tablero: empezando por la misma baldosa, las minas quedan en otro lugar")
-	# Destapar todo lo que no es mina limpia el tablero y abre la salida
+	# Tablero limpio abre la salida
 	for c in lvl.board.cells():
 		if not lvl.board.mines.has(c):
 			lvl.board.reveal(c)
@@ -626,15 +616,15 @@ func _test_vortex() -> void:
 	_check(game.level is FigureLevel and game.chamber_index == 3, "Sala 3: se cruza la salida y se llega a la Sala 4 (Factory: FigureBuilder)")
 
 
-## La Sala 6: al entrar despierta el jefe (y cura 2 corazones); el pisotón quita un corazón,
-## la ráfaga lanza orbes, al cambiar de fase se cubre con un escudo y llama guardianes, y
-## vencerlo gana el juego.
+## La Sala 6: el jefe completo.
 func _test_boss(lvl: ThroneLevel) -> void:
 	if lvl == null:
 		return
 	var boss := lvl.boss
 	game.dialog.close()
 	_check(not boss.is_awake(), "Jefe: duerme mientras Tala va por el pasillo")
+	var tuning: Dictionary = game.data.setting("boss", {})
+	_check(is_equal_approx(boss.tired_time, float(tuning.tired_time)) and boss.orbs_per_phase == [3, 5, 6, 7] and boss.max_hp == int(tuning.max_hp), "Jefe: sus números vienen de config.json (State: un estado por clase)")
 	game.health.halves = 4
 	game.player.place(lvl.room_entrance() + Vector2(0, 20), Vector2.UP)
 	await _walk_up_until(func(): return lvl._in_hall, 3.0)
@@ -695,7 +685,7 @@ func _test_boss(lvl: ThroneLevel) -> void:
 	game.health.halves = 4
 	await _wait(0.2)
 	_check(game.health.halves == 6 and not is_instance_valid(potion), "Poción: al tocarla Tala recupera un corazón")
-	# El tiempo se acaba: cuenta como error (la tercera ola es de 6)
+	# Se acaba el tiempo del problema
 	for i in boss.phase_hp():
 		boss.take_hit(1, Vector2.UP)
 	t = 0.0
@@ -707,7 +697,7 @@ func _test_boss(lvl: ThroneLevel) -> void:
 		await _wait(0.5)
 		waited += 0.5
 	_check(waited >= 15.0 and lvl.alarm.fighting() and lvl.alarm.alive_count() == 6, "Jefe: sin responder, a los 15 s llama a 6 guardianes")
-	# Tala cae en plena pelea: la pelea empieza de nuevo, con el jefe a toda vida
+	# Tala cae: la pelea empieza de nuevo
 	lvl.restart_after_death()
 	await _wait(0.5)
 	_check(boss.hp == boss.max_hp and boss.phase == 0 and not lvl.alarm.fighting() and boss.can_be_hit() and game.get_tree().get_nodes_in_group("potions").is_empty(), "Jefe: si Tala cae, el jefe recupera toda la vida y vuelve a la fase 1")
@@ -731,14 +721,15 @@ func _test_boss(lvl: ThroneLevel) -> void:
 	_check(game.machine.current is EndState and game.machine.current._won, "Jefe: al vencerlo se gana el juego")
 
 
-## Los problemas del jefe: cada tipo trae opciones distintas y exactamente una buena.
+## Cada problema tiene una sola respuesta buena.
 func _test_boss_quiz() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 9
+	var quiz := BossQuiz.new(game.data.message)
 	var ok := true
 	for i in 300:
 		var kind: String = ["paridad", "multiplo", "despejar"][i % 3]
-		var q := BossQuiz.make(kind, rng)
+		var q := quiz.make(kind, rng)
 		var options: Array = q.options
 		var unique := {}
 		for o in options:
@@ -746,12 +737,12 @@ func _test_boss_quiz() -> void:
 		ok = ok and unique.size() == options.size() and q.answer >= 0 and q.answer < options.size()
 		ok = ok and options.size() == (2 if kind == "paridad" else 4)
 	_check(ok, "Prueba del jefe: 300 problemas, opciones distintas y una sola buena")
-	var p := BossQuiz.make("despejar", rng)
+	var p := quiz.make("despejar", rng)
 	var parts := String(p.question).split(" = ")
 	_check(p.options[p.answer] != "" and "x" in parts[0], "Prueba del jefe: despejar muestra ax + b = c")
 
 
-## Las prensas del pasillo de la Sala 2.
+## Prensas de la Sala 2.
 func _test_presses() -> void:
 	var lvl := game.level as RootsLevel
 	if lvl == null:
@@ -763,7 +754,7 @@ func _test_presses() -> void:
 		if n is Crusher:
 			press = n
 			break
-	# Quedarse quieta en medio de la prensa: la atrapa
+	# Quieta en la prensa: la atrapa
 	var resets := [0]
 	press.crushed.connect(func(): resets[0] += 1, CONNECT_ONE_SHOT)
 	game.player.place(press.global_position + Vector2(-30, 3), Vector2.UP)
@@ -773,7 +764,7 @@ func _test_presses() -> void:
 		t += 0.05
 	_check(resets[0] == 1, "Prensas: si Tala se queda dentro, la prensa la atrapa")
 	await _wait(0.3)
-	# Con el ritmo justo se cruza: esperar a que se abra y correr
+	# Con el ritmo justo pasa
 	game.player.place(press.global_position + Vector2(0, 26), Vector2.UP)
 	while press.extension() <= 0.0:
 		await _wait(0.02)
@@ -786,14 +777,12 @@ func _test_presses() -> void:
 	_release_all()
 	var past: bool = game.player.global_position.y < press.global_position.y - 10
 	_check(past and int(resets[0]) == start_resets, "Prensas: esperando el ritmo y corriendo, se cruza")
-	# Llegar a la sala
 	game.player.place(Level.cell_center(Vector2i(15, 24)), Vector2.UP)
 	await _walk_up_until(func(): return lvl._in_hall, 4.0)
 	_check(lvl._in_hall, "Prensas: se llega caminando a la sala del Mural")
 
 
-## Reglas del Mural de la Incógnita: la ecuación se escribe con sus signos, se acepta la x como
-## entero o decimal, y la solución de una línea despeja cualquier ecuación del juego.
+## Reglas del Mural.
 func _test_roots_trial() -> void:
 	_check(RootsTrial.equation(3, 5, 20) == "3x + 5 = 20" and RootsTrial.equation(2, -4, 10) == "2x − 4 = 10" and RootsTrial.equation(4, 9, -7) == "4x + 9 = −7", "Mural: la ecuación se escribe con sus signos")
 	var case := {"a": 3, "b": 5, "c": 20, "x": 5}
@@ -817,8 +806,7 @@ func _test_roots_trial() -> void:
 	_check(all_right, "Mural: return (c - b) / a despeja 100 ecuaciones al azar")
 
 
-## El Mural de verdad: una respuesta a medias y una fija (cada error despierta guardianes que hay
-## que vencer), la función correcta y la salida.
+## La Sala 2 completa.
 func _test_mural() -> void:
 	var lvl := game.level as RootsLevel
 	if lvl == null:
@@ -875,8 +863,7 @@ func _test_mural() -> void:
 	_check(game.level is VortexLevel and game.chamber_index == 2, "Sala 2: se cruza la reja del este y se llega a la Sala 3 (Factory: VortexBuilder)")
 
 
-## Guardar y cargar: Tala vuelve a la entrada de la sala donde guardó, con su código en la
-## máquina y, si la sala estaba resuelta, resuelta (la reja abierta).
+## Guardar y cargar.
 func _test_save_and_load() -> void:
 	game.saves.path = "user://save_prueba.cfg"
 	game.load_chamber(0)
@@ -912,7 +899,7 @@ func _test_save_and_load() -> void:
 	game.saves.path = SaveRepository.PATH
 
 
-## Un evento del ratón en la ventana: moverlo (move) o apretar/soltar el botón izquierdo.
+## Evento del mouse.
 func _mouse(at: Vector2, pressed: bool, move := false) -> void:
 	var event: InputEventMouse
 	if move:
@@ -921,14 +908,12 @@ func _mouse(at: Vector2, pressed: bool, move := false) -> void:
 		event = InputEventMouseButton.new()
 		event.button_index = MOUSE_BUTTON_LEFT
 		event.pressed = pressed
-	# push_input espera coordenadas de la ventana (sin ventana real, la ventana es diminuta)
 	event.position = game.get_viewport().get_final_transform() * at
 	event.global_position = event.position
 	game.get_viewport().push_input(event)
 
 
-## Resuelve un rompecabezas probando cada pieza en sus 4 giros y en cada lugar (vuelta atrás).
-## Deja las piezas puestas si encuentra solución.
+## Resuelve un rompecabezas probando todo (vuelta atrás).
 func _solve_figure(puzzle: FigurePuzzle, i := 0) -> bool:
 	if i == puzzle.pieces.size():
 		return puzzle.is_solved()
@@ -943,8 +928,7 @@ func _solve_figure(puzzle: FigurePuzzle, i := 0) -> bool:
 	return false
 
 
-## Reglas de la Mesa de las Figuras: las piezas salen del dibujo, giran, no se salen ni se
-## enciman, y cada figura de chambers.json se puede llenar aunque lleguen giradas.
+## Reglas de la Mesa.
 func _test_figure_rules() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 3
@@ -968,8 +952,7 @@ func _test_figure_rules() -> void:
 	_check(all_ok, "Figuras: las figuras de la sala siempre se pueden llenar, aunque las piezas lleguen giradas")
 
 
-## La Sala 4 de verdad: el atril abre la Mesa, ESC la cierra sin perder las piezas puestas, al
-## llenar una figura llega la siguiente y con la última se abre la reja del este.
+## La Sala 4 completa.
 func _test_figures() -> void:
 	var lvl := game.level as FigureLevel
 	if lvl == null:
@@ -990,7 +973,7 @@ func _test_figures() -> void:
 	state.handle_input(["cancel"])
 	await _wait(0.2)
 	_check(game.machine.current is PlayState and first.is_placed(0), "Mesa: ESC la cierra y las piezas quedan donde estaban")
-	# Arrastrar con el ratón: se toma una pieza de la bandeja y se suelta en su lugar
+	# Arrastrar con el mouse
 	lvl._open_table()
 	await _wait(0.2)
 	state = game.machine.current as PuzzleState
@@ -1023,8 +1006,7 @@ func _test_figures() -> void:
 			_solve_figure(puzzle)
 			state.check_solved(game.ui)
 		else:
-			# La Casa, como la juega una persona: R sobre la pieza hasta que quede bien girada
-			# y arrastrarla con el ratón a su lugar
+			# La Casa: girar con R y arrastrar
 			for i in puzzle.pieces.size():
 				var half_cell := Vector2.ONE * PuzzleState.CELL / 2.0
 				for turn in 4:
@@ -1065,8 +1047,7 @@ func _test_figures() -> void:
 	_check(game.level is CoreLevel and game.chamber_index == 4, "Sala 4: se cruza la reja del este y se llega a la Sala 5 (Factory: CoreBuilder)")
 
 
-## Reglas del sendero de la Sala 5: siempre hay un camino de losas buenas (vecinas, sin
-## diagonales) del borde de abajo a la losa dorada, y casi todas las demás son malas.
+## Reglas del sendero.
 func _test_path_rules() -> void:
 	var stones := NumberPath.new()
 	var rng := RandomNumberGenerator.new()
@@ -1093,8 +1074,7 @@ func _test_path_rules() -> void:
 	_check(few_safe and numbers_ok, "Sendero: fuera del camino hay a lo sumo 3 losas buenas; los números van de 2 a 60")
 
 
-## La Sala 5 de verdad: la regla se ve en el HUD, una losa mala se rompe (−7 s y queda el hueco),
-## la orilla de una losa buena no rompe la vecina, y por el camino bueno se llega al núcleo.
+## La Sala 5 completa.
 func _test_core() -> void:
 	var lvl := game.level as CoreLevel
 	if lvl == null:
@@ -1105,7 +1085,7 @@ func _test_core() -> void:
 	game.dialog.close()
 	var stones := lvl.stones
 	_check(str(stones.multiple) in lvl.hud_line(), "Sendero: la regla de la sala está en el HUD")
-	# Una losa mala de la fila de abajo
+	# Losa mala
 	var bad := Vector2i(-1, -1)
 	for x in stones.cols:
 		if not stones.is_safe(Vector2i(x, stones.rows - 1)):
@@ -1117,7 +1097,7 @@ func _test_core() -> void:
 	var lost := before - game.timer.remaining - 1.6
 	_check(stones.broken.has(bad) and lost > 6.5 and lost < 8.0, "Sendero: una losa mala se rompe y Tala cae (−7 s)")
 	_check(game.player.global_position.distance_to(lvl.room_entrance()) < 4.0, "Sendero: después de caer, Tala vuelve a la entrada")
-	# La orilla: pisar el borde de una losa buena, junto a una mala, no rompe nada
+	# El borde de una losa buena no rompe nada
 	var start: Vector2i = stones.path[0]
 	var side := start + Vector2i.LEFT if start.x > 0 else start + Vector2i.RIGHT
 	if not stones.is_safe(side) and not stones.broken.has(side):
@@ -1125,7 +1105,7 @@ func _test_core() -> void:
 		game.player.global_position = edge
 		await _wait(0.3)
 		_check(not stones.broken.has(side) and not game.player.falling, "Sendero: pisar la orilla de la losa buena no rompe la vecina")
-	# El camino bueno, losa por losa, hasta el núcleo: lleva a la Sala 6
+	# Camino bueno hasta el núcleo
 	for c in stones.path:
 		game.player.global_position = stones.cell_center_global(c)
 		await _wait(0.15)

@@ -1,11 +1,8 @@
-## PATRÓN OBSERVER (sujeto).
-## Los objetos que producen eventos (reglas, casillas, temporizador) solo publican;
-## no saben quién escucha. Los observadores (sonido, estadísticas, libro de reglas, HUD)
-## se suscriben sin que el emisor cambie. Esto mantiene bajo el acoplamiento.
+## Patrón Observer: canal de eventos. Quien publica no sabe quién escucha.
 class_name EventBus
 extends RefCounted
 
-var _subscribers: Dictionary = {}  # StringName -> Array[Callable]
+var _subscribers: Dictionary = {}
 
 
 func subscribe(event: StringName, callback: Callable) -> void:

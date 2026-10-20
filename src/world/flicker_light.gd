@@ -1,5 +1,4 @@
-## Luz de fuego (antorchas y braseros): la energía tiembla un poco, como una llama.
-## phase separa unas llamas de otras (negativa = una al azar al empezar).
+## Luz de fuego que tiembla.
 class_name FlickerLight
 extends PointLight2D
 

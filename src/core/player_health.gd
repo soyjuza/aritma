@@ -1,6 +1,4 @@
-## Los corazones de Tala. Se cuentan en mitades (5 corazones = 10 mitades): el golpe de un
-## centinela quita media. No sabe nada de dibujos ni de sonidos: publica eventos y el HUD,
-## el sonido y el nivel reaccionan (patrón Observer).
+## Corazones de Tala, contados en mitades.
 class_name PlayerHealth
 extends RefCounted
 
@@ -23,7 +21,7 @@ func is_dead() -> bool:
 	return halves <= 0
 
 
-## Quita "amount" mitades. Devuelve true si con este golpe se acabaron los corazones.
+## Quita mitades. Devuelve true si se acabaron.
 func damage(amount: int) -> bool:
 	if is_dead() or amount <= 0:
 		return false

@@ -1,5 +1,4 @@
-## Registro de creadores de cámaras por tipo ("filter", ...), según el
-## campo "kind" de chambers.json. Agregar una cámara es registrar su creador (Abierto/Cerrado).
+## Creadores de salas según el "kind" de chambers.json.
 class_name ChamberRegistry
 extends RefCounted
 
@@ -10,7 +9,7 @@ static func register(kind: String, builder: ChamberBuilder) -> void:
 	_builders[kind] = builder
 
 
-static func create(data: Dictionary) -> Level:
+static func create(data: Dictionary) -> ChamberLevel:
 	if _builders.is_empty():
 		_register_defaults()
 	var kind := String(data.get("kind", ""))

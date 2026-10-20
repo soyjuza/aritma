@@ -1,9 +1,4 @@
-## Sala 5 — La Singularidad del Cero (escena: scenes/niveles/sala_5_singularidad.tscn).
-## Un pasillo sin trampas lleva a la antesala, frente al abismo. Sobre él flota un sendero de
-## losas numeradas (NumberPath): solo aguantan las que cumplen la regla de la sala (en
-## chambers.json, por ejemplo «múltiplos de 3»). Esta sala no es de código, es de razonamiento.
-## Pisar una losa mala la rompe y Tala cae al abismo (−7 s); la losa rota queda como hueco.
-## Tomar el núcleo, en la losa dorada de arriba, lleva a la Sala 6, la del jefe final.
+## Sala 5: el Sendero sobre el abismo. Solo aguantan las losas que cumplen la regla.
 class_name CoreLevel
 extends ChamberLevel
 
@@ -23,7 +18,6 @@ func wire() -> void:
 		_rng.randomize()
 	var rules: Array = data.get("rules", [{"multiple": 3, "text": "múltiplos de 3"}])
 	_rule = rules[_rng.randi_range(0, rules.size() - 1)]
-	# Una copia con la regla de esta partida ya escrita (también la lee el letrero de la sala)
 	data = data.duplicate(true)
 	data["intro"] = rule_lines("intro")
 	var path: Dictionary = data.get("path", {})
@@ -33,7 +27,7 @@ func wire() -> void:
 	$Zonas/EntradaSala.crossed.connect(_on_hall_entered)
 
 
-## Las líneas de chambers.json con la regla de esta partida puesta en {regla}.
+## Textos de la sala con la regla puesta.
 func rule_lines(key: String) -> Array:
 	return data.get(key, []).map(func(line): return String(line).format({"regla": _rule.get("text", "")}))
 
@@ -67,12 +61,11 @@ func _physics_process(_delta: float) -> void:
 		_wrong_stone(c)
 
 
-## Una losa que no cumple la regla: se desmorona bajo los pies de Tala.
+## Losa mala: se rompe y Tala cae.
 func _wrong_stone(c: Vector2i) -> void:
 	stones.crumble(c)
 	_game.bus.publish(GameEvents.STONE_BROKEN)
 	await player_fall()
-	# Después del aviso de la caída: por qué se rompió
 	_game.notify([_game.data.message("path_wrong_stone", {"n": stones.numbers[c], "regla": _rule.get("text", "")})], 5.0)
 
 
@@ -81,7 +74,7 @@ func player_fall() -> void:
 	await _on_player_fell()
 
 
-## Tala toma el núcleo: se abre el camino a la Sala 6 (o, si no hay más salas, se gana).
+## Tala toma el núcleo.
 func _take_core() -> void:
 	_won = true
 	stones.core_taken = true

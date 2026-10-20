@@ -1,5 +1,4 @@
-## PATRÓN STATE — Base de los estados en el suelo: aplican la velocidad del estado, revisan
-## el salto y dejan las demás transiciones a cada subclase.
+## Patrón State: base de los estados en el suelo.
 class_name GroundState
 extends MoveState
 

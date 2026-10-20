@@ -1,6 +1,4 @@
-## Herramientas de dibujo con el estilo del juego: paneles de piedra oscura con borde dorado
-## y detalles de circuito cian, títulos en Cinzel y texto en Exo 2.
-## Todas las pantallas dibujan a través de esta clase, así el estilo vive en un solo lugar.
+## Herramientas de dibujo de la interfaz.
 class_name UIKit
 extends RefCounted
 
@@ -17,7 +15,7 @@ const SHADE := Color(0.0, 0.0, 0.02, 0.6)
 
 var time := 0.0
 var _canvas: CanvasItem
-const PIXEL_FONT := "res://assets/fonts/PixelifySans.ttf"
+const PIXEL_FONT := "res://assets/fonts/Jersey10.ttf"
 
 var _fonts: Dictionary = {}
 var _vignette: GradientTexture2D
@@ -25,7 +23,6 @@ var _vignette: GradientTexture2D
 
 func _init(canvas: CanvasItem) -> void:
 	_canvas = canvas
-	# Fuente pixelada (Pixelify Sans) para que la interfaz combine con el pixel art
 	_fonts["title"] = _variation(PIXEL_FONT, 700)
 	_fonts["title_light"] = _variation(PIXEL_FONT, 500)
 	_fonts["body"] = _variation(PIXEL_FONT, 400)
@@ -37,7 +34,7 @@ static func _variation(path: String, weight: int) -> FontVariation:
 	font.base_font = load(path)
 	var ts := TextServerManager.get_primary_interface()
 	font.variation_opentype = {ts.name_to_tag("wght"): weight}
-	# Sin ligaduras: en Pixelify Sans la «fi» sale como una sola letra rara («Agura»)
+	# Sin ligaduras
 	font.opentype_features = {ts.name_to_tag("liga"): 0}
 	return font
 
@@ -70,7 +67,7 @@ func arc(center: Vector2, radius: float, from: float, to: float, color: Color, w
 	_canvas.draw_arc(center, radius, from, to, 48, color, width, true)
 
 
-## Panel principal: fondo oscuro, borde dorado y esquinas con detalle cian.
+## Panel principal.
 func panel(r: Rect2, fill := PANEL) -> void:
 	rect(r, fill)
 	frame(r, GOLD_DARK, 2.0)
@@ -83,7 +80,7 @@ func panel(r: Rect2, fill := PANEL) -> void:
 		line(corner, corner + Vector2(0, dy), CYAN, 3.0)
 
 
-## Etiqueta redondeada pequeña (indicadores del HUD).
+## Etiqueta pequeña.
 func pill(r: Rect2, fill := PANEL, border := GOLD_DARK) -> void:
 	var style := StyleBoxFlat.new()
 	style.bg_color = fill
@@ -94,7 +91,6 @@ func pill(r: Rect2, fill := PANEL, border := GOLD_DARK) -> void:
 	_canvas.draw_style_box(style, r)
 
 
-## Texto con su esquina superior izquierda en "at".
 func text(s: String, at: Vector2, font_size := 22, color := TEXT, font_name := "body", shadow := true) -> void:
 	var f := font(font_name)
 	var baseline := at + Vector2(0, f.get_ascent(font_size))
@@ -120,7 +116,7 @@ func line_height(font_size := 22, font_name := "body") -> float:
 	return font(font_name).get_height(font_size) + 4.0
 
 
-## Parte un texto en líneas que no superan "max_width" píxeles.
+## Parte un texto en líneas.
 func wrap(s: String, max_width: float, font_size := 22, font_name := "body") -> Array:
 	var out: Array = []
 	var current := ""
@@ -136,7 +132,7 @@ func wrap(s: String, max_width: float, font_size := 22, font_name := "body") -> 
 	return out
 
 
-## Tecla dibujada como una pequeña placa: [Z] Hablar. Devuelve el ancho usado.
+## Tecla dibujada. Devuelve el ancho.
 func key_hint(key: String, label_text: String, at: Vector2, font_size := 18) -> float:
 	var kw := maxf(28.0, measure(key, font_size, "bold") + 14.0)
 	pill(Rect2(at, Vector2(kw, font_size + 12)), PANEL_LIGHT, GOLD)
@@ -163,7 +159,6 @@ func dim(amount := 0.6) -> void:
 	rect(Rect2(Vector2.ZERO, size()), Color(0.0, 0.01, 0.03, amount))
 
 
-## Barra de nivel de 0 a "maximum" (volumen).
 func bar(at: Vector2, level: int, maximum: int, color := GOOD) -> void:
 	for k in maximum:
 		var r := Rect2(at + Vector2(k * 22, 0), Vector2(16, 20))
@@ -171,12 +166,12 @@ func bar(at: Vector2, level: int, maximum: int, color := GOOD) -> void:
 		frame(r, Color(0, 0, 0, 0.6), 1.0)
 
 
-## Un trozo de una textura (un cuadro de una tira del pack) dibujado en "dest".
+## Un cuadro de una textura.
 func texture_region(texture: Texture2D, dest: Rect2, source: Rect2, modulate := Color.WHITE) -> void:
 	_canvas.draw_texture_rect_region(texture, dest, source, modulate)
 
 
-## Viñeta en los bordes de la pantalla: oscura (ambiente de ruinas) o de color (la alarma).
+## Viñeta en los bordes.
 func vignette(strength := 0.55, color := Color.BLACK) -> void:
 	if _vignette == null:
 		var gradient := Gradient.new()

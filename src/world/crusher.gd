@@ -1,7 +1,5 @@
 @tool
-## Prensa de piedra: dos bloques salen de los muros y se juntan en el centro del pasillo,
-## una y otra vez, con un ritmo fijo. Si atrapan a Tala, la devuelven al último punto seguro.
-## Una lámpara se pone roja justo antes de cerrar (así se puede leer el ritmo).
+## Prensa de piedra. Si atrapa a Tala vuelve al punto seguro.
 class_name Crusher
 extends Node2D
 
@@ -12,24 +10,22 @@ const STONE := Color("4a5a50")
 const STONE_LIGHT := Color("7a8c80")
 const BRONZE := Color("b48a4e")
 
-## Se ajustan en el Inspector; el ritmo (period) lo pueden cambiar los datos de la sala.
-@export var half_width := 40.0      # ancho del pasillo / 2 (px)
-@export var depth := 14.0           # alto de la prensa (px)
+@export var half_width := 40.0
+@export var depth := 14.0
 @export var period := 2.4
 @export var phase := 0.0
-@export var closed_part := 0.35     # fracción del ciclo en que está cerrada (o cerrándose)
+@export var closed_part := 0.35    # parte del ciclo cerrada
 
 var _time := 0.0
 var _hit := false
 
 
-## Cuánto salió cada bloque (0 = metido en el muro, 1 = juntos en el centro).
+## 0 metido en el muro, 1 cerrado.
 func extension() -> float:
 	var k := fposmod(_time / period + phase, 1.0)
 	var close_at := 1.0 - closed_part
 	if k < close_at:
 		return 0.0
-	# Sale rápido, se queda un instante y vuelve
 	var c := (k - close_at) / closed_part
 	if c < 0.25:
 		return c / 0.25
@@ -72,10 +68,9 @@ func _draw() -> void:
 		draw_rect(r.grow(1), OUTLINE)
 		draw_rect(r, STONE)
 		draw_rect(Rect2(r.position, Vector2(r.size.x, 2)), STONE_LIGHT)
-		# Cara de bronce con dientes
 		var face_x: float = inner - side * 3.0
 		draw_rect(Rect2(minf(face_x, inner), -depth / 2.0, 3.0, depth), BRONZE)
-	# Lámparas de aviso en los muros
+	# Lámparas
 	var lamp := Color("ff5a4e") if warning() or extension() > 0.0 else Color("3a2a2a")
 	for side in [-1.0, 1.0]:
 		draw_circle(Vector2(side * (half_width + 4.0), -depth / 2.0 - 4.0), 2.5, OUTLINE)

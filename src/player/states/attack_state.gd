@@ -1,5 +1,4 @@
-## PATRÓN STATE — Golpear con el garrote: Tala casi se detiene, el garrote barre un arco
-## delante de ella y, a un tercio del golpe, alcanza a los guardianes que estén en el arco.
+## Patrón State: golpe con el garrote.
 class_name AttackState
 extends MoveState
 
@@ -33,3 +32,7 @@ func physics(delta: float) -> String:
 
 func animation() -> String:
 	return "attack"
+
+
+func stops_on_death() -> bool:
+	return true

@@ -1,6 +1,4 @@
-## PATRÓN STRATEGY — Estrategia concreta del guardián rúnico: no golpea; se carga un buen rato
-## (el círculo rojo del suelo marca el alcance) y explota. Si Tala sigue dentro del círculo,
-## el juego le pone el reto de teclas. El rúnico se destruye en su propia explosión.
+## Patrón Strategy: el rúnico se carga y explota.
 class_name RuneBlast
 extends GuardianAttack
 

@@ -1,5 +1,5 @@
-## Capturas del camino real en 2D (necesita ventana):
-##   Godot --path . -- --recorrido=/ruta/carpeta
+## Capturas del recorrido (necesita ventana):
+## Godot --path . -- --recorrido=/ruta/carpeta
 class_name RouteTour
 extends RefCounted
 
@@ -102,7 +102,7 @@ func run(arg: String) -> void:
 	game.get_tree().quit()
 
 
-## La Sala 2 por dentro: prensas, sala, Mural, Códice y el Mural trabajando.
+## Capturas de la Sala 2.
 func _roots_room() -> void:
 	var lvl := game.level as RootsLevel
 	await _wait(0.8)
@@ -138,7 +138,7 @@ func _roots_room() -> void:
 	await _shot("26_mural_resuelto")
 
 
-## La Sala 3: el Faro apagado, el Códice con luces.encender() y la sala encendida.
+## Capturas de la Sala 3.
 func _vortex_room() -> void:
 	var lvl := game.level as VortexLevel
 	game.player.place(lvl.get_node("Zonas/EntradaSala").point(), Vector2.UP)
@@ -157,7 +157,7 @@ func _vortex_room() -> void:
 	game.open_codex(lvl.machine.session)
 	await _wait(0.6)
 	await _shot("31a_error_conservado")
-	game.codex.editor.text = lvl.machine.session.code + "luces.encender()\n"
+	game.codex.editor.text = "luces.encender()\n"
 	await _shot("31_codice_luces")
 	game.machine.current.run()
 	await _wait(2.5)
@@ -166,7 +166,7 @@ func _vortex_room() -> void:
 	game.player.place(lvl.board.cell_center(Vector2i(3, 6)), Vector2.UP)
 	await _wait(1.0)
 	await _shot("33_tablero_encendido")
-	# Lo limpia como una persona: parada en cada baldosa segura, E
+	# Lo limpia caminando y con E
 	for c in lvl.board.cells():
 		if lvl.board.mines.is_empty() or not (lvl.board.mines.has(c) or lvl.board.revealed.has(c)):
 			game.player.place(lvl.board.cell_center(c), Vector2.UP)
@@ -180,7 +180,7 @@ func _vortex_room() -> void:
 	await _shot("35_tablero_limpio_reja")
 
 
-## La Sala 4: la Mesa en la sala, el rompecabezas vacío, a medias, lleno y la segunda figura.
+## Capturas de la Sala 4.
 func _figures_room() -> void:
 	var lvl := game.level as FigureLevel
 	game.player.place(lvl.get_node("Zonas/EntradaSala").point(), Vector2.UP)
@@ -206,7 +206,6 @@ func _figures_room() -> void:
 	await _shot("44_figura_llena")
 	await _wait(1.5)
 	await _shot("45_segunda_figura")
-	# La segunda figura llega con las piezas giradas: se giran hasta quedar como en el dibujo
 	puzzle = lvl.table.puzzle()
 	for i in puzzle.pieces.size():
 		for k in 4:
@@ -224,7 +223,7 @@ func _figures_room() -> void:
 	await _shot("46_mesa_una_lista")
 
 
-## La Sala 5: el sendero con la regla, una losa rota y Tala cruzando hasta el núcleo.
+## Capturas de la Sala 5.
 func _path_room() -> void:
 	var lvl := game.level as CoreLevel
 	game.player.place(lvl.get_node("Zonas/EntradaSala").point(), Vector2.UP)
@@ -255,7 +254,7 @@ func _path_room() -> void:
 	await _shot("55_junto_al_nucleo")
 
 
-## El jefe final (Sala 6): el pasillo, la entrada a la sala y cada parte de la pelea.
+## Capturas del jefe.
 func _boss_fight() -> void:
 	var lvl := game.level as ThroneLevel
 	await _wait(1.0)

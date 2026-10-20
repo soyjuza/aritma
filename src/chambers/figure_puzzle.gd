@@ -1,24 +1,18 @@
-## Reglas de un rompecabezas de la Mesa de las Figuras (Sala 4), sin nada visible.
-## La figura grande y sus piezas salen de un dibujo en chambers.json, una letra por pieza:
-##   "..A.."
-##   ".AAA."
-##   "BBCDD"
-## Las casillas con letra forman la figura; las de la misma letra, una pieza. Así siempre hay
-## solución. Las piezas se pueden girar y van a la figura sin salirse ni encimarse; se resuelve
-## cuando están todas puestas (entre todas suman justo las casillas de la figura).
+## Reglas de un rompecabezas de la Mesa.
+## La figura sale de chambers.json: cada letra es una pieza.
 class_name FigurePuzzle
 extends RefCounted
 
 const NONE := Vector2i(-99, -99)
 
 var title := ""
-var target: Dictionary = {}      # {Vector2i: true}: las casillas de la figura
-var size := Vector2i.ZERO        # ancho y alto de la figura (en casillas)
-var pieces: Array = []           # [{cells: Array[Vector2i], at: Vector2i (NONE = sin poner)}]
-var solution: Array = []         # por pieza: {cells, at} tal como venía en el dibujo
+var target: Dictionary = {}
+var size := Vector2i.ZERO
+var pieces: Array = []
+var solution: Array = []
 
 
-## turned: las piezas llegan giradas al azar (hay que girarlas para que encajen).
+## turned: las piezas llegan giradas.
 static func from_layout(layout: Array, p_title: String, turned: bool, rng: RandomNumberGenerator) -> FigurePuzzle:
 	var puzzle := FigurePuzzle.new()
 	puzzle.title = p_title
@@ -49,7 +43,6 @@ static func from_layout(layout: Array, p_title: String, turned: bool, rng: Rando
 	return puzzle
 
 
-## La esquina de arriba a la izquierda de unas casillas.
 static func corner(cells: Array[Vector2i]) -> Vector2i:
 	var low := Vector2i(1 << 20, 1 << 20)
 	for c in cells:
@@ -57,7 +50,7 @@ static func corner(cells: Array[Vector2i]) -> Vector2i:
 	return low
 
 
-## Corre las casillas para que la esquina de arriba a la izquierda quede en (0, 0).
+## Corre las casillas a (0, 0).
 static func normalized(cells: Array[Vector2i]) -> Array[Vector2i]:
 	var low := corner(cells)
 	var out: Array[Vector2i] = []
@@ -66,7 +59,6 @@ static func normalized(cells: Array[Vector2i]) -> Array[Vector2i]:
 	return out
 
 
-## Ancho y alto de una pieza (en casillas).
 static func extent(cells: Array[Vector2i]) -> Vector2i:
 	var high := Vector2i.ZERO
 	for c in cells:
@@ -78,7 +70,7 @@ func cells_of(i: int) -> Array[Vector2i]:
 	return pieces[i].cells
 
 
-## Gira la pieza un cuarto de vuelta, en el sentido del reloj.
+## Gira la pieza a la derecha.
 func rotate(i: int) -> void:
 	var turned: Array[Vector2i] = []
 	for c in cells_of(i):
@@ -90,7 +82,7 @@ func is_placed(i: int) -> bool:
 	return pieces[i].at != NONE
 
 
-## {casilla: pieza} de las piezas que ya están en la figura (sin contar «except»).
+## Casillas ocupadas.
 func occupied(except := -1) -> Dictionary:
 	var out := {}
 	for i in pieces.size():
@@ -100,7 +92,7 @@ func occupied(except := -1) -> Dictionary:
 	return out
 
 
-## ¿Cabe la pieza con su esquina en «at»? (dentro de la figura y sin encimarse)
+## ¿Cabe la pieza en at?
 func can_place(i: int, at: Vector2i) -> bool:
 	var taken := occupied(i)
 	for c in cells_of(i):

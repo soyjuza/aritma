@@ -1,6 +1,4 @@
-## Cuenta regresiva del desafío (15 minutos por defecto).
-## Publica eventos en vez de llamar a otros objetos: quien quiera reaccionar al
-## fin del tiempo o al aviso del último minuto se suscribe al EventBus.
+## Cuenta regresiva de 15 minutos. Avisa por el EventBus.
 class_name CountdownTimer
 extends RefCounted
 

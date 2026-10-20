@@ -1,8 +1,5 @@
 @tool
-## La Mesa de las Figuras (Sala 4): una losa de piedra y bronce con la silueta de una figura
-## grabada. Desde su atril se abre el rompecabezas (PuzzleState): hay que llenar la figura con
-## todas las piezas. Guarda los rompecabezas de la sala (FigurePuzzle) en orden; la losa muestra
-## el que toca y las casillas que ya están llenas. Al resolver el último, emite «solved».
+## La Mesa de las Figuras (Sala 4). Emite solved al terminar.
 class_name FigureTable
 extends Node2D
 
@@ -17,12 +14,12 @@ const BRONZE_DARK := Color("6e5232")
 const CYAN := Color("3fe0ff")
 const GOLD := Color("ffc857")
 const SLAB := Rect2(-60, -92, 120, 84)
-const MINI := 13.0                # tamaño de cada casilla grabada (px)
+const MINI := 13.0
 
-var puzzles: Array = []           # FigurePuzzle, en orden
+var puzzles: Array = []
 var current := 0
 var is_solved := false
-var glow := 0.0                   # 0..1: brillo dorado al terminar
+var glow := 0.0
 
 var _time := 0.0
 var _font: Font = load(UIKit.PIXEL_FONT)
@@ -30,7 +27,6 @@ var _font: Font = load(UIKit.PIXEL_FONT)
 @onready var _light: PointLight2D = $Luz
 
 
-## data: la sala de chambers.json ("puzzles": [{"title", "rows", "turned"}]).
 func setup(data: Dictionary, rng: RandomNumberGenerator, open_puzzle: Callable) -> void:
 	puzzles.clear()
 	for p in data.get("puzzles", []):
@@ -44,7 +40,7 @@ func puzzle() -> FigurePuzzle:
 	return puzzles[mini(current, puzzles.size() - 1)]
 
 
-## Pasa al rompecabezas siguiente. Devuelve true si ya no quedan (la mesa queda resuelta).
+## Siguiente rompecabezas. true si ya no quedan.
 func advance() -> bool:
 	current += 1
 	if current < puzzles.size():
@@ -71,14 +67,13 @@ func _process(delta: float) -> void:
 # ------------------------------------------------------------------ dibujo
 
 func _draw() -> void:
-	# La losa: piedra con marco de bronce
+	# Losa
 	draw_rect(SLAB.grow(3), OUTLINE)
 	draw_rect(SLAB.grow(2), BRONZE_DARK)
 	draw_rect(SLAB, STONE)
 	draw_rect(Rect2(SLAB.position, Vector2(SLAB.size.x, 3)), STONE_LIGHT)
 	draw_rect(Rect2(SLAB.position.x, SLAB.end.y - 3, SLAB.size.x, 3), STONE_DARK)
 	draw_rect(Rect2(SLAB.position.x - 3, SLAB.position.y - 6, SLAB.size.x + 6, 4), BRONZE)
-	# Patas
 	for x in [SLAB.position.x + 8, SLAB.end.x - 16]:
 		draw_rect(Rect2(x, SLAB.end.y, 8, 8), OUTLINE)
 		draw_rect(Rect2(x + 1, SLAB.end.y, 6, 7), STONE_DARK)

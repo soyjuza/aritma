@@ -1,5 +1,4 @@
-## PATRÓN STATE — Vencido: se deshace en números (NumberBurst) y polvo. El que cayó del techo
-## se borra; la estatua solo se esconde (puede volver a su pedestal si Tala reaparece).
+## Patrón State: se deshace en números.
 class_name DyingState
 extends GuardianState
 

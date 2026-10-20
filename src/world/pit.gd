@@ -1,8 +1,5 @@
 @tool
-## Foso: un rectángulo de vacío (el dibujo son los tiles del Suelo; este nodo es la trampa).
-## Si los pies del jugador quedan dentro sin estar en el aire, cae. Se mira el punto de los
-## pies (no el cuerpo entero) para que sea justo: pisar el borde no tumba. En el editor se ve
-## como un recuadro rojo; su tamaño se cambia en el Inspector.
+## Foso: si los pies de Tala quedan dentro sin saltar, cae.
 class_name Pit
 extends Node2D
 

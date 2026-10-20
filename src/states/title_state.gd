@@ -1,4 +1,4 @@
-## PATRÓN STATE — Título: plano fijo del valle y la montaña, con el nombre del juego.
+## Patrón State: título.
 class_name TitleState
 extends GameState
 

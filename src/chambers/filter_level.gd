@@ -1,7 +1,4 @@
-## Sala 1 — El Filtro de la Dualidad (escena: scenes/niveles/sala_1_filtro.tscn).
-## Se entra por un pasillo con dos fosos que solo se cruzan saltando a la carrera. Después,
-## la sala de la Criba: hay que programarla para que solo las esferas pares lleguen al cáliz.
-## Al lograrlo, la reja de la salida (al norte) se levanta.
+## Sala 1: la Criba. Las pares van al cáliz.
 class_name FilterLevel
 extends ChamberLevel
 

@@ -1,6 +1,4 @@
-## Registra las acciones del juego en el InputMap de Godot a partir de config.json
-## ("move_forward": ["key:W", "key:Up"], "scan": ["mouse:1"]...). Así los controles se
-## cambian sin tocar el código, y el resto del juego usa Input.is_action_pressed().
+## Registra los controles de config.json en el InputMap.
 class_name InputSetup
 extends RefCounted
 
@@ -16,7 +14,11 @@ static func register(controls: Dictionary) -> void:
 				InputMap.action_add_event(action, event)
 
 
-## Nombre visible de la primera tecla de una acción ("E", "Shift", "Clic izq.").
+## Nombres de los botones del ratón (texts.json).
+static var mouse_names: Dictionary = {}
+
+
+## Nombre de la primera tecla de una acción.
 static func key_name(action: String) -> String:
 	if not InputMap.has_action(action):
 		return "?"
@@ -24,7 +26,8 @@ static func key_name(action: String) -> String:
 		if event is InputEventKey:
 			return OS.get_keycode_string(event.keycode)
 		if event is InputEventMouseButton:
-			return {MOUSE_BUTTON_LEFT: "Clic izq.", MOUSE_BUTTON_RIGHT: "Clic der."}.get(event.button_index, "Clic")
+			var names := {MOUSE_BUTTON_LEFT: "left", MOUSE_BUTTON_RIGHT: "right"}
+			return String(mouse_names.get(names.get(event.button_index, "other"), "?"))
 	return "?"
 
 

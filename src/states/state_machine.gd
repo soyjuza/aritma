@@ -1,4 +1,4 @@
-## PATRÓN STATE — Máquina de estados: guarda el estado actual y hace las transiciones.
+## Patrón State: guarda el estado actual y hace los cambios.
 class_name StateMachine
 extends RefCounted
 

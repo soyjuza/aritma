@@ -1,6 +1,4 @@
-## PATRÓN INTERPRETER + COMPOSITE — Nodos concretos del lenguaje del Códice.
-## Expresiones (Literal, Name, Binary, Call...) e instrucciones (If, While, For, Def...).
-## Block es el compuesto: contiene instrucciones y las ejecuta en orden.
+## Patrón Interpreter y Composite: los nodos del lenguaje. Block contiene instrucciones.
 class_name ScriptNodes
 extends RefCounted
 
@@ -67,12 +65,12 @@ class Unary:
 				return not ScriptContext.truthy(v)
 			"-", "+":
 				if not ScriptContext.is_number(v):
-					ctx.fail("No se puede usar «%s» con %s." % [op, ScriptContext.type_name(v)], line)
+					ctx.fail(ScriptMessages.text("no_puede_usar_2") % [op, ScriptContext.type_name(v)], line)
 					return null
 				return -v if op == "-" else v
 			"~":
 				if typeof(v) != TYPE_INT:
-					ctx.fail("«~» solo funciona con números enteros.", line)
+					ctx.fail(ScriptMessages.text("solo_funciona_numeros_enteros"), line)
 					return null
 				return ~v
 		return null
@@ -126,7 +124,7 @@ class Binary:
 class Compare:
 	extends ScriptNode
 	var ops: Array        # ["<", "<="]
-	var operands: Array   # [a, b, c]  -> a < b <= c
+	var operands: Array    # a < b <= c
 
 	func _init(p_ops: Array, p_operands: Array, p_line: int) -> void:
 		ops = p_ops
@@ -165,7 +163,7 @@ class Call:
 			if ctx.failed():
 				return null
 		if not (target is ScriptCallable):
-			ctx.fail("«%s» no es una función: no se puede llamar con ( )." % ScriptContext.to_text(target), line)
+			ctx.fail(ScriptMessages.text("no_es_funcion_no_puede") % ScriptContext.to_text(target), line)
 			return null
 		if not ctx.tick(line):
 			return null
@@ -190,14 +188,14 @@ class Attribute:
 			var method := ScriptNodes.ListMethod.create(obj, attr)
 			if method:
 				return method
-			ctx.fail("Las listas no tienen «%s». Prueba append, pop o len(lista)." % attr, line)
+			ctx.fail(ScriptMessages.text("las_listas_no_tienen_prueba") % attr, line)
 			return null
 		if obj is ScriptObject:
 			var method: ScriptCallable = obj.get_method(attr)
 			if method:
 				return method
 			return obj.get_attribute(ctx, attr, line)
-		ctx.fail("%s no tiene «%s»." % [ScriptContext.type_name(obj), attr], line)
+		ctx.fail(ScriptMessages.text("no_tiene_2") % [ScriptContext.type_name(obj), attr], line)
 		return null
 
 	func store(ctx: ScriptContext, value) -> void:
@@ -207,7 +205,7 @@ class Attribute:
 		if obj is ScriptObject:
 			obj.set_attribute(ctx, attr, value, line)
 			return
-		ctx.fail("No se puede cambiar «%s» de %s." % [attr, ScriptContext.type_name(obj)], line)
+		ctx.fail(ScriptMessages.text("no_puede_cambiar_2") % [attr, ScriptContext.type_name(obj)], line)
 
 
 class Index:
@@ -229,15 +227,15 @@ class Index:
 			return obj.get_index(ctx, i, line)
 		if typeof(obj) in [TYPE_ARRAY, TYPE_STRING]:
 			if typeof(i) != TYPE_INT:
-				ctx.fail("El índice debe ser un número entero.", line)
+				ctx.fail(ScriptMessages.text("indice_debe_ser_numero_entero"), line)
 				return null
 			var n: int = obj.length() if typeof(obj) == TYPE_STRING else obj.size()
 			var k: int = i + n if i < 0 else i
 			if k < 0 or k >= n:
-				ctx.fail("Índice %d fuera de rango (hay %d elementos)." % [i, n], line)
+				ctx.fail(ScriptMessages.text("indice_fuera_rango_hay_elementos") % [i, n], line)
 				return null
 			return obj[k]
-		ctx.fail("%s no se puede usar con [ ]." % ScriptContext.type_name(obj), line)
+		ctx.fail(ScriptMessages.text("no_puede_usar_3") % ScriptContext.type_name(obj), line)
 		return null
 
 	func store(ctx: ScriptContext, value) -> void:
@@ -246,11 +244,11 @@ class Index:
 		if ctx.failed():
 			return
 		if typeof(obj) != TYPE_ARRAY or typeof(i) != TYPE_INT:
-			ctx.fail("Solo se puede asignar a una posición de una lista.", line)
+			ctx.fail(ScriptMessages.text("solo_puede_asignar_posicion_lista"), line)
 			return
 		var k: int = i + obj.size() if i < 0 else i
 		if k < 0 or k >= obj.size():
-			ctx.fail("Índice %d fuera de rango (hay %d elementos)." % [i, obj.size()], line)
+			ctx.fail(ScriptMessages.text("indice_fuera_rango_hay_elementos") % [i, obj.size()], line)
 			return
 		obj[k] = value
 
@@ -312,13 +310,13 @@ class Assign:
 		elif target is ScriptNodes.Attribute:
 			target.store(ctx, v)
 		else:
-			ctx.fail("No se puede asignar a eso.", line)
+			ctx.fail(ScriptMessages.text("no_puede_asignar_eso"), line)
 
 
 class If:
 	extends ScriptNode
-	var conditions: Array = []   # [ScriptNode]
-	var blocks: Array = []       # [Block]
+	var conditions: Array = []
+	var blocks: Array = []
 	var otherwise: Block
 
 	func execute(ctx: ScriptContext) -> void:
@@ -381,7 +379,7 @@ class For:
 		if typeof(items) == TYPE_STRING:
 			items = Array(items.split(""))
 		if typeof(items) != TYPE_ARRAY:
-			ctx.fail("for necesita una lista o range(...), no %s." % ScriptContext.type_name(items), line)
+			ctx.fail(ScriptMessages.text("for_necesita_lista_o_range") % ScriptContext.type_name(items), line)
 			return
 		for item in items:
 			if not ctx.tick(line):
@@ -443,7 +441,7 @@ class Flow:
 
 # ================================================================== funciones
 
-## Función escrita por el jugador con def.
+## Función hecha con def.
 class UserFunction:
 	extends ScriptCallable
 	var definition: FunctionDef
@@ -454,13 +452,13 @@ class UserFunction:
 
 	func invoke(ctx: ScriptContext, args: Array, line: int):
 		if args.size() != definition.params.size():
-			ctx.fail("%s() recibe %d argumento(s) y le diste %d." % [name, definition.params.size(), args.size()], line)
+			ctx.fail(ScriptMessages.text("recibe_argumento_y_le_diste") % [name, definition.params.size(), args.size()], line)
 			return null
 		var locals := {}
 		for i in args.size():
 			locals[definition.params[i]] = args[i]
 		if not ctx.push_frame(locals):
-			ctx.fail("Demasiadas llamadas anidadas. ¿%s() se llama a sí misma sin parar?" % name, line)
+			ctx.fail(ScriptMessages.text("demasiadas_llamadas_anidadas_llama_si") % name, line)
 			return null
 		definition.body.execute(ctx)
 		ctx.pop_frame()
@@ -470,7 +468,7 @@ class UserFunction:
 		return result
 
 
-## Métodos de las listas: append, pop, insert, index, count.
+## Métodos de las listas.
 class ListMethod:
 	extends ScriptCallable
 	var list: Array
@@ -487,12 +485,12 @@ class ListMethod:
 		match name:
 			"append":
 				if args.size() != 1:
-					ctx.fail("append() recibe 1 argumento.", line)
+					ctx.fail(ScriptMessages.text("append_recibe_argumento"), line)
 					return null
 				list.append(args[0])
 			"pop":
 				if list.is_empty():
-					ctx.fail("pop() en una lista vacía.", line)
+					ctx.fail(ScriptMessages.text("pop_lista_vacia"), line)
 					return null
 				return list.pop_back() if args.is_empty() else list.pop_at(int(args[0]))
 			"insert":
@@ -500,7 +498,7 @@ class ListMethod:
 			"index":
 				var k := list.find(args[0])
 				if k < 0:
-					ctx.fail("%s no está en la lista." % ScriptContext.repr(args[0]), line)
+					ctx.fail(ScriptMessages.text("no_esta_lista") % ScriptContext.repr(args[0]), line)
 					return null
 				return k
 			"count":
@@ -519,7 +517,7 @@ static func apply_binary(op: String, a, b, ctx: ScriptContext, line: int):
 		return a.repeat(maxi(0, b))
 	if op in ["^", "&", "|", "<<", ">>"]:
 		if typeof(a) != TYPE_INT or typeof(b) != TYPE_INT:
-			ctx.fail("«%s» solo funciona con números enteros." % op, line)
+			ctx.fail(ScriptMessages.text("solo_funciona_numeros_enteros_2") % op, line)
 			return null
 		match op:
 			"^":
@@ -534,10 +532,10 @@ static func apply_binary(op: String, a, b, ctx: ScriptContext, line: int):
 				return a >> b
 	if not ScriptContext.is_number(a) or not ScriptContext.is_number(b):
 		var tb := ScriptContext.type_name(b)
-		ctx.fail("No se puede usar «%s» entre %s %s %s." % [op, ScriptContext.type_name(a), "e" if tb.begins_with("i") else "y", tb], line)
+		ctx.fail(ScriptMessages.text("no_puede_usar_entre") % [op, ScriptContext.type_name(a), ScriptMessages.text("conj_e") if tb.begins_with("i") else ScriptMessages.text("conj_y"), tb], line)
 		return null
 	if op in ["/", "//", "%"] and b == 0:
-		ctx.fail("División entre cero.", line)
+		ctx.fail(ScriptMessages.text("division_entre_cero"), line)
 		return null
 	match op:
 		"+":
@@ -559,7 +557,7 @@ static func apply_binary(op: String, a, b, ctx: ScriptContext, line: int):
 					result *= a
 				return result
 			return pow(float(a), float(b))
-	ctx.fail("Operador desconocido «%s»." % op, line)
+	ctx.fail(ScriptMessages.text("operador_desconocido") % op, line)
 	return null
 
 
@@ -579,13 +577,13 @@ static func compare(op: String, a, b, ctx: ScriptContext, line: int) -> bool:
 			elif typeof(b) == TYPE_STRING and typeof(a) == TYPE_STRING:
 				found = a in b
 			else:
-				ctx.fail("«in» necesita una lista o un texto.", line)
+				ctx.fail(ScriptMessages.text("in_necesita_lista_o_texto"), line)
 				return false
 			return found if op == "in" else not found
 	var both_numbers := ScriptContext.is_number(a) and ScriptContext.is_number(b)
 	var both_text := typeof(a) == TYPE_STRING and typeof(b) == TYPE_STRING
 	if not (both_numbers or both_text):
-		ctx.fail("No se puede comparar %s con %s." % [ScriptContext.type_name(a), ScriptContext.type_name(b)], line)
+		ctx.fail(ScriptMessages.text("no_puede_comparar") % [ScriptContext.type_name(a), ScriptContext.type_name(b)], line)
 		return false
 	match op:
 		"<":

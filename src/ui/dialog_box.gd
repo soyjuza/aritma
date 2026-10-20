@@ -1,6 +1,4 @@
 ## Cuadro de diálogo con efecto de máquina de escribir.
-## Si un texto empieza con "NOMBRE: ", el nombre se muestra en una placa aparte.
-## Divide los textos en páginas de 3 líneas y ejecuta un callback al cerrarse.
 class_name DialogBox
 extends RefCounted
 
@@ -11,7 +9,7 @@ const BOX_H := 170.0
 
 var _bus: EventBus
 var _ui: UIKit
-var _pages: Array = []      # [{speaker, lines}]
+var _pages: Array = []
 var _page := 0
 var _shown := 0.0
 var _on_done: Array[Callable] = []
@@ -26,7 +24,7 @@ func is_open() -> bool:
 	return not _pages.is_empty()
 
 
-## Agrega textos. Si ya hay un diálogo abierto, se encolan al final.
+## Agrega textos al final.
 func say(texts: Array, on_done: Callable = Callable()) -> void:
 	for t in texts:
 		var raw := String(t)

@@ -1,12 +1,10 @@
-## PATRÓN FACADE (estructural).
-## Ofrece una interfaz simple (play_sfx, play_music, set_volume) que oculta los detalles
-## del motor de audio de Godot: buses, reproductores, carga de archivos y repetición de la música.
+## Patrón Facade: música y sonidos con funciones simples.
 class_name AudioService
 extends RefCounted
 
 const BUS_MUSIC := "Music"
 const BUS_SFX := "SFX"
-const AUDIO_DIR := "res://assets/pack/sounds/%s.wav"   # sonidos por nombre; la música va con ruta completa
+const AUDIO_DIR := "res://assets/pack/sounds/%s.wav"
 const SFX_VOICES := 4
 
 var _host: Node
@@ -54,7 +52,7 @@ func play_music(track: String) -> void:
 	_music.play()
 
 
-## level: 0 (silencio) a 10 (máximo)
+## level: de 0 a 10
 func set_volume(bus_name: String, level: int) -> void:
 	var bus := AudioServer.get_bus_index(bus_name)
 	AudioServer.set_bus_mute(bus, level <= 0)

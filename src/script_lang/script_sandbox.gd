@@ -1,6 +1,4 @@
-## PATRÓN FACADE (estructural) — Punto de entrada único al lenguaje del Códice.
-## Oculta el analizador léxico, el sintáctico, el árbol de nodos, las funciones incluidas
-## y el límite de pasos: el juego solo llama run(código, objetos_del_juego).
+## Patrón Facade: el juego solo llama run(código, objetos).
 class_name ScriptSandbox
 extends RefCounted
 
@@ -19,8 +17,7 @@ class Result:
 		return "Línea %d: %s" % [line, error] if line > 0 else error
 
 
-## Ejecuta un programa. api: nombres extra disponibles (funciones HostFunction u objetos
-## ScriptObject del juego, como "puerta" o "guardian").
+## Ejecuta un programa. api: objetos del juego ("puerta", "guardian"...).
 func run(source: String, api: Dictionary = {}, max_steps := 200000) -> Result:
 	var result := Result.new()
 	var ctx := ScriptContext.new()
@@ -49,18 +46,17 @@ func run(source: String, api: Dictionary = {}, max_steps := 200000) -> Result:
 		result.line = ctx.error_line
 		return result
 	if ctx.flow == "break" or ctx.flow == "continue":
-		result.error = "«%s» solo puede usarse dentro de un for o un while." % ctx.flow
+		result.error = ScriptMessages.text("solo_dentro_for_while") % ctx.flow
 		return result
 	result.ok = true
 	return result
 
 
-## Llama a una función definida en el programa (lo usa la prueba final del Archivo).
-## Devuelve [ok, valor_o_mensaje_de_error].
+## Llama a una función del programa. Devuelve [ok, valor o error].
 func call_function(result: Result, function_name: String, args: Array) -> Array:
 	var ctx := result.context
 	if ctx == null or not ctx.globals.has(function_name) or not (ctx.globals[function_name] is ScriptCallable):
-		return [false, "No encontré la función %s()." % function_name]
+		return [false, ScriptMessages.text("no_encontre_funcion") % function_name]
 	ctx.error = ""
 	ctx.steps = 0
 	var value = ctx.globals[function_name].invoke(ctx, args, 0)
@@ -94,7 +90,7 @@ func _install_builtins(ctx: ScriptContext) -> void:
 func _range(ctx: ScriptContext, args: Array, line: int):
 	for a in args:
 		if typeof(a) != TYPE_INT:
-			ctx.fail("range() necesita números enteros.", line)
+			ctx.fail(ScriptMessages.text("range_necesita_numeros_enteros"), line)
 			return null
 	var start := 0
 	var stop: int = args[0]
@@ -105,7 +101,7 @@ func _range(ctx: ScriptContext, args: Array, line: int):
 	if args.size() == 3:
 		step = args[2]
 	if step == 0:
-		ctx.fail("range() no puede avanzar de a 0.", line)
+		ctx.fail(ScriptMessages.text("range_no_puede_avanzar"), line)
 		return null
 	var out: Array = []
 	var i := start
@@ -113,7 +109,7 @@ func _range(ctx: ScriptContext, args: Array, line: int):
 		out.append(i)
 		i += step
 		if out.size() > MAX_RANGE:
-			ctx.fail("range() demasiado grande.", line)
+			ctx.fail(ScriptMessages.text("range_demasiado_grande"), line)
 			return null
 	return out
 
@@ -124,7 +120,7 @@ func _len(ctx: ScriptContext, args: Array, line: int):
 		return v.size()
 	if typeof(v) == TYPE_STRING:
 		return v.length()
-	ctx.fail("len() necesita una lista o un texto.", line)
+	ctx.fail(ScriptMessages.text("len_necesita_lista_o_texto"), line)
 	return null
 
 
@@ -138,7 +134,7 @@ func _print(ctx: ScriptContext, args: Array, _line: int):
 
 func _abs(ctx: ScriptContext, args: Array, line: int):
 	if not ScriptContext.is_number(args[0]):
-		ctx.fail("abs() necesita un número.", line)
+		ctx.fail(ScriptMessages.text("abs_necesita_numero"), line)
 		return null
 	return absi(args[0]) if typeof(args[0]) == TYPE_INT else absf(args[0])
 
@@ -146,12 +142,12 @@ func _abs(ctx: ScriptContext, args: Array, line: int):
 func _min_max(ctx: ScriptContext, args: Array, line: int, is_min: bool):
 	var items: Array = args[0] if args.size() == 1 and typeof(args[0]) == TYPE_ARRAY else args
 	if items.is_empty():
-		ctx.fail("min()/max() de una lista vacía.", line)
+		ctx.fail(ScriptMessages.text("min_max_lista_vacia"), line)
 		return null
 	var best = items[0]
 	for item in items:
 		if not ScriptContext.is_number(item):
-			ctx.fail("min()/max() necesitan números.", line)
+			ctx.fail(ScriptMessages.text("min_max_necesitan_numeros"), line)
 			return null
 		if (is_min and item < best) or (not is_min and item > best):
 			best = item
@@ -163,17 +159,17 @@ func _int(ctx: ScriptContext, args: Array, line: int):
 	if typeof(v) == TYPE_STRING:
 		if v.strip_edges().is_valid_int():
 			return int(v)
-		ctx.fail("«%s» no es un número entero." % v, line)
+		ctx.fail(ScriptMessages.text("no_es_numero_entero") % v, line)
 		return null
 	if ScriptContext.is_number(v) or typeof(v) == TYPE_BOOL:
 		return int(v)
-	ctx.fail("int() no entiende %s." % ScriptContext.type_name(v), line)
+	ctx.fail(ScriptMessages.text("int_no_entiende") % ScriptContext.type_name(v), line)
 	return null
 
 
 func _bin(ctx: ScriptContext, args: Array, line: int):
 	if typeof(args[0]) != TYPE_INT:
-		ctx.fail("bin() necesita un número entero.", line)
+		ctx.fail(ScriptMessages.text("bin_necesita_numero_entero"), line)
 		return null
 	var n: int = args[0]
 	if n == 0:
@@ -188,12 +184,12 @@ func _bin(ctx: ScriptContext, args: Array, line: int):
 
 func _sum(ctx: ScriptContext, args: Array, line: int):
 	if typeof(args[0]) != TYPE_ARRAY:
-		ctx.fail("sum() necesita una lista.", line)
+		ctx.fail(ScriptMessages.text("sum_necesita_lista"), line)
 		return null
 	var total = 0
 	for item in args[0]:
 		if not ScriptContext.is_number(item):
-			ctx.fail("sum() necesita una lista de números.", line)
+			ctx.fail(ScriptMessages.text("sum_necesita_lista_numeros"), line)
 			return null
 		total += item
 	return total
@@ -201,7 +197,7 @@ func _sum(ctx: ScriptContext, args: Array, line: int):
 
 func _sorted(ctx: ScriptContext, args: Array, line: int):
 	if typeof(args[0]) != TYPE_ARRAY:
-		ctx.fail("sorted() necesita una lista.", line)
+		ctx.fail(ScriptMessages.text("sorted_necesita_lista"), line)
 		return null
 	var copy: Array = args[0].duplicate()
 	copy.sort()

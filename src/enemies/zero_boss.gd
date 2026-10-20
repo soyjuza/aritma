@@ -1,26 +1,13 @@
-## El jefe final: el Guardián del Cero (escena: scenes/enemigos/jefe_cero.tscn), un tengu
-## rojo y alado que sella el núcleo de la Sala 5. Aparece en la antesala cuando Tala toca el
-## núcleo, y el sello no se rompe hasta vencerlo.
-## Pelea en 4 fases (la vida se reparte en partes iguales):
-## - Persigue a Tala despacio y la ataca de dos maneras, que se avisan antes:
-##   · Ráfaga: abre las alas y lanza un abanico de orbes rojos (3, 5, 6 y 7 según la fase). Se
-##     esquivan corriendo y el garrote los deshace.
-##   · Pisotón: salta, un círculo rojo marca dónde cae y al caer quita un corazón a quien esté
-##     dentro sin estar saltando. Después queda cansado un momento: es el mejor momento para
-##     pegarle.
-## - Al cambiar de fase se cubre con un escudo y pone a prueba a Tala con un problema (la sala
-##   abre QuizState). Si acierta, el escudo cae; si falla o se acaba el tiempo, llama a una ola
-##   de guardianes (summon) y el escudo cae cuando no queda ninguno.
-## Contexto del patrón State en versión simple: cada estado es una función (_state_...) y
-## change() cambia de una a otra.
+## Jefe final: el Guardián del Cero.
+## Tiene 4 fases; al perder cada una se cubre con un escudo y pone un problema.
+## Usa estados (State), en src/enemies/boss_states/.
 class_name ZeroBoss
 extends CharacterBody2D
 
 signal defeated
 signal shielded
-signal shield_down     # el escudo cayó (por acertar o por vencer la ola)
+signal shield_down
 
-const ORB := preload("res://scenes/enemigos/orbe.tscn")
 const RED := Color("ff3b2f")
 const CYAN := Color("3fe0ff")
 const SHEETS := {
@@ -31,38 +18,59 @@ const SHEETS := {
 	"appear": [preload("res://assets/pack/actors/TenguRed/Trans.png"), 11, 7.0],
 }
 
+# Valores por defecto. setup() los cambia por los de config.json ("boss").
 @export var max_hp := 16
 @export var speed := 30.0
+@export var speed_per_phase := 0.2
+@export var accel := 300.0
+@export var keep_distance := 34.0
+@export var wake_distance := 150.0
+@export var wake_delay := 1.5
+@export var appear_pause := 0.4
+@export var first_attack := 1.6
+@export var attack_every := 2.2
+@export var attack_every_step := 0.4
+@export var slam_range := 70.0    # más cerca: pisotón; más lejos: ráfaga
 @export var orbs_per_phase: Array[int] = [3, 5, 6, 7]
-## Nivel de alarma de la ola si falla el problema de cada fase (con "waves" de config.json:
-## nivel 4 = 4 guardianes, 5 = 5, 6 = 6).
-@export var waves_on_fail: Array[int] = [0, 4, 5, 6]
+@export var orb_spread := 0.28
+@export var orb_speed := 80.0
+@export var orb_life := 3.2
+@export var volley_fire_at := 0.75
 @export var slam_radius := 42.0
-@export var slam_damage := 2                          # mitades de corazón
+@export var slam_damage := 2    # mitades de corazón
+@export var slam_rise := 0.9
+@export var slam_land := 1.3
+@export var slam_height := 40.0
+@export var ring_speed := 160.0
+@export var tired_time := 1.8
 @export var touch_damage := 1
-@export var wake_distance := 150.0                    # más lejos que esto, espera en su lugar
+@export var dying_time := 2.0
+## Guardianes que llama si falla el problema de cada fase.
+@export var waves_on_fail: Array[int] = [0, 4, 5, 6]
 
 var radius := 11.0
 var hp := 16
 var phase := 0
-var awaiting_answer := false   # con el escudo puesto, esperando la respuesta del problema
+var awaiting_answer := false
 var state := "hidden"
 var alarm: AlarmDirector
 var bus: EventBus
 var home := Vector2.ZERO
-var hold_while: Callable     # mientras devuelva true se queda quieto (Tala lee un diálogo)
-var arena := Rect2()         # dónde puede caer el pisotón (la antesala, en coordenadas globales)
+var hold_while: Callable    # si devuelve true se queda quieto
+var arena := Rect2()
+var next_attack := 1.6
+var lift := 0.0
+var wave_ring := -1.0    # -1: no hay onda
+var bar: Control
+var title := ""               # el nombre sobre la barra de vida (texts.json → "boss_name")
 
-var _t := 0.0                # tiempo en el estado actual
-var _next_attack := 1.6
-var _slam_at := Vector2.ZERO
-var _lift := 0.0
+var _states: Dictionary = {}
+var _state: BossState
+var _clock := 0.0
 var _flash := 0.0
-var _shield := 0.0           # 0..1: el escudo se ve
-var _wave_ring := -1.0       # radio de la onda del pisotón (-1: no hay)
+var _shield := 0.0
 var _anim := "idle"
 var _anim_t := 0.0
-var _bar: Control
 
 @onready var sprite: Sprite2D = $Sprite
 @onready var shadow: Sprite2D = $Sombra
@@ -72,45 +80,93 @@ var _bar: Control
 
 func _ready() -> void:
 	add_to_group("boss")
-	set_collision_mask_value(4, true)    # tampoco cruza el abismo
+	set_collision_mask_value(4, true)
 	home = position
 	hp = max_hp
-	_bar = BossBar.new(self)
+	bar = BossBar.new(self)
 	var layer := CanvasLayer.new()
 	layer.layer = 4
-	layer.add_child(_bar)
+	layer.add_child(bar)
 	add_child(layer)
+	_states = {
+		"hidden": BossHiddenState.new(self),
+		"appear": BossAppearState.new(self),
+		"wait": BossWaitState.new(self),
+		"chase": BossChaseState.new(self),
+		"volley": BossVolleyState.new(self),
+		"slam": BossSlamState.new(self),
+		"tired": BossTiredState.new(self),
+		"shield": BossShieldState.new(self),
+		"dying": BossDyingState.new(self),
+	}
 	change("hidden")
 
 
-func setup(p_bus: EventBus, p_alarm: AlarmDirector) -> void:
+## Recibe el bus, la alarma y los valores de config.json.
+func setup(p_bus: EventBus, p_alarm: AlarmDirector, tuning: Dictionary = {}) -> void:
 	bus = p_bus
 	alarm = p_alarm
+	for key in tuning.keys():
+		if not key in self:
+			continue
+		var current = get(key)
+		if current is Array:
+			(current as Array).assign((tuning[key] as Array).map(func(v): return int(v)))
+		elif current is int:
+			set(key, int(tuning[key]))
+		else:
+			set(key, tuning[key])
+	hp = max_hp
+	next_attack = first_attack
+
+
+func change(next: String) -> void:
+	if _state:
+		_state.exit()
+	_state = _states[next]
+	state = next
+	_state.enter()
+
+
+func _physics_process(delta: float) -> void:
+	_clock += delta
+	_flash = maxf(0.0, _flash - delta)
+	_shield = move_toward(_shield, 1.0 if state == "shield" else 0.0, delta * 3.0)
+	if wave_ring >= 0.0:
+		wave_ring += delta * ring_speed
+		if wave_ring > slam_radius * 1.4:
+			wave_ring = -1.0
+	var paused: bool = hold_while.is_valid() and hold_while.call() and state != "appear"
+	if not paused:
+		var next := _state.physics(delta)
+		if next != "":
+			change(next)
+		_play(_state.animation())
+	_animate(delta)
+	queue_redraw()
 
 
 # ------------------------------------------------------------------ órdenes de la sala
 
-## Sale del abismo (Tala tocó el núcleo sellado).
 func appear() -> void:
 	if state == "hidden":
 		change("appear")
 
 
-## Tala cayó vencida: vuelve a su lugar con toda la vida y la pelea empieza desde la fase 1.
+## Si Tala muere, el jefe vuelve a la fase 1 con toda la vida.
 func reset_for_retry() -> void:
 	if state == "hidden" or state == "dying":
 		return
 	hp = max_hp
 	phase = 0
 	awaiting_answer = false
-	_wave_ring = -1.0
+	wave_ring = -1.0
 	position = home
 	velocity = Vector2.ZERO
 	change("wait")
 
 
-## La respuesta al problema del escudo: si falló, llama a su ola de guardianes (más grande en
-## cada fase); si acertó, el escudo cae sin pelear.
+## Si falló el problema, llama a sus guardianes.
 func answered(right: bool) -> void:
 	awaiting_answer = false
 	if not right and alarm and waves_on_fail[phase] > 0:
@@ -128,15 +184,14 @@ func phase_hp() -> int:
 # ------------------------------------------------------------------ golpes de Tala
 
 func can_be_hit() -> bool:
-	return is_awake() and state != "appear" and state != "shield"
+	return _state != null and _state.hittable()
 
 
 func take_hit(amount: int, direction: Vector2) -> void:
 	hp -= amount
 	_flash = 0.15
 	velocity = direction * 50.0
-	if bus:
-		bus.publish(GameEvents.GUARDIAN_HIT)
+	publish(GameEvents.GUARDIAN_HIT)
 	var burst := NumberBurst.new()
 	burst.count = 4
 	burst.tint = RED
@@ -149,180 +204,30 @@ func take_hit(amount: int, direction: Vector2) -> void:
 		change("shield")
 
 
-# ------------------------------------------------------------------ estados
+# ------------------------------------------------------------------ ayudas para los estados
 
-func change(next: String) -> void:
-	state = next
-	_t = 0.0
-	match next:
-		"hidden":
-			visible = false
-			body_shape.set_deferred("disabled", true)
-			_bar.visible = false
-		"appear":
-			visible = true
-			position = home
-			body_shape.set_deferred("disabled", false)
-			_bar.visible = true
-			_play("appear")
-			if bus:
-				bus.publish(GameEvents.BOSS_APPEARED)
-		"wait", "chase":
-			_play("idle")
-		"volley":
-			_play("attack")
-			if bus:
-				bus.publish(GameEvents.GUARDIAN_CHARGING)
-		"slam":
-			_slam_at = _player().global_position if _player() else global_position
-			if arena.has_area():
-				_slam_at = _slam_at.clamp(arena.position, arena.end)
-			_play("idle")
-			if bus:
-				bus.publish(GameEvents.GUARDIAN_CHARGING)
-		"tired":
-			_play("hit")
-		"shield":
-			_play("idle")
-			awaiting_answer = true
-			if bus:
-				bus.publish(GameEvents.BOSS_SHIELD)
-			shielded.emit()
-		"dying":
-			_play("hit")
-			body_shape.set_deferred("disabled", true)
-			if bus:
-				bus.publish(GameEvents.BOSS_DEFEATED)
+func publish(event: StringName) -> void:
+	if bus:
+		bus.publish(event)
 
 
-func _physics_process(delta: float) -> void:
-	_t += delta
-	_flash = maxf(0.0, _flash - delta)
-	_shield = move_toward(_shield, 1.0 if state == "shield" else 0.0, delta * 3.0)
-	if _wave_ring >= 0.0:
-		_wave_ring += delta * 160.0
-		if _wave_ring > slam_radius * 1.4:
-			_wave_ring = -1.0
-	if hold_while.is_valid() and hold_while.call() and state != "appear":
-		_animate(delta)
-		queue_redraw()
-		return
-	match state:
-		"appear":
-			_lift = 0.0
-			if _t >= 11.0 / 7.0 + 0.4:
-				change("chase")
-		"wait":
-			_state_wait(delta)
-		"chase":
-			_state_chase(delta)
-		"volley":
-			_state_volley(delta)
-		"slam":
-			_state_slam(delta)
-		"tired":
-			velocity = velocity.move_toward(Vector2.ZERO, 200.0 * delta)
-			move_and_slide()
-			if _t >= 1.8:
-				change("chase")
-		"shield":
-			velocity = (home - position) * 2.0
-			move_and_slide()
-			if _t > 1.0 and not awaiting_answer and (alarm == null or not alarm.fighting()):
-				change("chase")
-				shield_down.emit()
-		"dying":
-			modulate.a = 1.0 - clampf((_t - 1.0) / 1.0, 0.0, 1.0)
-			if randf() < 0.15:
-				var burst := NumberBurst.new()
-				burst.count = 3
-				burst.tint = RED if randf() < 0.5 else CYAN
-				burst.position = position + Vector2(randf_range(-14, 14), randf_range(-30, -6))
-				get_parent().add_child(burst)
-			if _t >= 2.0:
-				change("hidden")
-				modulate.a = 1.0
-				defeated.emit()
-	_animate(delta)
-	queue_redraw()
+func player() -> PlayerController:
+	return get_tree().get_first_node_in_group("player")
 
 
-## Espera en su lugar hasta que Tala vuelve a la antesala.
-func _state_wait(delta: float) -> void:
+func return_home() -> void:
 	velocity = (home - position) * 2.0
 	move_and_slide()
-	var p := _player()
-	if p and _t > 1.5 and p.global_position.distance_to(position) < wake_distance:
-		change("chase")
 
 
-## Se acerca a Tala sin pegarse a ella; cuando le toca, ataca.
-func _state_chase(delta: float) -> void:
-	var p := _player()
-	if p == null:
-		return
-	var to := p.global_position - global_position
-	var want := to.normalized() * speed * (1.0 + 0.2 * phase) if to.length() > 34.0 else Vector2.ZERO
-	velocity = velocity.move_toward(want, 300.0 * delta)
+func brake(delta: float) -> void:
+	velocity = velocity.move_toward(Vector2.ZERO, accel * delta)
 	move_and_slide()
-	_play("walk" if velocity.length() > 5.0 else "idle")
-	sprite.flip_h = to.x < 0.0
-	if to.length() < radius + 6.0 and not p.airborne:
-		p.hurt(touch_damage, global_position)
-	_next_attack -= delta
-	if _next_attack <= 0.0:
-		_next_attack = 2.2 - 0.4 * phase
-		change("slam" if to.length() < 70.0 else "volley")
 
 
-## Abre las alas (aviso) y lanza un abanico de orbes hacia Tala.
-func _state_volley(delta: float) -> void:
-	velocity = velocity.move_toward(Vector2.ZERO, 300.0 * delta)
-	move_and_slide()
-	if _t >= 0.75 and _t - delta < 0.75:
-		_fire_fan(orbs_per_phase[phase])
-	if _t >= 15.0 / 14.0:
-		change("chase")
-
-
-func _fire_fan(count: int) -> void:
-	var p := _player()
-	if p == null:
-		return
-	var from := global_position + Vector2(0, -16)
-	var aim := (p.global_position + Vector2(0, -4) - from).angle()
-	for i in count:
-		var orb: RuneOrb = ORB.instantiate()
-		var angle := aim + (i - (count - 1) / 2.0) * 0.28
-		orb.position = get_parent().to_local(from)
-		orb.velocity = Vector2.from_angle(angle) * 80.0
-		orb.color = RED
-		orb.damage = 1
-		orb.life = 3.2
-		get_parent().add_child(orb)
-	if bus:
-		bus.publish(GameEvents.ORB_FIRED)
-
-
-## Salta, cae donde estaba Tala y la onda daña a quien esté dentro del círculo sin saltar.
-func _state_slam(delta: float) -> void:
-	var rise := 0.9
-	var land := 1.3
-	if _t < rise:
-		_lift = 40.0 * sin(_t / rise * PI * 0.5)
-		global_position = global_position.lerp(_slam_at, delta * 2.5)
-	elif _t < land:
-		_lift = 40.0 * (1.0 - (_t - rise) / (land - rise))
-		global_position = global_position.lerp(_slam_at, delta * 6.0)
-	elif _lift > 0.0:
-		_lift = 0.0
-		_wave_ring = 0.0
-		if bus:
-			bus.publish(GameEvents.BOSS_SLAM)
-		var p := _player()
-		if p and not p.airborne and p.global_position.distance_to(global_position) <= slam_radius:
-			p.hurt(slam_damage, global_position)
-		change("tired")
+## Duración de una animación en segundos.
+func anim_length(anim: String) -> float:
+	return float(SHEETS[anim][1]) / SHEETS[anim][2]
 
 
 # ------------------------------------------------------------------ dibujo
@@ -342,44 +247,28 @@ func _animate(delta: float) -> void:
 	var frames: int = SHEETS[_anim][1]
 	var n := int(_anim_t * SHEETS[_anim][2])
 	sprite.frame = mini(n, frames - 1) if _anim in ["appear", "attack"] else n % frames
-	sprite.position = Vector2(0, -26 - _lift)
+	sprite.position = Vector2(0, -26 - lift)
 	sprite.modulate = Color(3, 3, 3) if _flash > 0.0 else Color.WHITE
-	shadow.scale = Vector2.ONE * 2.2 * clampf(1.0 - _lift / 80.0, 0.5, 1.0)
-	light.energy = 0.8 + 0.4 * sin(_t * 4.0) + 0.6 * _shield
+	shadow.scale = Vector2.ONE * 2.2 * clampf(1.0 - lift / 80.0, 0.5, 1.0)
+	light.energy = 0.8 + 0.4 * sin(_clock * 4.0) + 0.6 * _shield
 
 
 func _draw() -> void:
 	if not visible:
 		return
-	# Aviso del pisotón: círculo rojo donde va a caer (se llena mientras baja)
-	if state == "slam":
-		var at := _slam_at - global_position
-		var k := clampf(_t / 1.3, 0.0, 1.0)
-		draw_circle(at, slam_radius, Color(RED, 0.10 + 0.15 * k))
-		draw_arc(at, slam_radius, 0, TAU, 40, Color(RED, 0.9), 1.0)
-		draw_arc(at, slam_radius * k, 0, TAU, 40, Color(RED, 0.6), 1.0)
-	if _wave_ring >= 0.0:
-		draw_arc(Vector2.ZERO, _wave_ring, 0, TAU, 40, Color(1, 0.8, 0.6, 1.0 - _wave_ring / (slam_radius * 1.4)), 2.0)
-	# Escudo de fase
+	_state.draw()
+	if wave_ring >= 0.0:
+		draw_arc(Vector2.ZERO, wave_ring, 0, TAU, 40, Color(1, 0.8, 0.6, 1.0 - wave_ring / (slam_radius * 1.4)), 2.0)
 	if _shield > 0.0:
 		var c := Vector2(0, -24)
 		draw_circle(c, 24.0, Color(CYAN, 0.12 * _shield))
 		draw_arc(c, 24.0, 0, TAU, 32, Color(CYAN, 0.8 * _shield), 1.0)
 		for i in 6:
-			var a := _t * 1.5 + i * TAU / 6.0
+			var a := _clock * 1.5 + i * TAU / 6.0
 			draw_circle(c + Vector2.from_angle(a) * 24.0, 1.5, Color(CYAN, _shield))
-	# Cansado: estrellas sobre la cabeza
-	if state == "tired":
-		for i in 3:
-			var a := _t * 5.0 + i * TAU / 3.0
-			draw_circle(Vector2(0, -50) + Vector2(cos(a) * 9.0, sin(a) * 3.0), 1.2, Color("ffc857"))
 
 
-func _player() -> PlayerController:
-	return get_tree().get_first_node_in_group("player")
-
-
-## La barra de vida del jefe, abajo al centro de la pantalla, con su nombre.
+## Barra de vida del jefe.
 class BossBar extends Control:
 	var boss: ZeroBoss
 	var _font: Font = load(UIKit.PIXEL_FONT)
@@ -402,7 +291,7 @@ class BossBar extends Control:
 		for i in range(1, boss.orbs_per_phase.size()):
 			var x := bar.position.x + bar.size.x * (1.0 - float(i * boss.phase_hp()) / boss.max_hp)
 			draw_line(Vector2(x, bar.position.y), Vector2(x, bar.end.y), Color("101418"), 2.0)
-		var title := "EL GUARDIÁN DEL CERO"
+		var title := boss.title
 		var tw := _font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
 		draw_string_outline(_font, Vector2((size.x - tw) / 2.0, bar.position.y - 8.0), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, 4, Color("101418"))
 		draw_string(_font, Vector2((size.x - tw) / 2.0, bar.position.y - 8.0), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("ffe0d8"))

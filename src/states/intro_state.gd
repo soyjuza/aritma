@@ -1,4 +1,4 @@
-## PATRÓN STATE — Prólogo: la historia de Aritma, página por página, antes de la partida.
+## Patrón State: la historia antes de jugar.
 class_name IntroState
 extends GameState
 

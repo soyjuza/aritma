@@ -1,15 +1,11 @@
-## PATRÓN STATE — El Códice abierto: se escribe y se ejecuta código. El jugador no se mueve,
-## el mouse queda libre y el reloj de 15 minutos sigue corriendo.
-## Si la sesión es de una máquina (CodeMachine), la cámara la encuadra, el Códice se abre al
-## costado y, al ejecutar, se repliega para ver a la máquina hacer lo que ordenó el programa.
-## Si la máquina rechaza el código (por el motivo que sea, también un error de escritura),
-## se publica MACHINE_FAILED: en las salas eso despierta a los guardianes.
+## Patrón State: el Códice abierto.
+## Si la máquina rechaza el código se publica MACHINE_FAILED.
 class_name CodexState
 extends GameState
 
 var _session: CodexSession
 var _sandbox := ScriptSandbox.new()
-var _watching := false     # la máquina está mostrando el programa (el Códice está replegado)
+var _watching := false    # la máquina está mostrando el programa
 
 
 func enter(params: Dictionary = {}) -> void:
@@ -43,7 +39,7 @@ func handle_input(actions: Array) -> void:
 		run()
 
 
-## Ejecuta el programa del editor con los objetos de la sala.
+## Ejecuta el código del editor.
 func run() -> void:
 	if _watching:
 		return
@@ -56,7 +52,7 @@ func run() -> void:
 		game.bus.publish(GameEvents.CODE_FAILED)
 		_machine_failed(too_long)
 		return
-	game.codex.log_line("> ejecutar %s" % _session.file_name, "8d97a8")
+	game.codex.log_line(game.data.message("codex_run_log", {"file": _session.file_name}), "8d97a8")
 	if _session.machine:
 		_run_on_machine(source)
 		return
@@ -77,8 +73,7 @@ func run() -> void:
 		game.machine.change("play")
 
 
-## La máquina corre el programa con todos sus casos y, si no hay errores de Python, lo
-## muestra pieza por pieza con el Códice replegado. Si falló, el Códice vuelve con el motivo.
+## La máquina corre el código y luego lo muestra.
 func _run_on_machine(source: String) -> void:
 	var machine := _session.machine
 	var report := machine.evaluate(source, _sandbox)

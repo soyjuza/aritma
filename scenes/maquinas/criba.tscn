@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://dhngbea4oi1mt"]
 
 [ext_resource type="Script" uid="uid://fg2abv47i3nk" path="res://src/chambers/criba_machine.gd" id="1_ivuhc"]
-[ext_resource type="FontFile" uid="uid://bydcxqik0xa4o" path="res://assets/fonts/PixelifySans.ttf" id="2_5nexa"]
+[ext_resource type="FontFile" path="res://assets/fonts/Jersey10.ttf" id="2_5nexa"]
 [ext_resource type="Texture2D" uid="uid://b3k42g1ao17ty" path="res://assets/efectos/luz_suave.tres" id="3_ic7a5"]
 [ext_resource type="PackedScene" path="res://scenes/maquinas/atril.tscn" id="4_uqmwl"]
 

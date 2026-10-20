@@ -1,10 +1,10 @@
-## Guarda y carga la partida (sala actual, tiempo restante, corazones y el estado de la sala).
+## Guarda y carga la partida.
 class_name SaveRepository
 extends RefCounted
 
 const PATH := "user://save.cfg"
 
-var path := PATH     # las pruebas usan otro archivo para no pisar la partida del jugador
+var path := PATH    # las pruebas usan otro archivo
 
 
 func exists() -> bool:

@@ -1,14 +1,10 @@
-## PATRÓN STATE — Persigue a Tala en formación. Los de cuerpo a cuerpo van a su lugar
-## alrededor de ella (Guardian.formation_target) y, al alcance, preparan el golpe. Los de
-## distancia se mantienen lejos: huyen si Tala se acerca, se acercan si está lejos, se mueven
-## de lado mientras tanto y preparan un disparo cuando la tienen a tiro. Si Tala cayó vencida,
-## se quedan quietos.
+## Patrón State: persigue a Tala. Los de lejos mantienen la distancia.
 class_name ChaseState
 extends GuardianState
 
 var _strafe := 1.0
 var _strafe_left := 0.0
-var _blocked_for := 0.0     # segundos sin línea libre hacia Tala
+var _blocked_for := 0.0
 
 
 func enter() -> void:
@@ -46,8 +42,7 @@ func _keep_distance(to: Vector2, delta: float) -> String:
 	_blocked_for = _blocked_for + delta if blocked else 0.0
 	var d := to.length()
 	var side_dir := to.normalized().orthogonal() * _strafe
-	# Da la vuelta si choca de frente con algo hacia el lado al que va; sin línea libre
-	# sigue rodeando hacia el mismo lado hasta encontrarla
+	# Si choca de frente, da la vuelta
 	var hit := guardian.get_last_slide_collision()
 	var wall_ahead := hit != null and hit.get_normal().dot(side_dir) < -0.6
 	if wall_ahead or (_strafe_left <= 0.0 and not blocked):
@@ -60,9 +55,8 @@ func _keep_distance(to: Vector2, delta: float) -> String:
 		return ""
 	var want := Vector2.ZERO
 	if _blocked_for > 0.8:
-		# Algo le tapa el tiro (una máquina, una columna): se acerca bordeándolo
+		# Algo le tapa el tiro: lo bordea
 		want = (-away * 0.8 + side * 0.6).normalized() * guardian.speed
-		# Pegado a un obstáculo: avanza a lo largo de él (no contra él)
 		if hit:
 			var along := want.slide(hit.get_normal())
 			if along.length() > 0.1:

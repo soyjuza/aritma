@@ -1,4 +1,4 @@
-## PATRÓN STATE — Quieta.
+## Patrón State: quieta.
 class_name IdleState
 extends GroundState
 

@@ -1,8 +1,5 @@
 @tool
-## El Mural de la Incógnita (Sala 2): un panel de piedra y bronce con tres filas. Cada fila tiene
-## un engranaje, la placa con su ecuación ax + b = c (solo la primera se ve antes de ejecutar),
-## la placa donde aparece la x que despejó el programa y una lámpara. Es el invocador del patrón
-## Command: perform() prueba las filas una por una (RootsCommand).
+## El Mural (Sala 2). Patrón Command: perform() prueba las filas (RootsCommand).
 class_name MuralMachine
 extends CodeMachine
 
@@ -32,7 +29,7 @@ var _data: Dictionary
 var _text: Callable
 var _rng := RandomNumberGenerator.new()
 var _font: Font = load(UIKit.PIXEL_FONT)
-var _rows: Array = []           # [{poly, result, color, lamp, angle, revealed}]
+var _rows: Array = []
 var _active := -1
 
 @onready var _light: PointLight2D = $Luz
@@ -60,7 +57,7 @@ func setup(kit: TileKit, bus: EventBus, data: Dictionary, text: Callable, open_c
 	new_trial()
 
 
-## Ecuaciones nuevas (al empezar y después de cada fallo).
+## Ecuaciones nuevas.
 func new_trial() -> void:
 	trial = RootsTrial.new(_data.get("cases", []), _rng)
 	_rows.clear()
@@ -140,7 +137,7 @@ func perform(report: CodeMachine.Report) -> void:
 		new_trial()
 
 
-## Prueba una fila: se revela la ecuación, gira el engranaje y aparece el resultado.
+## Prueba una fila.
 func test_row(index: int, verdict: RootsTrial.Verdict, shown: String, _steps: int) -> void:
 	_active = index
 	var row: Dictionary = _rows[index]
@@ -190,19 +187,19 @@ func _draw() -> void:
 	draw_rect(panel, STONE)
 	draw_rect(Rect2(LEFT, TOP, W, 3), STONE_LIGHT)
 	draw_rect(Rect2(LEFT - 3, TOP - 6, W + 6, 4), BRONZE)
-	var title := String(_data.get("mural_title", "ax + b = c   →   x = ?"))
+	var title := String(_data.get("mural_title", ""))
 	_text_center(title, Vector2(0, TOP + 13), 8, GOLD)
 	for i in _rows.size():
 		var row: Dictionary = _rows[i]
 		var y := TOP + 18 + i * ROW_H
 		draw_rect(Rect2(LEFT + 4, y + 1, W - 8, ROW_H - 2), STONE_DARK if i != _active else STONE_DARK.lerp(CYAN, 0.12))
 		_gear(_gear_center(i), row.angle, row.lamp)
-		# Placa de la ecuación
+		# Ecuación
 		draw_rect(Rect2(LEFT + 26, y + 3, 78, ROW_H - 6), PLAQUE)
 		var poly: String = row.poly if row.revealed else String(_data.get("hidden_label", "? ? ?"))
 		_text_center(poly, Vector2(LEFT + 65, y + 12.5), 8, Color("e9f7ff") if row.revealed else Color("5a6672"))
 		_text_center("=", Vector2(LEFT + 109, y + 12.5), 8, BRONZE)
-		# Placa del resultado
+		# Resultado
 		draw_rect(Rect2(LEFT + 114, y + 3, 72, ROW_H - 6), PLAQUE)
 		if row.result != "":
 			_text_center(row.result, Vector2(LEFT + 150, y + 12.5), 8, row.color)
@@ -211,7 +208,7 @@ func _draw() -> void:
 		draw_circle(Vector2(LEFT + W - 8, y + ROW_H / 2.0), 2.5, row.lamp)
 
 
-## En el editor no hay ecuaciones todavía: filas vacías para ver el tamaño del Mural.
+## Filas vacías para verlo en el editor.
 func _preview_rows() -> void:
 	for i in 3:
 		_rows.append({"poly": "", "result": "", "color": Color("8d97a8"), "lamp": Color("2a3036"), "angle": 0.0, "revealed": false})
@@ -228,8 +225,7 @@ func _gear(c: Vector2, angle: float, glow: Color) -> void:
 	draw_circle(c, 2.2, glow)
 
 
-## Texto centrado. Se dibuja al doble de tamaño y a media escala: con la cámara a 3x las
-## letras quedan nítidas (a 8 px directos se ven borrosas).
+## Texto centrado y nítido.
 func _text_center(text: String, at: Vector2, size: int, color: Color) -> void:
 	var big := size * 2
 	var w := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, big).x

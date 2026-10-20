@@ -1,24 +1,20 @@
-## PATRÓN STATE — La Mesa de las Figuras abierta (Sala 4). A la izquierda, la figura grande;
-## a la derecha, las piezas. Se arrastran con el ratón, R o clic derecho las gira y, al
-## soltarlas sobre la figura, encajan en la cuadrícula si caben. Una pieza puesta se puede volver
-## a levantar. El mundo queda quieto, pero el reloj de 15 minutos sigue corriendo.
-## Al llenar la figura pasa a la siguiente; con la última, la mesa queda resuelta.
+## Patrón State: rompecabezas de la Mesa (Sala 4). Se arrastran piezas y R las gira.
 class_name PuzzleState
 extends GameState
 
 const CELL := 48.0
-const SLOT := 3.4                     # cada hueco de la bandeja mide 3,4 × 3,4 casillas
+const SLOT := 3.4
 const COLORS := [Color("e2b44f"), Color("4fe3ff"), Color("6be38b"), Color("ff7a5c"), Color("b78bff"), Color("ff9fd0")]
 const SOLVED_PAUSE := 1.4
 
 var table: FigureTable
 
-var _held := -1                       # la pieza que se arrastra (-1: ninguna)
-var _grab := Vector2.ZERO             # dónde se tomó, respecto de la esquina de la pieza
-var _order: Array = []                # orden de las piezas en la bandeja
-var _solved_at := -1.0                # ui.time en que se llenó la figura (-1: todavía no)
-var _mouse := Vector2.ZERO            # el ratón, en coordenadas de la pantalla de la interfaz
-var _rotated := false                 # ya giró alguna pieza: el aviso de girar deja de latir
+var _held := -1    # -1: ninguna
+var _grab := Vector2.ZERO
+var _order: Array = []
+var _solved_at := -1.0
+var _mouse := Vector2.ZERO
+var _rotated := false
 
 
 func enter(params: Dictionary = {}) -> void:
@@ -46,7 +42,7 @@ func _puzzle() -> FigurePuzzle:
 	return table.puzzle()
 
 
-## Las piezas se reparten en la bandeja en un orden al azar (no en el de la solución).
+## Piezas en orden al azar.
 func _shuffle_tray() -> void:
 	_order = range(_puzzle().pieces.size())
 	_order.shuffle()
@@ -74,7 +70,6 @@ func _slot_rect(ui: UIKit, slot: int) -> Rect2:
 	return Rect2(Vector2(left + col * (size.x + 14), p.position.y + 112 + row * (size.y + 14)), size)
 
 
-## La esquina de arriba a la izquierda de la pieza, en pantalla.
 func _piece_origin(ui: UIKit, i: int) -> Vector2:
 	var puzzle := _puzzle()
 	if i == _held:
@@ -85,7 +80,7 @@ func _piece_origin(ui: UIKit, i: int) -> Vector2:
 	return (slot.get_center() - Vector2(FigurePuzzle.extent(puzzle.cells_of(i))) * CELL / 2.0).round()
 
 
-## La pieza bajo el ratón (la de arriba si hay varias) o -1.
+## Pieza bajo el mouse o -1.
 func _piece_at(ui: UIKit, point: Vector2) -> int:
 	var puzzle := _puzzle()
 	for i in range(puzzle.pieces.size() - 1, -1, -1):
@@ -132,8 +127,7 @@ func _pick(ui: UIKit, mouse: Vector2) -> void:
 	game.bus.publish(GameEvents.PIECE_PICKED)
 
 
-## Suelta la pieza: si cae sobre la figura y cabe, encaja en la casilla más cercana; si no,
-## vuelve a la bandeja.
+## Suelta la pieza: encaja si cabe, si no vuelve a la bandeja.
 func _drop(ui: UIKit) -> void:
 	if _held < 0:
 		return
@@ -145,14 +139,14 @@ func _drop(ui: UIKit) -> void:
 		check_solved(ui)
 
 
-## Si la figura quedó llena, la celebra un momento y después pasa a la siguiente.
+## Figura llena: pasa a la siguiente.
 func check_solved(ui: UIKit) -> void:
 	if _solved_at < 0.0 and _puzzle().is_solved():
 		_solved_at = ui.time
 		game.bus.publish(GameEvents.PUZZLE_SOLVED)
 
 
-## Gira una pieza. Si es la que se arrastra, queda centrada en el ratón.
+## Gira una pieza.
 func _rotate(_ui: UIKit, i: int) -> void:
 	if i < 0:
 		return
@@ -190,19 +184,19 @@ func draw(ui: UIKit) -> void:
 	ui.text_centered(game.data.message("figures_hint"), p.position.y + 62, 18, UIKit.MUTED)
 	if _solved_at < 0.0:
 		_draw_rotate_hint(ui, p)
-	# La figura: casillas vacías con borde dorado
+	# Figura
 	var origin := _board_origin(ui)
 	for c in puzzle.target:
 		var r := Rect2(origin + Vector2(c) * CELL, Vector2(CELL, CELL))
 		ui.rect(r, Color(0.05, 0.06, 0.09, 0.95))
 		ui.frame(r.grow(-1), Color(UIKit.GOLD, 0.35), 1.0)
 	ui.text_centered(game.data.message("figures_board"), origin.y + puzzle.size.y * CELL + 18, 18, UIKit.MUTED, "body", origin.x + puzzle.size.x * CELL / 2.0)
-	# La bandeja
+	# Bandeja
 	for slot in _order.size():
 		var r := _slot_rect(ui, slot)
 		ui.rect(r, Color(1, 1, 1, 0.03))
 		ui.frame(r, Color(UIKit.CYAN, 0.18), 1.0)
-	# Las piezas (la que se arrastra, encima de todas)
+	# Piezas
 	for i in puzzle.pieces.size():
 		if i != _held:
 			_draw_piece(ui, i)
@@ -227,7 +221,7 @@ func _draw_piece(ui: UIKit, i: int) -> void:
 		ui.rect(Rect2(r.position + Vector2(3, 3), Vector2(r.size.x - 6, 4)), color.lightened(0.35))
 
 
-## Dónde caería la pieza que se arrastra: verde si cabe ahí.
+## Dónde caería la pieza.
 func _draw_shadow(ui: UIKit, i: int) -> void:
 	var puzzle := _puzzle()
 	var corner := (_piece_origin(ui, i) - _board_origin(ui)) / CELL
@@ -240,15 +234,16 @@ func _draw_shadow(ui: UIKit, i: int) -> void:
 		ui.frame(r, Color(UIKit.GOOD, 0.8), 2.0)
 
 
-## "R o clic derecho = GIRAR" en grande bajo las piezas; late hasta que se gira una pieza.
+## Aviso de girar.
 func _draw_rotate_hint(ui: UIKit, p: Rect2) -> void:
+	var key := InputSetup.key_name("rotate")
 	var text: String = game.data.message("figures_rotate")
-	var w := ui.measure("R", 24, "bold") + 18 + ui.measure(text, 24, "bold") + 40
-	var r := Rect2(p.position.x + 860 - w / 2.0, p.end.y - 98, w, 44)    # bajo la bandeja
+	var w := ui.measure(key, 24, "bold") + 18 + ui.measure(text, 24, "bold") + 40
+	var r := Rect2(p.position.x + 860 - w / 2.0, p.end.y - 98, w, 44)
 	var pulse := 1.0 if _rotated else 0.6 + 0.4 * sin(ui.time * 6.0)
 	ui.rect(r, Color(0.08, 0.06, 0.02, 0.92))
 	ui.frame(r, Color(UIKit.GOLD, pulse), 2.0 if _rotated else 3.0)
-	var kw := ui.measure("R", 24, "bold") + 18
+	var kw := ui.measure(key, 24, "bold") + 18
 	ui.rect(Rect2(r.position + Vector2(10, 8), Vector2(kw, 28)), UIKit.GOLD)
-	ui.text("R", r.position + Vector2(19, 9), 24, Color("0b0f14"), "bold", false)
+	ui.text(key, r.position + Vector2(19, 9), 24, Color("0b0f14"), "bold", false)
 	ui.text(text, r.position + Vector2(kw + 22, 9), 24, UIKit.GOLD, "bold")

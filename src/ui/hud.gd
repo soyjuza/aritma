@@ -1,10 +1,8 @@
-## Indicadores durante el juego: objetivo, energía del núcleo (tiempo), corazones, castigos de
-## tiempo, alarma de los guardianes, aliento, mira, ayuda de lo que se tiene enfrente y teclas.
-## Solo dibuja; los datos se los pasa PlayState.
+## Lo que se ve mientras se juega. Los datos los pasa PlayState.
 class_name Hud
 extends RefCounted
 
-const HEART := preload("res://assets/pack/ui/Receptacle/Heart.png")   # 5 cuadros: vacío → lleno
+const HEART := preload("res://assets/pack/ui/Receptacle/Heart.png")
 const HEART_SCALE := 2.0
 
 
@@ -35,7 +33,7 @@ func draw(ui: UIKit, info: Dictionary) -> void:
 	var c := s / 2.0
 	ui.rect(Rect2(c - Vector2(3, 3), Vector2(6, 6)), Color(0, 0, 0, 0.5))
 	ui.rect(Rect2(c - Vector2(2, 2), Vector2(4, 4)), UIKit.TEXT)
-	# Ayuda de interacción
+	# Ayuda
 	if info.get("prompt", "") != "":
 		var key := String(info.prompt_key)
 		var text := String(info.prompt)
@@ -58,8 +56,7 @@ func draw(ui: UIKit, info: Dictionary) -> void:
 		ui.text_right(String(info.fps), s.x - 24, s.y - 40, 15, UIKit.MUTED)
 
 
-## Aviso arriba al centro (se desvanece en el último segundo). Urgente: rojo; buena noticia
-## (good): verde, más grande y con el borde latiendo.
+## Aviso arriba. good: verde.
 func draw_notice(ui: UIKit, text: String, left: float, good := false) -> void:
 	if text == "" or left <= 0.0:
 		return
@@ -84,8 +81,7 @@ func draw_notice(ui: UIKit, text: String, left: float, good := false) -> void:
 		y += ui.line_height(size, "bold") + 2
 
 
-## Corazones bajo el reloj, en mitades (el cuadro 0 es vacío, el 2 medio y el 4 lleno).
-## Si quedan pocos, el último late.
+## Corazones en mitades.
 func draw_hearts(ui: UIKit, health: PlayerHealth, hurt: float) -> void:
 	var s := ui.size()
 	var size := 16.0 * HEART_SCALE
@@ -103,7 +99,7 @@ func draw_hearts(ui: UIKit, health: PlayerHealth, hurt: float) -> void:
 		ui.texture_region(HEART, r, src)
 
 
-## "−7 s" en rojo bajo los corazones: sube y se desvanece.
+## "-7 s" bajo los corazones.
 func draw_penalty(ui: UIKit, text: String, left: float) -> void:
 	if text == "" or left <= 0.0:
 		return
@@ -113,7 +109,7 @@ func draw_penalty(ui: UIKit, text: String, left: float) -> void:
 	ui.text_right(text, s.x - 28, y, 30, Color(UIKit.ALERT, a), "title")
 
 
-## La alarma: los bordes laten en rojo y arriba al centro se lee el nivel y cuántos quedan.
+## Alarma de guardianes.
 func draw_alarm(ui: UIKit, level: int, guardians: int, label: String) -> void:
 	var s := ui.size()
 	var pulse := 0.5 + 0.5 * sin(ui.time * 5.0)

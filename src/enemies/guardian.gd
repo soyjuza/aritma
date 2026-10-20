@@ -1,11 +1,5 @@
-## Guardián de la tumba (escenas: scenes/enemigos/centinela.tscn, el caballero dorado, y
-## hechicero.tscn, que ataca de lejos). Duerme como estatua sobre su pedestal o cae del techo
-## cuando la alarma sube; despierto, ataca en formación: los de cuerpo a cuerpo rodean a Tala
-## desde lados distintos y cuidan a los de distancia; los de distancia mantienen la distancia.
-## Cada tipo lleva un aro de color en el suelo para reconocerlo de un vistazo.
-## Contexto del patrón State: cada paso de física delega en su estado (dormido, despertando,
-## cayendo, persiguiendo, preparando, golpeando, aturdido, vencido). Cómo ataca lo decide su
-## estrategia (patrón Strategy: GuardianAttack).
+## Guardián de la tumba (caballero y hechicero).
+## Usa estados (State) y su forma de atacar es una estrategia (Strategy).
 class_name Guardian
 extends CharacterBody2D
 
@@ -13,45 +7,41 @@ signal defeated(guardian: Guardian)
 
 const STONE_SHADER := preload("res://assets/efectos/piedra.gdshader")
 
-## Empieza como estatua sobre su pedestal (se ajusta en el Inspector).
 @export var dormant := false
-## Nombre del tipo (para la alarma del HUD).
 @export var kind := "caballero"
-## Cómo ataca: "golpe" (cuerpo a cuerpo) u "orbe" (lanza orbes desde lejos).
+## "golpe" o "orbe".
 @export_enum("golpe", "orbe") var attack_kind := "golpe"
-## Color del aro del suelo que distingue a cada tipo.
 @export var ring_color := Color(1.0, 0.78, 0.25)
-## Tamaño del dibujo (1.5 = más imponente que Tala).
 @export var body_scale := 1.0
-## De distancia: se queda lejos de Tala y dispara cuando la tiene a tiro.
+## Ataca de lejos.
 @export var keep_distance := 80.0
 @export var shot_range := 125.0
 @export var max_hp := 3
-@export var damage := 1               # mitades de corazón por golpe
+@export var damage := 1    # mitades de corazón
 @export var speed := 38.0
 @export var reach := 14.0
 @export var pedestal_height := 7.0
-## Un golpe de garrote lo aturde y le cancela el ataque (el rúnico no: sigue cargando).
+## Un golpe de garrote le cancela el ataque.
 @export var staggers := true
 
 var radius := 6.0
 var hp := 3
-var speed_scale := 1.0                # lo sube la alarma
+var speed_scale := 1.0
 var facing := Vector2.DOWN
 var attack: GuardianAttack
 var bus: EventBus
 var kit: TileKit
 var settings: Dictionary = {}         # sección "combat" de config.json
-var from_ceiling := false             # cayó del techo: al vencerlo se borra
+var from_ceiling := false    # cayó del techo
 var state_name := ""
-var lift := 0.0                       # altura del dibujo sobre el suelo (pedestal, caída)
+var lift := 0.0
 var cooldown := 0.0
-var cracks := 0.0                     # 0..1: grietas de la piedra al despertar
-var glow := 0.0                       # 0..1: brillo de aviso antes de golpear
-var stone := 0.0                      # 1 = piedra gris, 0 = color vivo
-var shake := 0.0                      # temblor del dibujo (px)
-var shadow_size := -1.0               # tamaño forzado de la sombra (el aviso de la caída)
-var charge := 0.0                     # 0..1 mientras prepara el ataque
+var cracks := 0.0
+var glow := 0.0
+var stone := 0.0    # 1 = piedra gris
+var shake := 0.0
+var shadow_size := -1.0
+var charge := 0.0
 var _hit_flash := 0.0
 var home := Vector2.ZERO
 
@@ -69,7 +59,7 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
 	add_to_group("guardians")
-	set_collision_mask_value(4, true)    # la barrera del abismo (Sala 5) solo los detiene a ellos
+	set_collision_mask_value(4, true)    # la barrera del abismo solo detiene a los guardianes
 	_material.shader = STONE_SHADER
 	sprite.material = _material
 	sprite.modulate = Color.WHITE
@@ -92,8 +82,7 @@ func _ready() -> void:
 	change("dormant" if dormant else "chase")
 
 
-## Estrategia de ataque de este tipo de guardián (Strategy): el caballero golpea y el
-## hechicero lanza orbes.
+## El caballero golpea y el hechicero lanza orbes.
 func _make_attack() -> GuardianAttack:
 	return OrbShot.new() if attack_kind == "orbe" else MeleeStrike.new()
 
@@ -144,8 +133,6 @@ func _update_visual() -> void:
 	queue_redraw()
 
 
-## El aro del tipo bajo los pies, el orbe que prepara el hechicero y las grietas de la
-## estatua al despertar.
 func _draw() -> void:
 	if is_active() and state_name != "dropping" and state_name != "waking":
 		var pts := PackedVector2Array()
@@ -182,20 +169,19 @@ func dir_name() -> String:
 
 # ------------------------------------------------------------------ órdenes del director
 
-## La estatua despierta (alarma).
 func wake() -> void:
 	if state_name == "dormant":
 		change("waking")
 
 
-## Cae del techo en "at" (la sombra avisa antes).
+## Cae del techo en at.
 func drop(at: Vector2) -> void:
 	from_ceiling = true
 	global_position = at
 	change("dropping")
 
 
-## Vuelve a ser una estatua quieta sobre su pedestal (al reaparecer Tala tras caer vencida).
+## Vuelve a su pedestal como estatua.
 func restore() -> void:
 	hp = max_hp
 	position = home
@@ -205,13 +191,12 @@ func restore() -> void:
 	change("dormant")
 
 
-## Se deshace en números sin pelear (la sala quedó resuelta).
+## Desaparece sin pelear (la sala ya se resolvió).
 func dissolve() -> void:
 	if is_active():
 		change("dying")
 
 
-## Despierto (o despertando o cayendo): cuenta como guardián de la ola.
 func is_active() -> bool:
 	return state_name != "dormant" and state_name != "dying" and visible
 
@@ -234,13 +219,11 @@ func take_hit(amount: int, direction: Vector2) -> void:
 		velocity = direction * 60.0
 
 
-## Se destruye en su propio ataque (el rúnico al explotar).
 func blow_up() -> void:
 	if state_name != "dying":
 		change("dying")
 
 
-## Aviso de los estados para los tipos que se ven distinto (los redefine el rúnico).
 func on_windup() -> void:
 	pass
 
@@ -251,12 +234,8 @@ func on_landed() -> void:
 
 # ------------------------------------------------------------------ formación
 
-## A dónde ir para atacar en formación (los de cuerpo a cuerpo):
-## - lejos de Tala, directo hacia ella;
-## - si Tala se acerca a un compañero de distancia, el caballero más cercano a él se pone en
-##   medio para cubrirlo;
-## - cerca, cada uno toma un lugar distinto alrededor de Tala (la rodean, no hacen fila).
-##   Para llegar a su lugar rodea a Tala por el borde (no la atraviesa).
+## A dónde ir para atacar: los caballeros rodean a Tala
+## y cubren al hechicero si ella se le acerca.
 func formation_target() -> Vector2:
 	var p := player().global_position
 	if global_position.distance_to(p) > 72.0:
@@ -274,8 +253,7 @@ func formation_target() -> Vector2:
 	return p + Vector2.from_angle(slot) * (reach + 3.0)
 
 
-## El ángulo (alrededor de Tala) que le toca a este caballero, o NAN si no hay formación
-## (está solo o lejos). Se reparten en orden, así nadie cruza por delante de otro.
+## Ángulo alrededor de Tala que le toca a este caballero, o NAN.
 func formation_slot() -> float:
 	var p := player().global_position
 	var melee: Array = get_tree().get_nodes_in_group("guardians").filter(func(g): return g.is_active() and not g.is_ranged() and g.global_position.distance_to(p) < 96.0)
@@ -286,13 +264,11 @@ func formation_slot() -> float:
 	return base + melee.find(self) * TAU / melee.size()
 
 
-## ¿Ya está en su lugar de la formación (o no hay formación)? Solo entonces golpea.
 func in_formation() -> bool:
 	var slot := formation_slot()
 	return is_nan(slot) or absf(angle_difference((global_position - player().global_position).angle(), slot)) < 0.7
 
 
-## Un compañero de distancia al que Tala se está acercando.
 func _ward_in_danger(p: Vector2) -> Guardian:
 	for g in get_tree().get_nodes_in_group("guardians"):
 		if g != self and g.is_active() and g.is_ranged() and g.global_position.distance_to(p) < 64.0:
@@ -308,7 +284,7 @@ func _closest_melee_to(at: Vector2) -> Guardian:
 	return best
 
 
-## ¿Hay una línea libre (sin muros) hasta Tala? Los de distancia solo disparan así.
+## true si no hay muros entre él y Tala.
 func clear_shot(from := Vector2.INF) -> bool:
 	var p := player()
 	if p == null:
@@ -321,8 +297,7 @@ func clear_shot(from := Vector2.INF) -> bool:
 	return hit.is_empty() or not (hit.collider is StaticBody2D or hit.collider is TileMapLayer)
 
 
-## El hechicero atrapado sin tiro se teletransporta (con humo) a un punto de la sala desde el
-## que ve a Tala, ni muy cerca ni muy lejos. Devuelve false si no encontró ninguno.
+## El hechicero sin tiro se teletransporta a otro punto. false si no encontró.
 func blink() -> bool:
 	var p := player().global_position
 	var spots: Array = get_tree().get_nodes_in_group("guardian_spots").map(func(m): return m.global_position)
@@ -349,7 +324,7 @@ func to_player() -> Vector2:
 	return p.global_position - global_position if p else Vector2.ZERO
 
 
-## El ritmo de la ola: con más alarma todo pasa un poco más rápido (con tope).
+## Con más alarma son más rápidos.
 func pace() -> float:
 	return 1.0 + (speed_scale - 1.0) * 0.6
 
@@ -358,7 +333,6 @@ func setting(key: String, fallback):
 	return settings.get(key, fallback)
 
 
-## Un puñado de partículas del pack que se borra solo al terminar.
 func burst(at: Vector2, fx: String, amount: int, lifetime: float, gravity := Vector2(0, 60)) -> CPUParticles2D:
 	if kit == null:
 		return null
@@ -373,7 +347,7 @@ func burst(at: Vector2, fx: String, amount: int, lifetime: float, gravity := Vec
 	return p
 
 
-## Se aleja un poco de los otros guardianes para no amontonarse.
+## Se separa de los otros para no amontonarse.
 func separation() -> Vector2:
 	var push := Vector2.ZERO
 	for other in get_tree().get_nodes_in_group("guardians"):

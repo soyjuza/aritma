@@ -1,9 +1,9 @@
-## PATRÓN FACTORY METHOD — Creador concreto de la Sala 3: El Vórtice de Celdas.
+## Patrón Factory Method: crea la Sala 3.
 class_name VortexBuilder
 extends ChamberBuilder
 
 const SCENE := "res://scenes/niveles/sala_3_vortice.tscn"
 
 
-func create_level() -> Level:
+func create_level() -> ChamberLevel:
 	return (load(SCENE) as PackedScene).instantiate()

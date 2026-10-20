@@ -1,7 +1,4 @@
-## Sala 2 — El Mural de la Incógnita (escena: scenes/niveles/sala_2_raices.tscn).
-## Se entra por un pasillo con tres prensas de piedra que se cierran con ritmos distintos.
-## En la sala, el Mural: hay que escribir despejar(a, b, c), que devuelve la x de ax + b = c.
-## El Mural la prueba con tres ecuaciones (solo una a la vista).
+## Sala 2: el Mural. Hay que escribir despejar(a, b, c).
 class_name RootsLevel
 extends ChamberLevel
 
@@ -11,7 +8,6 @@ var _in_hall := false
 
 
 func wire() -> void:
-	# El ritmo de cada prensa (de abajo hacia arriba) sale de chambers.json
 	var periods: Array = data.get("press_periods", [])
 	var presses := nodes_of(Crusher)
 	for i in presses.size():

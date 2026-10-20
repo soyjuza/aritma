@@ -1,12 +1,10 @@
-## PATRÓN COMMAND — Cada ecuación probada es una orden: se anota al correr el programa (al
-## instante) y el Mural (el invocador) la ejecuta después con su animación: se enciende la
-## placa, gira el engranaje y aparece la x que despejó el jugador.
+## Patrón Command: una ecuación probada en el Mural.
 class_name RootsCommand
 extends RefCounted
 
 var index: int
 var verdict: RootsTrial.Verdict
-var shown: String        # lo que aparece en la placa de resultado
+var shown: String
 var steps: int
 
 

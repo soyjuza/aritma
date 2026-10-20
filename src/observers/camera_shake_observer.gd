@@ -1,6 +1,4 @@
-## PATRÓN OBSERVER — Observador concreto: hace temblar la cámara con los eventos fuertes
-## (una caída alta, un mecanismo pesado). La tabla evento → intensidad viene de config.json;
-## quien publica el evento no sabe que la cámara tiembla.
+## Patrón Observer: hace temblar la cámara con algunos eventos.
 class_name CameraShakeObserver
 extends RefCounted
 

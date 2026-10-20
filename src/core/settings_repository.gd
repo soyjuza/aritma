@@ -1,6 +1,4 @@
-## Ajustes del jugador (volumen, calidad gráfica, cámara, mouse, campo de visión, pantalla).
-## Se encarga de guardarlos y cargarlos, y de aplicar lo que es suyo (audio y ventana).
-## Quien dependa de otros ajustes (calidad, cámara) escucha la señal "applied".
+## Ajustes del jugador: los guarda, los carga y aplica audio y ventana.
 class_name SettingsRepository
 extends RefCounted
 

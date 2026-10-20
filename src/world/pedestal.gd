@@ -1,6 +1,5 @@
 @tool
-## Pedestal de piedra de una estatua de guardián (escena: scenes/objetos/estatua_guardian.tscn).
-## La estatua es su hijo «Caballero» (el caballero dorado, dormido). Cuando despierta, el pedestal queda vacío y con escombros.
+## Pedestal de una estatua de guardián.
 class_name Pedestal
 extends Node2D
 
@@ -22,7 +21,6 @@ func _draw() -> void:
 	draw_rect(front, STONE)
 	draw_rect(top, STONE_LIGHT)
 	draw_rect(Rect2(-12, 0, 24, 2), STONE_DARK)
-	# Una franja grabada en el frente
 	draw_rect(Rect2(-8, -3, 16, 1), STONE_DARK)
 	if rubble:
 		for chunk in [Rect2(-9, -12, 5, 3), Rect2(-2, -13, 4, 3), Rect2(4, -12, 6, 3), Rect2(-5, -11, 2, 2)]:

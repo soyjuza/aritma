@@ -1,25 +1,20 @@
-## Reglas de la Criba (Sala 1, El Filtro de la Dualidad), sin nada de 3D.
-## Cada ronda trae esferas numeradas: el programa las suelta una por una a la compuerta y
-## decide a dónde va cada una. Las pares van al cáliz y las impares al crisol. Mientras el
-## programa corre, cada paso queda anotado como una orden (FilterCommand) para que la
-## máquina 3D lo repita después con su animación.
+## Reglas de la Criba (Sala 1). Cada paso queda como un FilterCommand.
 class_name ParityFilter
 extends RefCounted
 
 enum Fault { NONE, WRONG_SIDE, LEFT_OVER }
 
-var rounds: Array = []        # Array de Array[int]: los números de cada ronda, en orden
+var rounds: Array = []
 var round_index := 0
-var commands: Array = []      # FilterCommand, en el orden en que el programa los dio
+var commands: Array = []
 var fault := Fault.NONE
-var fault_value := 0          # la esfera que falló (o cuántas quedaron sin clasificar)
+var fault_value := 0
 
 var _queue: Array = []
-var _held: Variant = null     # el número de la esfera que está en la compuerta
+var _held: Variant = null
 
 
-## rules: la lista "rounds" de chambers.json, por ejemplo
-##   [{"count": [8, 10], "min": 1, "max": 20}, {"count": [5, 7], "min": 10, "max": 99, "zero": true}]
+## rules: "rounds" de chambers.json.
 func _init(rules: Array, rng: RandomNumberGenerator) -> void:
 	for r: Dictionary in rules:
 		rounds.append(make_round(r, rng))
@@ -33,7 +28,7 @@ static func make_round(rule: Dictionary, rng: RandomNumberGenerator) -> Array:
 		values.append(rng.randi_range(int(rule.get("min", 1)), int(rule.get("max", 20))))
 	if bool(rule.get("zero", false)) and not 0 in values:
 		values[rng.randi_range(0, count - 1)] = 0
-	# Siempre hay al menos una par y una impar: así ningún atajo ("todo al cáliz") pasa
+	# Siempre hay al menos una par y una impar
 	if not values.any(func(v): return v % 2 == 0):
 		values[0] = values[0] + 1
 	if not values.any(func(v): return v % 2 != 0):
@@ -45,7 +40,7 @@ static func is_even(value: int) -> bool:
 	return posmod(value, 2) == 0
 
 
-## Empieza la ronda "index": la tolva se llena con sus esferas.
+## Empieza la ronda index.
 func start_round(index: int) -> void:
 	round_index = index
 	_queue = rounds[index].duplicate()
@@ -65,7 +60,7 @@ func held() -> Variant:
 	return _held
 
 
-## Suelta la siguiente esfera a la compuerta. Devuelve un texto de error si no se puede.
+## Suelta la siguiente esfera. Devuelve el error o "".
 func release() -> String:
 	if failed():
 		return ""
@@ -78,7 +73,7 @@ func release() -> String:
 	return ""
 
 
-## Manda la esfera de la compuerta al cáliz (to_chalice = true) o al crisol.
+## Manda la esfera al cáliz o al crisol.
 func send(to_chalice: bool) -> String:
 	if failed():
 		return ""
@@ -94,7 +89,7 @@ func send(to_chalice: bool) -> String:
 	return ""
 
 
-## El programa terminó esta ronda: no pueden quedar esferas sin clasificar.
+## No pueden quedar esferas sin clasificar.
 func end_round() -> void:
 	if failed():
 		return

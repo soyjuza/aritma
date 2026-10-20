@@ -1,13 +1,9 @@
-## Sala 3 — El Vórtice de Celdas (escena: scenes/niveles/sala_3_vortice.tscn).
-## Un pasillo sin trampas lleva a la sala del tablero. El Faro enciende el tablero cuando el
-## jugador ordena luces.encender(). Encendido, es un buscaminas que se juega caminando: E destapa
-## la baldosa que pisa Tala y Q le pone o quita la bandera. Destapar una mina cuesta 2 corazones
-## y devuelve a Tala a la entrada con un tablero nuevo. Esta sala no tiene guardianes.
+## Sala 3: el buscaminas. Una mina quita 2 corazones y reinicia el tablero.
 class_name VortexLevel
 extends ChamberLevel
 
 var _in_hall := false
-var _busy := false          # mostrando una explosión: no se destapa nada más
+var _busy := false
 
 @onready var machine: BeaconMachine = $Actores/Faro
 @onready var board: MineBoard = $Tablero
@@ -41,13 +37,12 @@ func _open_machine() -> void:
 
 func _on_powered() -> void:
 	board.power_on()
-	# Se encienden las luces: la sala entera se aclara
 	create_tween().tween_property($Ambiente, "color", Color(0.62, 0.6, 0.74), 1.2)
 	objective_key = "objective_vortex_board"
 	_game.bus.publish(GameEvents.BOARD_POWERED)
 
 
-## E destapa y Q marca la baldosa que pisa Tala (si el tablero está encendido).
+## E destapa y Q marca.
 func handle_action(actions: Array) -> bool:
 	if not board.powered or solved or _busy:
 		return false
@@ -78,8 +73,7 @@ func hud_line() -> String:
 	return _game.data.message("hud_board", {"mines": board.mine_count, "flags": board.flags.size(), "left": left})
 
 
-## Una mina: explota, −2 corazones y, tras un instante, Tala vuelve a la entrada con un
-## tablero nuevo (si con eso se quedó sin corazones, manda el castigo de siempre).
+## Una mina: explota y Tala vuelve a la entrada.
 func _on_exploded(cell: Vector2i) -> void:
 	_busy = true
 	_game.bus.publish(GameEvents.MINE_EXPLODED)
@@ -97,7 +91,7 @@ func _on_exploded(cell: Vector2i) -> void:
 	_game.player.hurt(int(_game.combat("mine_damage", 4)), board.cell_center(cell), true)
 	if _game.health.is_dead():
 		_busy = false
-		return    # el juego se encarga (−1 minuto o fin) y llama a restart_after_death()
+		return
 	await get_tree().create_timer(1.3).timeout
 	await _game.fade_out()
 	board.reset()
@@ -106,7 +100,7 @@ func _on_exploded(cell: Vector2i) -> void:
 	_busy = false
 
 
-## Cargando una partida con el tablero ya limpio: el Faro encendido y el tablero destapado.
+## Cargando partida con el tablero limpio.
 func restore_solved() -> void:
 	machine.mark_solved()
 	board.show_solved()

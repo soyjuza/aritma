@@ -1,4 +1,4 @@
-## Punto seguro: al cruzar la zona, si Tala cae o la aplastan, vuelve al Marker2D «Punto».
+## Punto seguro: si Tala cae vuelve aquí.
 class_name CheckpointZone
 extends TriggerZone
 

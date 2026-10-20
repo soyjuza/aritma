@@ -1,6 +1,4 @@
-## Ventana del Códice: editor de código con colores (CodeEdit), ayuda de las funciones de la
-## sala y consola de salida. Es una interfaz de controles reales (para poder escribir),
-## encima de la vista 3D; CodexState decide cuándo se muestra y qué pasa al ejecutar.
+## Ventana del Códice: editor, ayuda y consola.
 class_name CodexPanel
 extends Control
 
@@ -16,7 +14,7 @@ var help_label := RichTextLabel.new()
 var console := RichTextLabel.new()
 var run_button := Button.new()
 var footer := Label.new()
-var docked := false        # al costado de una máquina (la máquina se ve a la derecha)
+var docked := false
 
 var _shade := ColorRect.new()
 
@@ -48,8 +46,8 @@ func _init() -> void:
 	_setup_rich(console, _mono, 16)
 	_place(help_label, Vector2(0.65, 0.11), Vector2(0.97, 0.80))
 	_setup_rich(help_label, _body, 17)
+	help_label.scroll_following = false
 	_place(run_button, Vector2(0.65, 0.83), Vector2(0.97, 0.91))
-	run_button.text = "EJECUTAR  (F5)"
 	run_button.add_theme_font_override("font", _title)
 	run_button.add_theme_font_size_override("font_size", 22)
 	run_button.focus_mode = Control.FOCUS_NONE
@@ -73,7 +71,7 @@ func _anchor(control: Control, from: Vector2, to: Vector2) -> void:
 	control.anchor_bottom = to.y
 
 
-## Pantalla completa (terminales) o al costado izquierdo (máquinas: se ven a la derecha).
+## Pantalla completa o al costado de la máquina.
 func _layout(side: bool) -> void:
 	docked = side
 	if side:
@@ -81,14 +79,14 @@ func _layout(side: bool) -> void:
 		_shade.color = Color(0.01, 0.02, 0.03, 0.9)
 		_anchor(title_label, Vector2(0.02, 0.03), Vector2(0.45, 0.08))
 		_anchor(counter_label, Vector2(0.25, 0.085), Vector2(0.45, 0.12))
-		_anchor(editor, Vector2(0.02, 0.12), Vector2(0.45, 0.56))
-		_anchor(help_label, Vector2(0.02, 0.57), Vector2(0.45, 0.73))
+		_anchor(editor, Vector2(0.02, 0.12), Vector2(0.45, 0.52))
+		_anchor(help_label, Vector2(0.02, 0.53), Vector2(0.45, 0.73))
 		_anchor(console, Vector2(0.02, 0.74), Vector2(0.45, 0.88))
 		_anchor(run_button, Vector2(0.27, 0.89), Vector2(0.45, 0.94))
 		_anchor(footer, Vector2(0.02, 0.95), Vector2(0.45, 0.99))
 		title_label.add_theme_font_size_override("font_size", 22)
-		help_label.add_theme_font_size_override("normal_font_size", 15)
-		help_label.add_theme_font_size_override("bold_font_size", 15)
+		help_label.add_theme_font_size_override("normal_font_size", 14)
+		help_label.add_theme_font_size_override("bold_font_size", 14)
 		run_button.add_theme_font_size_override("font_size", 18)
 		footer.add_theme_font_size_override("font_size", 13)
 	else:
@@ -108,7 +106,7 @@ func _layout(side: bool) -> void:
 		footer.add_theme_font_size_override("font_size", 15)
 
 
-## Repliega el Códice (mientras la máquina muestra el programa) o lo vuelve a mostrar.
+## Esconde o muestra el Códice.
 func fold(folded: bool) -> void:
 	visible = not folded
 	if folded:
@@ -165,26 +163,32 @@ func _setup_rich(label: RichTextLabel, font: Font, size: int) -> void:
 
 
 var _session: CodexSession
+var text: Callable
+
+
+func _t(key: String, params: Dictionary = {}) -> String:
+	return String(text.call(key, params)) if text.is_valid() else key
 
 
 func open(session: CodexSession, keys_text: String, side := false) -> void:
 	_session = session
 	_layout(side)
-	title_label.text = ("%s  ·  %s" if side else "EL CÓDICE  ·  %s  ·  %s") % [session.title, session.file_name]
+	run_button.text = _t("codex_run_button")
+	title_label.text = _t("codex_title_side" if side else "codex_title", {"title": session.title, "file": session.file_name})
 	editor.text = session.code
 	console.clear()
-	console.append_text("[color=#8d97a8]Escribe tu programa y presiona EJECUTAR.[/color]\n")
-	# Lo que la consola mostraba antes (los errores no se pierden al salir a pelear)
+	console.append_text("[color=#8d97a8]%s[/color]\n" % _t("codex_welcome"))
+	# Lo que tenía la consola antes
 	for line in session.log:
 		console.append_text(line)
-	var help := "[color=#e2b44f][b]FUNCIONES DE ESTA SALA[/b][/color]\n" + ("" if side else "\n")
+	var help := "[color=#e2b44f][b]%s[/b][/color]\n" % _t("codex_help_title") + ("" if side else "\n")
 	for entry in session.help:
 		if side:
 			help += "[color=#4fe3ff]%s[/color]  [color=#8d97a8]%s[/color]\n" % [entry[0], entry[1]]
 		else:
 			help += "[color=#4fe3ff]%s[/color]\n[color=#8d97a8]%s[/color]\n\n" % [entry[0], entry[1]]
 	if not side:
-		help += "[color=#8d97a8]Python simplificado: variables, if / elif / else, while, for ... in range(...), def, return, listas, print().[/color]"
+		help += "[color=#8d97a8]%s[/color]" % _t("codex_language")
 	help_label.text = help
 	footer.text = keys_text
 	_update_counter()
@@ -212,8 +216,8 @@ func _update_counter() -> void:
 		return
 	var used := CodexSession.count_lines(editor.text)
 	if _session.max_lines > 0:
-		counter_label.text = "LÍNEAS %d / %d" % [used, _session.max_lines]
+		counter_label.text = _t("codex_lines_max", {"used": used, "max": _session.max_lines})
 		counter_label.add_theme_color_override("font_color", UIKit.ALERT if used > _session.max_lines else UIKit.CYAN)
 	else:
-		counter_label.text = "LÍNEAS %d" % used
+		counter_label.text = _t("codex_lines", {"used": used})
 		counter_label.add_theme_color_override("font_color", UIKit.CYAN)

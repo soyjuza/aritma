@@ -1,5 +1,4 @@
-## Un personaje que espera en el mundo (Orun). Se le habla con E; talk_key es la clave de su
-## conversación en data/texts.json.
+## Personaje con el que se habla con E.
 class_name Npc
 extends Node2D
 

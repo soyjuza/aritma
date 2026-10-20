@@ -1,5 +1,4 @@
-## PATRÓN STATE — Prepara el ataque: se detiene y brilla cada vez más rápido. Es el aviso para
-## esquivar (o para golpearlo primero: al centinela un golpe de Tala le cancela el ataque).
+## Patrón State: brilla antes de atacar (el aviso para esquivar).
 class_name WindupState
 extends GuardianState
 

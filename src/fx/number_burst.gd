@@ -1,5 +1,4 @@
-## Un guardián que cae se deshace en números: dígitos que saltan, caen y se apagan.
-## Se crea en el lugar y se borra solo.
+## Números que saltan cuando cae un guardián.
 class_name NumberBurst
 extends Node2D
 
@@ -9,7 +8,7 @@ var count := 9
 var tint := Color("9fb8a6")
 
 var _t := 0.0
-var _bits: Array = []      # [{text, pos, vel}]
+var _bits: Array = []
 var _font: Font = load(UIKit.PIXEL_FONT)
 
 

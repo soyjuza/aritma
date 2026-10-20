@@ -1,6 +1,4 @@
-## PATRÓN OBSERVER — Observador concreto: efectos de sonido.
-## La tabla evento → sonido viene de config.json. Ninguna regla del juego llama al audio
-## directamente; solo publican eventos y este observador decide qué sonido corresponde.
+## Patrón Observer: pone el sonido de cada evento.
 class_name SoundObserver
 extends RefCounted
 

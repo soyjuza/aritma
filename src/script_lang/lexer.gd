@@ -1,6 +1,4 @@
-## Analizador léxico del lenguaje del Códice (Python simplificado).
-## Convierte el texto en fichas (números, nombres, operadores...) y, como Python, convierte
-## la sangría en fichas INDENT y DEDENT para marcar dónde empieza y termina cada bloque.
+## Lexer: convierte el código en fichas. La sangría da INDENT y DEDENT.
 class_name Lexer
 extends RefCounted
 
@@ -12,7 +10,7 @@ var error_line := 0
 
 
 class Token:
-	var kind: String      # NUMBER, STRING, NAME, KEYWORD, OP, NEWLINE, INDENT, DEDENT, EOF
+	var kind: String
 	var value
 	var line: int
 
@@ -31,7 +29,7 @@ class Token:
 func tokenize(source: String) -> Array:
 	var tokens: Array = []
 	var indents: Array[int] = [0]
-	var depth := 0  # paréntesis abiertos: dentro de ellos los saltos de línea no cuentan
+	var depth := 0    # dentro de paréntesis los saltos de línea no cuentan
 	var lines := source.replace("\t", "    ").split("\n")
 	for line_index in lines.size():
 		var line_number := line_index + 1
@@ -48,7 +46,7 @@ func tokenize(source: String) -> Array:
 				indents.pop_back()
 				tokens.append(Token.new("DEDENT", indent, line_number))
 			if indent != indents[-1]:
-				return _fail("La sangría no coincide con ningún bloque anterior.", line_number)
+				return _fail(ScriptMessages.text("sangria_no_coincide_ningun_bloque"), line_number)
 		var i := text.length() - text.lstrip(" ").length()
 		while i < text.length():
 			var ch := text[i]
@@ -67,7 +65,7 @@ func tokenize(source: String) -> Array:
 			if ch == "\"" or ch == "'":
 				var end := text.find(ch, i + 1)
 				if end < 0:
-					return _fail("Falta cerrar el texto con %s." % ch, line_number)
+					return _fail(ScriptMessages.text("falta_cerrar_texto") % ch, line_number)
 				tokens.append(Token.new("STRING", text.substr(i + 1, end - i - 1), line_number))
 				i = end + 1
 				continue
@@ -84,7 +82,7 @@ func tokenize(source: String) -> Array:
 					matched = op
 					break
 			if matched == "":
-				return _fail("No entiendo el símbolo '%s'." % ch, line_number)
+				return _fail(ScriptMessages.text("no_entiendo_simbolo") % ch, line_number)
 			if matched in ["(", "["]:
 				depth += 1
 			elif matched in [")", "]"]:

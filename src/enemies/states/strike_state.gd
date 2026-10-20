@@ -1,5 +1,4 @@
-## PATRÓN STATE — Golpea: se lanza un poco hacia delante y su estrategia de ataque decide si
-## alcanzó a Tala. Después descansa antes de poder volver a atacar.
+## Patrón State: golpea y después descansa.
 class_name StrikeState
 extends GuardianState
 
@@ -11,7 +10,6 @@ var _done := false
 func enter() -> void:
 	super()
 	_done = false
-	# El de cuerpo a cuerpo se lanza un poco; el de distancia dispara quieto
 	guardian.velocity = Vector2.ZERO if guardian.is_ranged() else guardian.facing * 90.0
 
 

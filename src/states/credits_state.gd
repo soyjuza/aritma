@@ -1,4 +1,4 @@
-## PATRÓN STATE — Créditos.
+## Patrón State: créditos.
 class_name CreditsState
 extends GameState
 

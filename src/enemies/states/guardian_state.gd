@@ -1,6 +1,4 @@
-## PATRÓN STATE (comportamiento) — Estado de un guardián. El guardián (contexto) le delega
-## cada paso de física; el estado decide qué hace, qué animación muestra, si se le puede
-## golpear y a qué estado pasa.
+## Patrón State: estado base del guardián.
 class_name GuardianState
 extends RefCounted
 
@@ -20,12 +18,11 @@ func exit() -> void:
 	pass
 
 
-## Un paso de física. Devuelve el nombre del siguiente estado o "" para seguir.
+## Devuelve el siguiente estado o "" para seguir.
 func physics(_delta: float) -> String:
 	return ""
 
 
-## Animación base ("idle", "walk", "attack", "jump"); el guardián le agrega la dirección.
 func animation() -> String:
 	return "idle"
 

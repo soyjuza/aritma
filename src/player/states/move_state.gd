@@ -1,6 +1,4 @@
-## PATRÓN STATE (comportamiento) — Estado de movimiento de Tala. El jugador (contexto) le
-## delega cada paso de física; el estado decide la velocidad, la animación y a qué estado
-## pasar. Así no hay un gran "match" de casos en el controlador.
+## Patrón State: estado base del movimiento de Tala.
 class_name MoveState
 extends RefCounted
 
@@ -19,15 +17,24 @@ func exit() -> void:
 	pass
 
 
-## Un paso de física. Devuelve el nombre del siguiente estado o "" para seguir.
+## Devuelve el siguiente estado o "" para seguir.
 func physics(_delta: float) -> String:
 	return ""
 
 
-## Animación base ("idle", "walk", "jump"); el controlador le agrega la dirección.
 func animation() -> String:
 	return "idle"
 
 
 func animation_speed() -> float:
 	return 1.0
+
+
+## Al correr no recupera aliento.
+func regenerates_stamina() -> bool:
+	return true
+
+
+## El golpe se corta si Tala muere.
+func stops_on_death() -> bool:
+	return false

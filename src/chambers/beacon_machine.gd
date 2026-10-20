@@ -1,7 +1,5 @@
 @tool
-## El Faro de Celdas (Sala 3): un obelisco de piedra con un cristal arriba y, en su cara, un
-## tablero grabado de 8×8. Enciende el tablero del Vórtice cuando el programa del jugador
-## ordena luces.encender() (LightsAdapter), igual que puerta.abrir() en el pueblo.
+## El Faro (Sala 3). Enciende el tablero con luces.encender().
 class_name BeaconMachine
 extends CodeMachine
 
@@ -11,12 +9,12 @@ const STONE_LIGHT := Color("6e6790")
 const STONE_DARK := Color("2c2840")
 const BRONZE := Color("b48a4e")
 const CYAN := Color("3fe0ff")
-const MINI := 2.0                  # tamaño de cada casilla del tablero grabado (px)
+const MINI := 2.0
 const MINI_ORIGIN := Vector2(-8, -36)
 
 var cols := 8
 var rows := 8
-var lit := 0.0                      # 0..1: el cristal encendido
+var lit := 0.0
 
 var _bus: EventBus
 var _text: Callable
@@ -88,7 +86,7 @@ func _draw() -> void:
 	draw_colored_polygon(crystal, Color("1d3a48").lerp(CYAN, lit))
 	draw_polyline(crystal + PackedVector2Array([crystal[0]]), OUTLINE, 1.0)
 	draw_line(Vector2(-2, -55), Vector2(0, -57), Color(1, 1, 1, 0.5 + 0.5 * lit), 1.0)
-	# El tablero grabado (8×8): se ilumina junto con el cristal
+	# Tablero grabado
 	var size := Vector2(cols, rows) * MINI
 	draw_rect(Rect2(MINI_ORIGIN - Vector2(1, 1) * (MINI + 1), size + Vector2(2, 2) * (MINI + 1)), STONE_DARK.darkened(0.3))
 	draw_rect(Rect2(MINI_ORIGIN - Vector2(1, 1), size + Vector2(2, 2)), OUTLINE)

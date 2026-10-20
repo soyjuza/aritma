@@ -1,7 +1,4 @@
-## Algo que el jugador puede usar con E: un personaje, una inscripción, una máquina. Es un
-## área invisible; su tamaño es el del CollisionShape2D hijo (se ajusta en el editor). El texto
-## de ayuda se elige en el Inspector (prompt_key) y lo que pasa al usarlo lo conecta el nivel a
-## la señal used.
+## Algo que se usa con E. El nivel conecta la señal used.
 class_name Interactable
 extends Area2D
 

@@ -1,9 +1,5 @@
 @tool
-## El sendero de la Singularidad (Sala 5): sobre el abismo flota una cuadrícula de losas con un
-## número grabado cada una. Solo aguantan las que cumplen la regla de la sala («múltiplos de 3»,
-## por ejemplo); las demás se desmoronan al pisarlas. Siempre hay un camino de losas buenas
-## desde el borde de abajo hasta la losa dorada del núcleo, arriba. Las losas rotas quedan como
-## hueco. Fuera de la cuadrícula y en los huecos, se cae.
+## Sendero de la Sala 5: losas con números sobre el abismo.
 class_name NumberPath
 extends Node2D
 
@@ -13,10 +9,10 @@ const STONE_LIGHT := Color("b3abc8")
 const STONE_DARK := Color("514b63")
 const CYAN := Color("3fe0ff")
 const GOLD := Color("ffc857")
-## Cuánto perdona el borde entre una losa buena y una mala (px): pisar la orilla no rompe nada.
+## Margen del borde entre losas (px).
 const EDGE_GRACE := 4.0
 
-## La zona del abismo (en coordenadas de este nodo): fuera de ella el piso es firme.
+## Zona del abismo.
 @export var void_rect := Rect2(24, 56, 448, 180):
 	set(value):
 		void_rect = value
@@ -34,20 +30,19 @@ const EDGE_GRACE := 4.0
 		cell = value
 		queue_redraw()
 
-var multiple := 3                   # la regla: solo aguantan los múltiplos de este número
-var numbers: Dictionary = {}        # {Vector2i: número grabado}
-var path: Array[Vector2i] = []      # el camino bueno, de abajo hacia el núcleo
-var broken: Dictionary = {}         # {Vector2i: segundos desde que se rompió}
-var goal := Vector2i(-1, -1)        # la losa dorada del núcleo (fila de arriba)
+var multiple := 3    # múltiplos de este número
+var numbers: Dictionary = {}
+var path: Array[Vector2i] = []
+var broken: Dictionary = {}
+var goal := Vector2i(-1, -1)
 var core_taken := false
-var standing := Vector2i(-1, -1)    # la losa que pisa Tala (se marca)
+var standing := Vector2i(-1, -1)
 
 var _time := 0.0
 var _font: Font = load(UIKit.PIXEL_FONT)
 
 
-## Arma un sendero nuevo: el camino bueno, unas losas buenas sueltas y el resto, números que
-## no cumplen la regla.
+## Arma un sendero nuevo.
 func generate(rng: RandomNumberGenerator, p_multiple: int, extra_safe := 3, top := 60) -> void:
 	multiple = p_multiple
 	numbers.clear()
@@ -57,7 +52,7 @@ func generate(rng: RandomNumberGenerator, p_multiple: int, extra_safe := 3, top 
 	var safe := {}
 	for c in path:
 		safe[c] = true
-	# Losas buenas sueltas junto al camino: callejones sin salida que obligan a seguir pensando
+	# Losas buenas sueltas para confundir
 	var spots: Array[Vector2i] = []
 	for c in path:
 		for n in [c + Vector2i.LEFT, c + Vector2i.RIGHT, c + Vector2i.DOWN]:
@@ -75,12 +70,12 @@ func generate(rng: RandomNumberGenerator, p_multiple: int, extra_safe := 3, top 
 			numbers[c] = _good_number(rng, top) if safe.has(c) else _bad_number(rng, top)
 
 
-## Un camino al azar por losas vecinas (sin diagonales), de la fila de abajo a la de arriba.
+## Camino al azar de abajo hacia arriba.
 func _random_path(rng: RandomNumberGenerator) -> Array[Vector2i]:
 	var c := Vector2i(rng.randi_range(1, cols - 2), rows - 1)
 	var out: Array[Vector2i] = [c]
-	var side := 0          # paso de costado en curso (−1, 0 o 1)
-	var run := 0           # cuántos pasos lleva de costado
+	var side := 0
+	var run := 0
 	while c.y > 0:
 		var moves: Array[Vector2i] = []
 		if run < 3:
@@ -88,7 +83,6 @@ func _random_path(rng: RandomNumberGenerator) -> Array[Vector2i]:
 				var n := c + Vector2i(dx, 0)
 				if in_grid(n) and not n in out:
 					moves.append(n)
-		# Subir es lo más común, pero de costado al menos una vez cada dos filas
 		if moves.is_empty() or rng.randf() < 0.45:
 			moves = [c + Vector2i.UP]
 		var next: Vector2i = moves[rng.randi_range(0, moves.size() - 1)]
@@ -134,8 +128,7 @@ func cell_center_global(c: Vector2i) -> Vector2:
 	return to_global(cell_rect(c).get_center())
 
 
-## La losa bajo un punto del mundo (o (-1, -1) fuera de la cuadrícula). En la orilla entre una
-## losa mala y una buena cuenta la buena.
+## Losa bajo un punto, o (-1, -1).
 func cell_at(world: Vector2) -> Vector2i:
 	var p := to_local(world) - origin()
 	var c := Vector2i(floori(p.x / cell), floori(p.y / cell))
@@ -149,7 +142,6 @@ func cell_at(world: Vector2) -> Vector2i:
 	return c
 
 
-## ¿El punto (del mundo) está sobre el abismo? (fuera de él el piso es firme)
 func over_void(world: Vector2) -> bool:
 	return void_rect.has_point(to_local(world))
 
@@ -179,7 +171,7 @@ func _draw() -> void:
 			_draw_stone(Vector2i(x, y))
 
 
-## En el editor todavía no hay números: una cuadrícula de muestra para ver el tamaño.
+## Cuadrícula de muestra para el editor.
 func _preview() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
@@ -189,7 +181,6 @@ func _preview() -> void:
 func _draw_void() -> void:
 	draw_rect(void_rect.grow(2), OUTLINE)
 	draw_rect(void_rect, Color("07060d"))
-	# Remolino del vórtice y polvo de estrellas
 	var c := void_rect.get_center()
 	for k in 5:
 		var r := 30.0 + k * 34.0
@@ -204,7 +195,7 @@ func _draw_void() -> void:
 func _draw_stone(c: Vector2i) -> void:
 	var r := cell_rect(c).grow(-1.5)
 	if broken.has(c):
-		# Se desmorona: los pedazos caen al vacío y se apagan
+		# Losa rota cayendo
 		var t: float = broken[c]
 		if t < 0.6:
 			var k := t / 0.6

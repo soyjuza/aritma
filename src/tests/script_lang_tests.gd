@@ -1,6 +1,4 @@
-## Pruebas del lenguaje del Códice: cada caso es un programa y lo que debe imprimir
-## (o el error que debe dar). Las usa SelfTest y también script_lang_runner.gd:
-##   Godot --headless --path . -s res://src/tests/script_lang_runner.gd
+## Pruebas del lenguaje del Códice: programa y lo que debe imprimir.
 class_name ScriptLangTests
 extends RefCounted
 
@@ -35,7 +33,6 @@ const ERRORS := [
 var failures := 0
 
 
-## report(ok: bool, etiqueta: String) se llama por cada caso.
 func run_all(report: Callable) -> int:
 	failures = 0
 	var sandbox := ScriptSandbox.new()

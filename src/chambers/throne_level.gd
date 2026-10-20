@@ -1,28 +1,24 @@
-## Sala 6 — El Trono del Cero (escena: scenes/niveles/sala_6_trono.tscn). El jefe final.
-## Sin máquina ni código: al entrar a la sala, el Guardián del Cero (ZeroBoss) despierta y hay
-## que vencerlo. Al cambiar de fase se cubre con un escudo y pone un problema de repaso de las
-## salas (QuizState, con BossQuiz). Si Tala falla o se le acaba el tiempo, el jefe llama una ola
-## de guardianes (el Director de Alarma de la sala, con los puntos «Guardianes/Caidas»); si
-## acierta, el escudo cae sin pelear. Vencerlo gana el juego.
-## Al aparecer el jefe, Tala recupera corazones, y cada vez que cae el escudo aparece una
-## poción (HeartPotion) que cura un corazón. Si Tala cae, la pelea empieza de nuevo.
+## Sala 6: el jefe final. En cada fase pone un problema y suelta una poción.
 class_name ThroneLevel
 extends ChamberLevel
 
 const POTION := preload("res://scenes/objetos/pocion.tscn")
 
-## Dónde puede caer el pisotón del jefe (el piso de la sala, sin los muros).
+## Donde puede caer el pisotón.
 @export var arena := Rect2(48, 56, 400, 250)
 
 var _in_hall := false
-var _framing := false       # la cámara muestra al jefe mientras se lee la presentación
+var _framing := false
 var _rng := RandomNumberGenerator.new()
+var _quiz: BossQuiz
 
 @onready var boss: ZeroBoss = $Actores/JefeCero
 
 
 func wire() -> void:
-	boss.setup(_game.bus, alarm)
+	boss.setup(_game.bus, alarm, _game.data.setting("boss", {}))
+	boss.title = _game.data.message("boss_name")
+	_quiz = BossQuiz.new(_game.data.message, (data.get("quiz", {}) as Dictionary).get("problems", {}))
 	boss.hold_while = _game.dialog.is_open
 	boss.arena = Rect2(to_global(arena.position), arena.size)
 	boss.defeated.connect(_on_boss_defeated)
@@ -40,23 +36,21 @@ func _on_hall_entered() -> void:
 	objective_key = "objective_throne_boss"
 	boss.appear()
 	_game.health.heal(int(_game.combat("heal_on_boss", 4)))
-	# La cámara muestra al jefe mientras aparece; mientras se lee, el jefe espera. Al cerrar el
-	# diálogo, la cámara vuelve a Tala y empieza la pelea.
+	# La cámara muestra al jefe mientras se lee
 	_framing = true
 	_game.rig.frame(boss.global_position + Vector2(0, 20), 1.0, 0.8)
 	_game.dialog.say(data.get("intro", []))
 
 
-## El escudo: un problema de repaso (el de la fase que empieza, según chambers.json "quiz").
+## Pone el problema de la fase.
 func _ask_question() -> void:
-	# Primero se ve el escudo; la prueba sale cuando Tala está jugando (no en otro reto)
 	await get_tree().create_timer(0.8).timeout
 	while not _game.machine.current is PlayState:
 		await get_tree().process_frame
 	var settings: Dictionary = data.get("quiz", {})
 	var kinds: Array = settings.get("kinds", ["paridad", "multiplo", "despejar"])
 	var kind := String(kinds[clampi(boss.phase - 1, 0, kinds.size() - 1)])
-	_game.machine.change("quiz", {"quiz": BossQuiz.make(kind, _rng), "seconds": float(settings.get("seconds", 15)), "on_done": _on_answered})
+	_game.machine.change("quiz", {"quiz": _quiz.make(kind, _rng), "seconds": float(settings.get("seconds", 15)), "on_done": _on_answered})
 
 
 func _on_answered(right: bool) -> void:
@@ -70,8 +64,7 @@ func _physics_process(_delta: float) -> void:
 		_game.follow_player()
 
 
-## Una poción en un lugar al azar de la sala, en piso libre (no sobre una columna) y lejos del
-## jefe y de Tala (hay que ir por ella).
+## Una poción lejos del jefe y de Tala.
 func _drop_potion() -> void:
 	var area := Rect2(to_global(arena.position), arena.size).grow(-24)
 	var spot := area.get_center()
@@ -86,7 +79,6 @@ func _drop_potion() -> void:
 	_game.notify([_game.data.message("boss_potion")], 3.0)
 
 
-## ¿No hay nada sólido (columnas, muros) a menos de 14 px de ese punto?
 func _floor_free(spot: Vector2) -> bool:
 	var circle := CircleShape2D.new()
 	circle.radius = 14.0
@@ -99,7 +91,7 @@ func _floor_free(spot: Vector2) -> bool:
 
 func _on_potion_taken(potion: HeartPotion) -> void:
 	if _game.health.halves >= _game.health.max_halves:
-		return    # con los corazones llenos, la poción se queda para después
+		return    # con vida llena se queda ahí
 	_game.health.heal(int(_game.combat("potion_heal", 2)))
 	potion.queue_free()
 

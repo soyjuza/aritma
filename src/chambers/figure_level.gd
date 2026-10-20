@@ -1,8 +1,4 @@
-## Sala 4 — La Mesa de las Figuras (escena: scenes/niveles/sala_4_figuras.tscn).
-## Se entra por un pasillo con prensas más rápidas que las de la Sala 2. En la sala, la Mesa
-## de las Figuras: desde su atril se abre un rompecabezas (PuzzleState) donde hay que llenar
-## una figura grande con piezas más pequeñas, sin que sobre ni falte nada. Son dos figuras
-## seguidas (en chambers.json, "puzzles"). Esta sala no es de código, es de razonamiento.
+## Sala 4: la Mesa de las Figuras (rompecabezas).
 class_name FigureLevel
 extends ChamberLevel
 
@@ -49,7 +45,7 @@ func _open_table() -> void:
 	_game.machine.change("puzzle", {"table": table})
 
 
-## Cargando una partida con la Mesa ya resuelta: las figuras quedan llenas.
+## Cargando partida con la Mesa resuelta.
 func restore_solved() -> void:
 	while not table.advance():
 		pass

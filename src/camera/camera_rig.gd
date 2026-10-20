@@ -1,7 +1,5 @@
-## Cámara del juego: sigue a Tala con suavidad, tiembla con los golpes y, mientras se
-## programa una máquina, se desliza para encuadrarla (la máquina queda en la mitad derecha
-## de la pantalla, la que no tapa el Códice). El zoom se redondea para que cada píxel del
-## arte ocupe un número entero de píxeles de pantalla (así el pixel art se ve nítido).
+## Cámara: sigue a Tala, tiembla con los golpes y encuadra las máquinas.
+## El zoom es entero para que el pixel art se vea nítido.
 class_name CameraRig
 extends Camera2D
 
@@ -9,7 +7,7 @@ var target: Node2D
 var base_zoom := 3.0
 var fixed_shot := false
 
-var _bounds := Rect2i()       # límites del nivel (en píxeles); los planos fijos los ignoran
+var _bounds := Rect2i()    # límites del nivel en píxeles
 var _shake := 0.0
 var _frame_from := Vector2.ZERO
 var _frame_to := Vector2.ZERO
@@ -25,7 +23,7 @@ func _ready() -> void:
 	_snap_zoom()
 
 
-## Zoom entero en píxeles reales de pantalla (el estiramiento de la ventana también cuenta).
+## Zoom entero según el tamaño real de la ventana.
 func _snap_zoom(extra := 1.0) -> void:
 	var stretch := get_viewport().get_final_transform().get_scale().x
 	var want := base_zoom * extra * stretch
@@ -33,7 +31,7 @@ func _snap_zoom(extra := 1.0) -> void:
 	zoom = Vector2.ONE * (whole / stretch)
 
 
-## Bordes del nivel que la cámara no pasa mientras sigue a Tala (vacío = sin bordes).
+## Bordes del nivel que la cámara no pasa.
 func set_bounds(pixels: Rect2i) -> void:
 	_bounds = pixels
 	_apply_limits(not fixed_shot)
@@ -57,10 +55,10 @@ func follow(node: Node2D) -> void:
 		global_position = node.global_position + Vector2(0, -8)
 
 
-## Plano fijo: mirar un punto (título, máquinas). zoom_factor multiplica el zoom base.
+## Plano fijo mirando un punto (título, máquinas).
 func frame(at: Vector2, zoom_factor := 1.0, seconds := 0.6) -> void:
 	fixed_shot = true
-	# Para encuadrar una máquina junto al borde, la cámara puede pasar los límites del nivel
+	# Junto a una máquina puede pasar los límites del nivel
 	_frame_from = get_screen_center_position()
 	_apply_limits(false)
 	_frame_to = at

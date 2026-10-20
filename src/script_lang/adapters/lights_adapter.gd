@@ -1,6 +1,4 @@
-## PATRÓN ADAPTER — Las luces del Faro vistas desde el Códice:
-##   luces.encender()   luces.apagar()   luces.encendidas
-## Igual que la puerta del pueblo: envuelve las funciones del Faro sin que el lenguaje las conozca.
+## Patrón Adapter: las luces del Faro en el Códice (luces.encender()).
 class_name LightsAdapter
 extends ScriptObject
 

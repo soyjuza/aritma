@@ -1,4 +1,4 @@
-## Lista de opciones con cursor, reutilizada por el menú principal y la pausa.
+## Lista de opciones con cursor.
 class_name MenuList
 extends RefCounted
 
@@ -14,7 +14,7 @@ func _init(p_options: Array, enabled: Callable = Callable()) -> void:
 	_enabled = enabled
 
 
-## Mueve el cursor saltando opciones deshabilitadas. Devuelve true si se movió.
+## Mueve el cursor. true si se movió.
 func move(actions: Array) -> bool:
 	var step := 1 if "ui_down" in actions else (-1 if "ui_up" in actions else 0)
 	if step == 0:

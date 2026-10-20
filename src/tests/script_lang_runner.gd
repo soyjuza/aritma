@@ -1,5 +1,5 @@
-## Corre solo las pruebas del lenguaje del Códice, sin abrir el juego:
-##   Godot --headless --path . -s res://src/tests/script_lang_runner.gd
+## Pruebas del lenguaje sin abrir el juego:
+## Godot --headless --path . -s res://src/tests/script_lang_runner.gd
 extends SceneTree
 
 

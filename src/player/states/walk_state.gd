@@ -1,4 +1,4 @@
-## PATRÓN STATE — Caminar.
+## Patrón State: caminar.
 class_name WalkState
 extends GroundState
 

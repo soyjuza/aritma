@@ -7,25 +7,39 @@
 | Creacional | **Factory** | `AlarmDirector` (instancia `centinela.tscn`, `hechicero.tscn`, `runico.tscn`); `OrbShot` (instancia `orbe.tscn`) | Crea los guardianes de cada ola y los orbes del hechicero. |
 | Estructural | **Facade** | `TileKit`, `AudioService` | Ocultan cómo se arman las partículas y el sonido con el pack de arte. |
 | Estructural | **Adapter** | `DoorAdapter`, `FilterAdapter`, `LightsAdapter` | Pasan los objetos del juego al lenguaje del Códice (`puerta.abrir()`, `tolva.soltar()`, `luces.encender()`). |
-| Comportamiento | **State** | `StateMachine` + `GameState` (título, juego, pausa, Códice, reto de teclas, rompecabezas de figuras…); `MoveState` (quieta, caminar, correr, saltar, golpear, caer); `GuardianState` (dormido, despertando, cayendo, persiguiendo, preparando, golpeando, aturdido, vencido) | Fases del juego, movimiento de Tala y comportamiento de los guardianes. |
+| Comportamiento | **State** | `StateMachine` + `GameState` (título, juego, pausa, Códice, reto de teclas, rompecabezas de figuras…); `MoveState` (quieta, caminar, correr, saltar, golpear, caer); `GuardianState` (dormido, despertando, cayendo, persiguiendo, preparando, golpeando, aturdido, vencido); `BossState` (escondido, aparece, espera, persigue, ráfaga, pisotón, cansado, escudo, vencido) | Fases del juego, movimiento de Tala y comportamiento de los guardianes y del jefe. |
 | Comportamiento | **Observer** | `EventBus` + `SoundObserver`, `CameraShakeObserver`, `AlarmDirector` (escucha `MACHINE_FAILED`); `PlayerHealth` publica golpes y caídas; señales de los nodos (`used`, `crossed`, `fell`, `solved`, `defeated`) | El sonido, la cámara y la alarma reaccionan a los eventos sin que quien los emite sepa de ellos. |
-| Comportamiento | **Strategy** | `QualityProfile` → `HighQuality`, `LowQuality`; `GuardianAttack` → `MeleeStrike` (caballero), `OrbShot` (hechicero), `RuneBlast` (rúnico) | Calidad de efectos; cómo ataca cada tipo de guardián. |
+| Comportamiento | **Strategy** | `QualityProfile` → `HighQuality`, `LowQuality`; `GuardianAttack` → `MeleeStrike` (caballero), `OrbShot` (hechicero), `RuneBlast` (rúnico); `QuizProblem` → `ParityProblem`, `MultipleProblem`, `SolveProblem` (con `BossQuiz` como contexto) | Calidad de efectos; cómo ataca cada tipo de guardián; qué problema pone el jefe en cada fase. |
 | Comportamiento | **Command** | `FilterCommand`, `RootsCommand` | El programa del jugador deja órdenes que la máquina ejecuta y anima una por una. |
 | Comportamiento | **Template Method** | `CodeMachine` → `GateMachine`, `CribaMachine`, `MuralMachine`, `BeaconMachine` | Pasos fijos para correr el código. Cada máquina redefine `evaluate()` y `perform()`. |
 | Comportamiento | **Interpreter** | `src/script_lang/` (Lexer, Parser, nodos, ScriptSandbox) | Ejecuta el código estilo Python que escribe el jugador. |
 
 ## SOLID y bajo acoplamiento
-- **S**: cada script de escena hace una sola cosa. `Grate` abre y cierra una reja,
-  `TriggerZone` avisa cuando se cruza, `FlickerLight` hace parpadear una luz y `Pit` es un foso.
+- **S**: cada clase hace una sola cosa. `Grate` abre y cierra una reja, `TriggerZone` avisa
+  cuando se cruza, `FlickerLight` hace parpadear una luz y `Pit` es un foso. `Game` solo
+  compone y delega: los avisos son de `NoticeBoard`, el fundido de `ScreenFade` y las reglas
+  de vidas y castigos de `LifeRules`. Las máquinas separan la lógica del dibujo
+  (`CribaMachine` / `CribaView`; `RootsTrial`, `ParityFilter` y `FigurePuzzle` son reglas sin
+  nada visible).
 - **O**: para agregar una sala se crea una escena nueva y un `ChamberBuilder` nuevo, y se
-  registra. `Level` y `ChamberLevel` no cambian.
+  registra. `Level` y `ChamberLevel` no cambian. Lo mismo con un estado nuevo (de Tala, de un
+  guardián o del jefe), un ataque nuevo o un tipo nuevo de problema del jefe: una clase nueva.
 - **L**: todas las salas son `ChamberLevel` y el juego las trata igual. Todas las máquinas son
-  `CodeMachine` y `CodexState` las usa igual.
+  `CodeMachine` y `CodexState` las usa igual. El pueblo y las salas son `Level`: `Game` llama a
+  `save_state()` y `restart_after_death()` sin preguntar de qué tipo es (polimorfismo).
 - **I/D**: los niveles se comunican con nodos genéricos (`SignPost`, `Npc`, `CheckpointZone`,
   `ExitZone`, `Grate`) a través de señales, sin conocer sus detalles. El juego depende de
   `Level`, no de cada sala concreta.
-- **Sin código rígido**: los textos, las rondas, los casos y los ritmos de las prensas están en
-  `data/*.json`. Las posiciones están en las escenas (Inspector), no en constantes del código.
+- **Encapsulamiento**: lo interno de cada clase empieza con `_` y ninguna otra clase lo toca;
+  para eso hay métodos públicos (por ejemplo `TriggerZone.mark_fired()`).
+- **Sin código rígido**: los textos que se leen en pantalla están en `data/texts.json`; las
+  rondas, los casos, los ritmos de las prensas y los rangos de los problemas en
+  `data/chambers.json`; la velocidad de Tala, el combate y los números de la pelea con el jefe
+  en `data/config.json`. Las posiciones están en las escenas (Inspector).
+
+**UML completo:** `docs/UML_COMPLETO.md` tiene las 148 clases, una por una, generado desde el
+código con `python3 tools/generar_uml.py` (siempre coincide con el código). El diagrama de abajo
+muestra las clases principales y cómo se relacionan.
 
 ## Diagrama UML (clases principales)
 ```mermaid
@@ -161,6 +175,19 @@ classDiagram
     GuardianState <|-- StaggerState
     GuardianState <|-- DyingState
     Guardian o-- GuardianState
+    class ZeroBoss { +appear() +take_hit() +answered() +reset_for_retry() }
+    class BossState { <<abstract>> +physics() +animation() +hittable() +draw() }
+    BossState <|-- BossHiddenState
+    BossState <|-- BossAppearState
+    BossState <|-- BossWaitState
+    BossState <|-- BossChaseState
+    BossState <|-- BossVolleyState
+    BossState <|-- BossSlamState
+    BossState <|-- BossTiredState
+    BossState <|-- BossShieldState
+    BossState <|-- BossDyingState
+    ZeroBoss o-- BossState
+    BossVolleyState ..> RuneOrb : crea
     class GuardianAttack { <<strategy>> +windup_time() +perform() }
     GuardianAttack <|-- MeleeStrike
     GuardianAttack <|-- RuneBlast
@@ -187,4 +214,20 @@ classDiagram
     class AudioService { <<facade>> }
     Game o-- TileKit
     Game o-- AudioService
+    class NoticeBoard { +notify() +penalty() +tick() }
+    class ScreenFade { +fade_in() +fade_out() +tick() }
+    class LifeRules { +penalize() }
+    Game o-- NoticeBoard
+    Game o-- ScreenFade
+    Game o-- LifeRules
+    LifeRules ..> EventBus : PLAYER_DIED
+    class BossQuiz { +make(kind, rng) }
+    class QuizProblem { <<strategy>> +make(rng) }
+    QuizProblem <|-- ParityProblem
+    QuizProblem <|-- MultipleProblem
+    QuizProblem <|-- SolveProblem
+    BossQuiz o-- QuizProblem
+    ThroneLevel o-- BossQuiz
+    CribaMachine ..> CribaView : dibuja con
+    CribaMachine o-- CribaSphere
 ```

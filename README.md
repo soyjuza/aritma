@@ -22,7 +22,8 @@ construía por código al ejecutar el juego.
 | `assets/tiles/` | TileSets: `suelo.tres` (se pisa) y `muros.tres` (todo lo que se pinta ahí es sólido y hace sombra). |
 | `src/` | Scripts: reglas, patrones de diseño, intérprete del Códice. |
 | `data/` | Textos, salas y configuración (JSON): nada de esto está escrito a mano en el código. |
-| `docs/ARQUITECTURA.md` | Diagrama UML y patrones de diseño. |
+| `docs/ARQUITECTURA.md` | Patrones de diseño, SOLID y el diagrama UML de las clases principales. |
+| `docs/UML_COMPLETO.md` | El UML de **todas** las clases, generado desde el código con `python3 tools/generar_uml.py`. |
 
 ## Cómo está armado un nivel
 Cada nivel tiene los mismos nodos:
@@ -49,7 +50,7 @@ puntos seguros, fosos, máquinas).
 | 3. El Vórtice de Celdas | Faro | `luces.encender()` (como `puerta.abrir()` en el pueblo): enciende la sala y el tablero | Buscaminas: E destapa, Q bandera; 10 minas; siempre se resuelve sin adivinar; una mina = −2 corazones y tablero nuevo. Sin guardianes. |
 | 4. La Mesa de las Figuras | Mesa | Sin código: llenar una figura grande con piezas más pequeñas (se arrastran con el ratón; R o clic derecho las gira). Dos figuras: un rectángulo y una casa con las piezas giradas | — |
 | 5. La Singularidad del Cero | — | Sin código: cruzar el abismo por losas numeradas pisando solo las que cumplen la regla (múltiplos de 3 o de 4, al azar) | Una losa mala se rompe y Tala cae (−7 s); la losa queda rota. Tomar el núcleo lleva a la Sala 6. |
-| 6. El Trono del Cero | — | Nada: es el **jefe final**, el Guardián del Cero (tengu rojo) | 3 fases. Ráfaga de orbes (3, 5, 7), pisotón con círculo rojo (salir o saltar con ESPACIO; −1 corazón) y, al cambiar de fase, escudo + ola de guardianes. Al entrar se recuperan 2 corazones. Vencerlo gana. |
+| 6. El Trono del Cero | — | Nada: es el **jefe final**, el Guardián del Cero (tengu rojo) | 16 de vida en 4 fases. Ráfaga de orbes (3, 5, 6, 7), pisotón con círculo rojo (salir o saltar con ESPACIO; −1 corazón). Al perder cada cuarta parte se cubre con un escudo y pone un **problema** de repaso (par/impar, múltiplo, despejar x; 15 s): si aciertas cae el escudo; si fallas llama 4, 5 o 6 guardianes. Al caer el escudo deja una **poción**. Al entrar se recuperan 2 corazones. Si Tala cae, el jefe vuelve a vida llena. Vencerlo gana. |
 
 ## Guardianes, corazones y castigos de tiempo
 - Cada vez que una máquina rechaza el código (también por un error de escritura) sube la
@@ -58,7 +59,7 @@ puntos seguros, fosos, máquinas).
   color bajo los pies: dorado el caballero, morado el hechicero (desde la alarma 2), rojo el
   rúnico (desde la alarma 3). Atacan en formación: los caballeros rodean a Tala y cubren al
   hechicero; el hechicero mantiene la distancia y, si algo le tapa el tiro, se teletransporta. Mientras quede uno, la máquina
-  está bloqueada. Al resolver la sala la alarma vuelve a 0. Resolver salas **no** cura: la única curación son 2 corazones al entrar a la sala del jefe.
+  está bloqueada. Al resolver la sala la alarma vuelve a 0. Resolver salas **no** cura: solo se recuperan 2 corazones al entrar a la sala del jefe y con las pociones que deja al caer su escudo.
 - Desde la alarma 3 cae también el **guardián rúnico** (calavera con aura roja): no golpea,
   se carga y explota. Si Tala queda dentro del círculo rojo, aparece el **reto de teclas**:
   pulsar en orden 4 a 7 teclas (A S D F J K L) en 5 a 8 segundos, tras un segundo para
@@ -69,10 +70,11 @@ puntos seguros, fosos, máquinas).
   a la entrada de la sala; si quedaba 1 minuto o menos, **fin del juego**.
 - La pausa detiene el reloj y a los guardianes. El libro (TAB) detiene a los guardianes, pero
   el reloj sigue.
-- Todos los números están en `data/config.json`, sección `combat`.
+- Todos los números están en `data/config.json`: secciones `combat` (guardianes, corazones, castigos) y `boss` (la pelea con el jefe).
+- Si el código tiene un error, la consola del Códice lo conserva: al volver de pelear sigue ahí.
 
 ## Pruebas automáticas
 ```
-godot --path . -- --selftest                       # 136 pruebas de reglas y del recorrido completo
+godot --path . -- --selftest                       # 151 pruebas de reglas y del recorrido completo
 godot --path . -- --recorrido=/carpeta[:sala2|:sala3|:sala4|:sala5|:jefe]  # capturas del camino del jugador
 ```

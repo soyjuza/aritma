@@ -1,6 +1,4 @@
-## PATRÓN STATE — Pausa (diseño aprobado): la escena oscurecida detrás, el menú a la
-## izquierda y, a la derecha, la energía del núcleo, el progreso y el objetivo actual.
-## La pausa detiene todo: el reloj de 15 minutos y el mundo (guardianes, prensas, Tala).
+## Patrón State: pausa. Se detiene el reloj y el mundo.
 class_name PauseState
 extends GameState
 
@@ -56,7 +54,7 @@ func update(delta: float) -> void:
 func draw(ui: UIKit) -> void:
 	var s := ui.size()
 	ui.rect(Rect2(Vector2.ZERO, s), Color(0.015, 0.025, 0.04, 0.62))
-	# Columna izquierda con el menú
+	# Menú
 	ui.rect(Rect2(0, 0, 470, s.y), Color(0.04, 0.05, 0.07, 0.9))
 	ui.text(game.data.message("pause_kicker"), Vector2(72, 64), 14, UIKit.CYAN, "bold")
 	ui.text(game.data.message("pause_title"), Vector2(70, 86), 54, UIKit.GOLD, "title")
@@ -65,7 +63,7 @@ func draw(ui: UIKit) -> void:
 	for i in ui.wrap(help, 330, 17).size():
 		ui.text(ui.wrap(help, 330, 17)[i], Vector2(72, 180 + _menu.height() + 24 + i * 24), 17, UIKit.MUTED)
 	ui.text(game.data.message("pause_keys", game.key_names()), Vector2(72, s.y - 52), 15, UIKit.MUTED)
-	# Columna derecha: núcleo, progreso, objetivo
+	# Núcleo, progreso y objetivo
 	var x := s.x - 620
 	var energy := Rect2(x, 64, 560, 150)
 	ui.panel(energy)

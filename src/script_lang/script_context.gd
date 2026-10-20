@@ -1,7 +1,4 @@
-## Estado de una ejecución de un programa del Códice: variables, funciones, salida de
-## texto, control de flujo (return, break, continue), errores y límite de pasos.
-## También reúne las reglas de los valores al estilo Python (qué es verdadero, cómo se
-## muestra cada valor, la división entera, el módulo...).
+## Estado de una ejecución: variables, salida, errores y límite de pasos.
 class_name ScriptContext
 extends RefCounted
 
@@ -29,11 +26,11 @@ func fail(message: String, line: int) -> void:
 		error_line = line
 
 
-## Cuenta un paso. Devuelve false si el programa ya se pasó del límite.
+## Cuenta un paso. false si se pasó del límite.
 func tick(line: int) -> bool:
 	steps += 1
 	if steps > max_steps:
-		fail("El programa tardó demasiado. ¿Hay un while que nunca termina?", line)
+		fail(ScriptMessages.text("programa_tardo_demasiado_hay_while"), line)
 		return false
 	return true
 
@@ -59,7 +56,7 @@ func lookup(name: String, line: int):
 	if globals.has(name):
 		return globals[name]
 	var hint := suggest(name)
-	fail("No conozco «%s».%s" % [name, (" ¿Quisiste decir «%s»?" % hint) if hint != "" else ""], line)
+	fail(ScriptMessages.text("no_conozco") % [name, (ScriptMessages.text("quisiste_decir") % hint) if hint != "" else ""], line)
 	return null
 
 
@@ -74,7 +71,7 @@ func print_line(text: String) -> void:
 	output.append(text)
 
 
-## El nombre conocido más parecido (para los mensajes de error).
+## El nombre más parecido, para los errores.
 func suggest(name: String) -> String:
 	var best := ""
 	var best_score := 0.0
@@ -157,14 +154,14 @@ static func is_number(v) -> bool:
 	return typeof(v) in [TYPE_INT, TYPE_FLOAT] and typeof(v) != TYPE_BOOL
 
 
-## Módulo al estilo Python: el resultado tiene el signo del divisor (-7 % 3 == 2).
+## Módulo como en Python (-7 % 3 == 2).
 static func py_mod(a, b):
 	if typeof(a) == TYPE_INT and typeof(b) == TYPE_INT:
 		return a - b * int(floor(float(a) / float(b)))
 	return a - b * floor(a / b)
 
 
-## División entera al estilo Python: redondea hacia abajo (-7 // 2 == -4).
+## División entera como en Python (-7 // 2 == -4).
 static func py_floordiv(a, b):
 	if typeof(a) == TYPE_INT and typeof(b) == TYPE_INT:
 		return int(floor(float(a) / float(b)))

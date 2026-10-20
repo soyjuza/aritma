@@ -1,20 +1,15 @@
-## PATRÓN STATE — El reto de teclas: un guardián rúnico explotó con Tala dentro de su círculo.
-## El mundo va en cámara lenta y en el centro aparece una fila de teclas al azar: hay que
-## pulsarlas EN ORDEN antes de que se vacíe la barra. Primero hay un instante para leerlas
-## («¡Prepárate!»). Solo cuentan las teclas del reto (A S D F J K L): las demás (W, flechas,
-## SHIFT...) se ignoran. Una tecla del reto equivocada o el tiempo agotado cuestan corazones;
-## completarlo no cuesta nada. El tiempo de la barra es tiempo real.
+## Patrón State: reto de teclas del rúnico. Hay que pulsarlas en orden antes de que se acabe la barra.
 class_name KeyChallengeState
 extends GameState
 
 const RESULT_TIME := 0.8
 
 var keys: Array = []       # ["J", "D", "K", "S"]
-var pool: Array = []       # las teclas que pueden salir (solo esas cuentan)
-var ready_time := 1.0      # segundos para leerlas antes de que corra la barra
-var index := 0             # la que toca
+var pool: Array = []
+var ready_time := 1.0
+var index := 0
 var seconds := 3.0
-var damage := 4            # mitades de corazón si falla
+var damage := 4    # mitades de corazón
 var won := false
 var finished := false
 
@@ -23,7 +18,7 @@ var _finish_ms := 0
 var _wrong := ""
 
 
-## Arma un reto: "count" teclas sacadas de "pool", sin repetir la misma dos veces seguidas.
+## Arma el reto sin repetir la misma tecla seguida.
 static func random_keys(pool: Array, count: int) -> Array:
 	var out: Array = []
 	while out.size() < count:
@@ -74,7 +69,7 @@ func handle_key(event: InputEventKey) -> bool:
 	return true
 
 
-## Los primeros instantes: las teclas se ven, pero la barra todavía no corre.
+## Al principio la barra no corre.
 func is_getting_ready() -> bool:
 	return (Time.get_ticks_msec() - _start_ms) / 1000.0 < ready_time
 
@@ -139,7 +134,7 @@ func draw(ui: UIKit) -> void:
 		ui.rect(r, fill)
 		ui.frame(r, border, 3.0)
 		ui.text_centered(String(keys[i]), r.position.y + r.size.y / 2.0 - 22, 40, text_color, "title", r.get_center().x)
-	# La barra de tiempo (se vacía en tiempo real)
+	# Barra de tiempo
 	var frac := clampf(time_left() / seconds, 0.0, 1.0) if not finished else 0.0
 	var bar := Rect2((s.x - w) / 2.0, y + box + 22, w, 12)
 	ui.rect(bar, Color(1, 1, 1, 0.08))

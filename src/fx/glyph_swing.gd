@@ -1,6 +1,4 @@
-## El rastro de un golpe de garrote: un arco cian que se apaga y unos símbolos de matemáticas
-## y de programación (+ − × ÷ = { } ; …) que salen disparados hacia afuera y se desvanecen.
-## Se crea en el lugar del golpe y se borra solo.
+## Rastro del golpe de garrote: un arco y símbolos que salen volando.
 class_name GlyphSwing
 extends Node2D
 
@@ -12,7 +10,7 @@ const ARC := 1.2
 var direction := Vector2.DOWN
 
 var _t := 0.0
-var _bits: Array = []      # [{text, angle, speed, spin, color}]
+var _bits: Array = []
 var _font: Font = load(UIKit.PIXEL_FONT)
 
 
@@ -39,12 +37,12 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	var k := _t / LIFE
 	var base := direction.angle()
-	# El arco: se dibuja ya completo y se va apagando desde la cola
+	# El arco se apaga desde la cola
 	var alpha := 1.0 - k
 	var from := base - ARC + ARC * 2.0 * minf(1.0, k * 2.5) * 0.35
 	draw_arc(Vector2.ZERO, RADIUS, from, base + ARC, 14, Color(0.25, 0.88, 1.0, 0.75 * alpha), 2.0)
 	draw_arc(Vector2.ZERO, RADIUS - 2.0, from, base + ARC, 14, Color(1, 1, 1, 0.45 * alpha), 1.0)
-	# Los símbolos: al doble de tamaño y a media escala, para que se vean nítidos
+	# Al doble y a media escala para que se vean nítidos
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(0.5, 0.5))
 	for bit in _bits:
 		var at: Vector2 = Vector2.from_angle(bit.angle) * (RADIUS * 0.6 + bit.speed * _t) * 2.0

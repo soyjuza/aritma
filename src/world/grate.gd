@@ -1,7 +1,4 @@
-## Reja (o sello) de bronce que cierra un paso. Los barrotes, el piso que queda debajo, el
-## polvo y la luz son nodos hijos: se ven y se acomodan en el editor. open() la levanta y
-## close() la vuelve a bajar. «Umbral» (opcional) es un bloqueo extra que se quita al abrir
-## y no vuelve (la oscuridad de la puerta del templo).
+## Reja de bronce. open() la levanta y close() la baja.
 class_name Grate
 extends Node2D
 
@@ -23,7 +20,7 @@ func open() -> void:
 	_set_solid(_body, false)
 	if has_node("Umbral"):
 		_set_solid($Umbral, false)
-		$Umbral.visible = false     # también deja de tapar la luz
+		$Umbral.visible = false
 	if has_node("Luz"):
 		$Luz.visible = true
 

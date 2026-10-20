@@ -1,5 +1,4 @@
-## PATRÓN STATE — Estatua: piedra gris y quieta sobre su pedestal. Cuando Tala se acerca a la
-## máquina, sus ojos brillan un instante (la única pista de que no es solo decoración).
+## Patrón State: estatua dormida sobre su pedestal.
 class_name DormantState
 extends GuardianState
 

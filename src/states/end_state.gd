@@ -1,5 +1,4 @@
-## PATRÓN STATE — El final: la Cámara superada (con el tiempo que tomó) o el núcleo apagado
-## porque se acabaron los 15 minutos. Enter vuelve al título.
+## Patrón State: pantalla final.
 class_name EndState
 extends GameState
 

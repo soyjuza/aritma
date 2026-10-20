@@ -1,6 +1,4 @@
-## Carga los datos del juego desde archivos JSON (configuración, cámaras de desafío, textos).
-## Responsabilidad única: leer datos. Ninguna regla del juego vive aquí,
-## y ningún contenido del juego está escrito en el código (sin "hardcoding").
+## Lee los JSON de data/ (configuración, salas y textos).
 class_name DataRepository
 extends RefCounted
 
@@ -34,7 +32,7 @@ func talk(key: String) -> Array:
 	return texts.get("talk", {}).get(key, [])
 
 
-## Devuelve un mensaje con sus marcadores {nombre} reemplazados.
+## Mensaje de texts.json con sus {marcadores} reemplazados.
 func message(key: String, params: Dictionary = {}) -> String:
 	var raw = texts.get("messages", {}).get(key, key)
 	if raw is Array:

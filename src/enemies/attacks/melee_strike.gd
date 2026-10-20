@@ -1,5 +1,4 @@
-## PATRÓN STRATEGY — Estrategia concreta del centinela de piedra: un golpe de puño que quita
-## medio corazón si Tala sigue al alcance cuando lo suelta.
+## Patrón Strategy: golpe de puño del caballero.
 class_name MeleeStrike
 extends GuardianAttack
 

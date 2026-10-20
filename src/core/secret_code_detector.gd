@@ -1,4 +1,4 @@
-## Detecta un código secreto escrito con el teclado (modo guía del expositor).
+## Detecta el código secreto escrito con el teclado.
 class_name SecretCodeDetector
 extends RefCounted
 
@@ -10,7 +10,7 @@ func _init(code: String) -> void:
 	_code = code.to_upper()
 
 
-## Devuelve true cuando las últimas letras escritas forman el código.
+## true cuando lo escrito forma el código.
 func feed(unicode: int) -> bool:
 	if unicode <= 0 or _code == "":
 		return false

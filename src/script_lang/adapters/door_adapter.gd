@@ -1,6 +1,4 @@
-## PATRÓN ADAPTER — Una puerta aritmana vista desde el Códice:
-##   puerta.abrir()   puerta.cerrar()   puerta.abierta
-## Envuelve las funciones reales del nivel (abrir y consultar) sin que el lenguaje las conozca.
+## Patrón Adapter: la puerta en el Códice (puerta.abrir(), puerta.abierta).
 class_name DoorAdapter
 extends ScriptObject
 

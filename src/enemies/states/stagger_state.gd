@@ -1,4 +1,4 @@
-## PATRÓN STATE — Aturdido por un golpe de garrote: sale empujado hacia atrás y destella.
+## Patrón State: aturdido por un golpe.
 class_name StaggerState
 extends GuardianState
 

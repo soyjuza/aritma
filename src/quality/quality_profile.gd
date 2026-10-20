@@ -1,6 +1,4 @@
-## PATRÓN STRATEGY (comportamiento) — Perfil de efectos. Cada perfil decide si las luces
-## proyectan sombras y cuántas partículas se dibujan; el juego usa el perfil elegido sin
-## saber cuál es. create() es una pequeña fábrica que elige la estrategia por índice.
+## Patrón Strategy: perfil de efectos. create() elige cuál usar.
 class_name QualityProfile
 extends RefCounted
 

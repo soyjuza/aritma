@@ -1,5 +1,4 @@
-## PATRÓN STATE — Jugando. El teclado mueve a Tala (ella resuelve su propia máquina de
-## estados de movimiento) y E usa lo que tiene delante.
+## Patrón State: jugando.
 class_name PlayState
 extends GameState
 
@@ -62,8 +61,8 @@ func draw(ui: UIKit) -> void:
 		"fps": game.data.message("fps", {"fps": Engine.get_frames_per_second()}) if game.show_fps else "",
 		"health": game.health,
 		"hurt": game.player.invulnerable - (float(game.combat("invulnerable_sec", 1.0)) - 0.25),
-		"penalty": game.penalty_text,
-		"penalty_left": game.penalty_left,
+		"penalty": game.notices.penalty_text,
+		"penalty_left": game.notices.penalty_left,
 	}
 	var room := game.level as ChamberLevel
 	if room and room.alarm and room.alarm.fighting():
@@ -80,11 +79,11 @@ func draw(ui: UIKit) -> void:
 			info.prompt_key = own.key
 	info.extra = game.level.hud_line()
 	_hud.draw(ui, info)
-	_hud.draw_notice(ui, game.notice, game.notice_left, game.notice_good)
+	_hud.draw_notice(ui, game.notices.text, game.notices.left, game.notices.good)
 	game.dialog.draw(ui)
 
 
-## "2 caballeros · 1 hechicero" (los nombres vienen de texts.json).
+## "2 caballeros · 1 hechicero"
 func _guardian_summary(counts: Dictionary) -> String:
 	var names: Dictionary = game.data.texts.get("guardian_names", {})
 	var parts: Array = []

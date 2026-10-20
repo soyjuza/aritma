@@ -1,8 +1,4 @@
-## Un nivel jugable en 2D (el pueblo o una sala), armado como escena (.tscn) en el editor:
-## capas de tiles (Suelo, Detalles, Muros: lo que se pinta en Muros es sólido y hace sombra),
-## los Actores (ordenados por altura, y-sort), los Efectos, los Bordes, las Zonas y los Fosos.
-## El script no construye nada: al cargar el nivel conecta lo que encuentra en la escena
-## (letreros, personajes, puntos seguros, fosos) y cada nivel agrega lo suyo en wire().
+## Nivel base (pueblo o sala). Conecta lo que hay en la escena.
 class_name Level
 extends Node2D
 
@@ -10,9 +6,7 @@ extends Node2D
 @export var music_key := "temple"
 @export var objective_key := ""
 @export var spawn_facing := Vector2.DOWN
-## En lo oscuro, el Códice de Tala ilumina un poco.
 @export var dark := false
-## Celdas que puede mostrar la cámara.
 @export var bounds := Rect2i()
 
 var kit: TileKit
@@ -25,8 +19,8 @@ var _game
 @onready var ground: TileMapLayer = $Suelo
 @onready var detail: TileMapLayer = $Detalles
 @onready var walls: TileMapLayer = $Muros
-@onready var actors: Node2D = $Actores     # personajes y objetos altos: se ordenan por y
-@onready var fx: Node2D = $Efectos         # efectos por encima de todo
+@onready var actors: Node2D = $Actores
+@onready var fx: Node2D = $Efectos
 
 
 func setup(game, p_kit: TileKit) -> void:
@@ -40,37 +34,35 @@ func setup(game, p_kit: TileKit) -> void:
 	wire()
 
 
-## Datos del nivel cuando no los trajo su creador (el pueblo los toma de config.json).
 func default_data() -> Dictionary:
 	return {}
 
 
-## Conecta lo propio del nivel (lo redefine cada nivel).
+## Cada nivel conecta lo suyo.
 func wire() -> void:
 	pass
 
 
-## Punto que mira la cámara en el título y los menús (el Marker2D «PuntoTitulo», si hay).
+## Punto para la cámara del título.
 func title_point() -> Vector2:
 	return ($PuntoTitulo as Marker2D).position if has_node("PuntoTitulo") else spawn
 
 
-## Acciones propias del nivel (por ejemplo, destapar baldosas). Devuelve true si las usó.
+## Acciones propias del nivel. true si las usó.
 func handle_action(_actions: Array) -> bool:
 	return false
 
 
-## Ayuda de teclas propia del nivel: {"key": "E", "text": "..."} o {} si no hay.
 func action_prompt() -> Dictionary:
 	return {}
 
 
-## Texto extra para el HUD (contadores de la sala). "" = nada.
+## Texto extra para el HUD.
 func hud_line() -> String:
 	return ""
 
 
-## Activa o apaga las sombras de las luces y ajusta la cantidad de partículas según la calidad.
+## Sombras y partículas según la calidad.
 func apply_quality(profile: QualityProfile) -> void:
 	for light in find_children("*", "PointLight2D", true, false):
 		(light as PointLight2D).shadow_enabled = profile.shadows() and light.get_meta("casts_shadow", false)
@@ -84,7 +76,6 @@ static func cell_center(cell: Vector2i) -> Vector2:
 	return Vector2(cell * TileKit.TILE) + Vector2(TileKit.TILE, TileKit.TILE) / 2.0
 
 
-## Todos los nodos de la escena de una clase (incluye los de escenas instanciadas).
 func nodes_of(kind) -> Array:
 	return find_children("*", "", true, false).filter(func(n): return is_instance_of(n, kind))
 
@@ -118,3 +109,13 @@ func _on_player_fell() -> void:
 func respawn_player() -> void:
 	_game.player.place(checkpoint, Vector2.UP)
 	_game.bus.publish(GameEvents.PLAYER_RESET)
+
+
+## Tala sin corazones: vuelve al punto seguro.
+func restart_after_death() -> void:
+	respawn_player()
+
+
+## Lo que se guarda del nivel.
+func save_state() -> Dictionary:
+	return {}

@@ -1,6 +1,4 @@
-## El pueblo de Raíz (escena: scenes/niveles/pueblo.tscn), levantado sobre las ruinas de
-## Aritma. Al norte, la fachada del templo con la puerta sellada: se abre programando su atril
-## (puerta.abrir()). Orun espera junto al camino.
+## El pueblo. La puerta del templo se abre con puerta.abrir().
 class_name TownLevel
 extends Level
 
@@ -15,7 +13,6 @@ func default_data() -> Dictionary:
 func wire() -> void:
 	gate.setup(data, func(key, args): return _game.data.message(key, args), open_gate, close_gate, func(): _game.open_codex(gate.session))
 	gate.solved.connect(func(): objective_key = "objective_town_open")
-	# Al cruzar la puerta abierta se entra al templo
 	$Zonas/EntradaTemplo.crossed.connect(func(): _game.enter_temple())
 
 

@@ -1,5 +1,4 @@
-## Catálogo de eventos que viajan por el EventBus (patrón Observer).
-## Usar constantes evita errores de tipeo y deja todos los eventos documentados en un solo lugar.
+## Nombres de los eventos del EventBus.
 class_name GameEvents
 extends RefCounted
 

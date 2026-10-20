@@ -1,7 +1,4 @@
-## PATRÓN ADAPTER — Las piezas de la Criba vistas desde el Códice:
-##   tolva.quedan()   tolva.soltar()   caliz.recibir()   crisol.desintegrar()
-## Cada objeto traduce sus llamadas a las reglas puras (ParityFilter). Los mensajes de error
-## vienen de texts.json (text: Callable(clave, datos) -> String).
+## Patrón Adapter: tolva, cáliz y crisol de la Criba en el Códice.
 class_name FilterAdapter
 extends RefCounted
 
@@ -14,7 +11,7 @@ static func objects(rules: ParityFilter, text: Callable) -> Dictionary:
 	}
 
 
-## La tolva: cuántas esferas quedan y soltar la siguiente.
+## La tolva: quedan() y soltar().
 class Hopper extends ScriptObject:
 	var _rules: ParityFilter
 	var _text: Callable
@@ -42,7 +39,7 @@ class Hopper extends ScriptObject:
 		return _rules.held() if _rules.held() != null else 0
 
 
-## El cáliz (pares) o el crisol (impares): recibe la esfera que está en la compuerta.
+## Cáliz o crisol: recibe la esfera de la compuerta.
 class Outlet extends ScriptObject:
 	var _rules: ParityFilter
 	var _text: Callable

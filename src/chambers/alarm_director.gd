@@ -1,14 +1,6 @@
-## El Director de Alarma de una sala: los guardianes de la tumba.
-## PATRÓN OBSERVER: escucha MACHINE_FAILED (la máquina rechazó el código: error de escritura,
-## respuesta equivocada, demasiado lento...). Cada error sube la alarma un nivel y manda una
-## ola: primero despiertan las estatuas de la sala (caballeros dorados con «dormant»), después
-## caen del techo los caballeros que falten, los hechiceros (atacan de lejos, desde la alarma 2)
-## y, al final, los rúnicos (explotan, desde la alarma 3), en los puntos «Guardianes/Caidas» de
-## la escena (Marker2D, se mueven en el editor). Si un rúnico explota con Tala dentro de su
-## círculo, le pone el reto de teclas.
-## PATRÓN FACTORY: los guardianes del techo se crean a partir de sus escenas.
-## Mientras quede un guardián, la máquina queda bloqueada. Al resolver la sala, la alarma
-## vuelve a 0 y los que queden se deshacen en números.
+## Director de Alarma de una sala. Patrón Observer: escucha MACHINE_FAILED.
+## Cada error sube la alarma y manda una ola de guardianes.
+## Mientras quede alguno, la máquina no acepta código.
 class_name AlarmDirector
 extends Node
 
@@ -16,17 +8,17 @@ const SENTINEL := preload("res://scenes/enemigos/centinela.tscn")
 const RUNIC := preload("res://scenes/enemigos/runico.tscn")
 const SORCERER := preload("res://scenes/enemigos/hechicero.tscn")
 
-var level := 0                  # nivel de alarma: errores en esta sala
-var cleared_key := "alarm_cleared"   # aviso al vencer la ola (la sala del jefe usa otro)
+var level := 0    # errores en esta sala
+var cleared_key := "alarm_cleared"
 
 var _game
 var _room: ChamberLevel
 var _settings: Dictionary = {}
-var _statues: Array = []        # Guardian dormidos sobre sus pedestales
-var _drops: Array = []          # Marker2D: donde pueden caer del techo
-var _alive: Array = []          # guardianes de la ola que siguen en pie
-var _pending := 0               # guardianes que todavía no caen del techo
-var _wave := 0                  # cambia al reiniciar: las caídas que faltaban se cancelan
+var _statues: Array = []    # estatuas sobre sus pedestales
+var _drops: Array = []    # puntos donde caen del techo
+var _alive: Array = []
+var _pending := 0
+var _wave := 0
 
 
 func setup(game, room: ChamberLevel) -> void:
@@ -41,7 +33,7 @@ func setup(game, room: ChamberLevel) -> void:
 	if room.has_node("Guardianes/Caidas"):
 		_drops = room.get_node("Guardianes/Caidas").get_children().filter(func(n): return n is Marker2D)
 		for m in _drops:
-			m.add_to_group("guardian_spots")    # también sirven al hechicero para teletransportarse
+			m.add_to_group("guardian_spots")
 	if enabled():
 		game.bus.subscribe(GameEvents.MACHINE_FAILED, _on_machine_failed)
 		game.bus.subscribe(GameEvents.RUNE_BLAST, _on_rune_blast)
@@ -73,25 +65,25 @@ func alive_by_kind() -> Dictionary:
 	return out
 
 
-## Cuántos guardianes manda la alarma "n" y qué tan rápidos son.
+## Cuántos guardianes manda la alarma n y qué tan rápidos son.
 func wave_size(n: int) -> int:
 	var waves: Array = _settings.get("waves", [2, 3, 3, 4, 5, 6])
 	return int(waves[clampi(n - 1, 0, waves.size() - 1)])
 
 
-## Cuántos de la ola son rúnicos (van al final y caen del techo).
+## Cuántos rúnicos tiene la ola.
 func runic_count(n: int) -> int:
 	var table: Array = _settings.get("runic_waves", [0, 0, 1, 1, 2, 2])
 	return mini(wave_size(n), int(table[clampi(n - 1, 0, table.size() - 1)]))
 
 
-## Cuántos de la ola son hechiceros (de distancia).
+## Cuántos hechiceros tiene la ola.
 func ranged_count(n: int) -> int:
 	var table: Array = _settings.get("ranged_waves", [0, 1, 1, 1, 2, 2])
 	return mini(wave_size(n) - runic_count(n), int(table[clampi(n - 1, 0, table.size() - 1)]))
 
 
-## La ola "n" en orden de llegada: "caballero", "hechicero", "runico".
+## La ola n en orden de llegada.
 func wave_kinds(n: int) -> Array:
 	var runics := runic_count(n)
 	var ranged := ranged_count(n)
@@ -105,7 +97,7 @@ func wave_kinds(n: int) -> Array:
 	return kinds
 
 
-## El reto de teclas según la alarma: de 4 teclas (5 s) hasta 7 teclas (8 s).
+## El reto de teclas según la alarma.
 func challenge(n: int) -> Dictionary:
 	var count := clampi(4 + n - 3, 4, 7)
 	var pool: Array = _settings.get("challenge_keys", ["A", "S", "D", "F", "J", "K", "L"])
@@ -135,7 +127,7 @@ func _on_machine_failed(payload: Dictionary) -> void:
 	lines.append(_game.data.message("alarm_wake"))
 	_game.notify(lines, 6.0)
 	_room.lock_machines(true)
-	# Un instante para leer el error en el Códice; después se cierra y empieza la pelea
+	# Un momento para leer el error y empieza la pelea
 	await _real_wait(0.6)
 	if _game.machine.current is CodexState:
 		_game.machine.change("play")
@@ -143,7 +135,7 @@ func _on_machine_failed(payload: Dictionary) -> void:
 	_send_wave(level)
 
 
-## El jefe final llama a la ola "n" sin subir la alarma.
+## El jefe llama una ola sin subir la alarma.
 func summon(n: int) -> void:
 	_slow_motion()
 	_send_wave(n)
@@ -163,7 +155,7 @@ func _send_wave(n: int) -> void:
 		_alive.append(statue)
 		woke += 1
 		_crumble_pedestal(statue)
-	# Los que no salieron de una estatua caen del techo, en orden: caballeros, hechiceros, rúnicos
+	# Los que faltan caen del techo
 	var falling := kinds.slice(woke)
 	var spots := _drop_spots(falling.size())
 	_pending = spots.size()
@@ -183,7 +175,6 @@ func _send_wave(n: int) -> void:
 		await _real_wait(float(_settings.get("drop_stagger", 0.5)))
 
 
-## El pedestal queda vacío y con escombros cuando a la estatua se le cae la piedra.
 func _crumble_pedestal(statue: Guardian) -> void:
 	var pedestal := statue.get_parent() as Pedestal
 	if pedestal == null:
@@ -194,7 +185,7 @@ func _crumble_pedestal(statue: Guardian) -> void:
 		pedestal.rubble = true
 
 
-## Puntos de caída lejos de Tala (nunca le caen encima), sin repetir.
+## Puntos de caída lejos de Tala, sin repetir.
 func _drop_spots(n: int) -> Array:
 	var spots: Array = []
 	if n <= 0 or _drops.is_empty():
@@ -211,7 +202,6 @@ func _drop_spots(n: int) -> Array:
 		if spots.size() >= n:
 			break
 		spots.append(at)
-	# Si la sala tiene pocos puntos, los que faltan caen cerca de los primeros
 	var i := 0
 	while spots.size() < n:
 		spots.append(spots[i % spots.size()] + Vector2(randf_range(-14, 14), randf_range(-10, 10)))
@@ -232,7 +222,7 @@ func _on_defeated(g: Guardian) -> void:
 		_room.lock_machines(false)
 
 
-## Cámara lenta un instante para ver despertar a los guardianes.
+## Cámara lenta al despertar.
 func _slow_motion() -> void:
 	Engine.time_scale = float(_settings.get("slowmo_scale", 0.35))
 	await _real_wait(float(_settings.get("slowmo_sec", 0.6)))
@@ -245,7 +235,7 @@ func _real_wait(seconds: float) -> void:
 
 # ------------------------------------------------------------------ fin de la pelea
 
-## La sala quedó resuelta: la alarma se apaga y los guardianes se deshacen.
+## Sala resuelta: la alarma se apaga y los guardianes se deshacen.
 func calm() -> void:
 	level = 0
 	_wave += 1
@@ -256,8 +246,7 @@ func calm() -> void:
 	_room.lock_machines(false)
 
 
-## Tala cayó vencida y vuelve a la entrada: las estatuas vuelven a su pedestal y los
-## guardianes del techo desaparecen. La alarma NO baja: los errores siguen contando.
+## Tala cayó: los guardianes vuelven a su lugar. La alarma no baja.
 func reset_after_death() -> void:
 	_wave += 1
 	_pending = 0

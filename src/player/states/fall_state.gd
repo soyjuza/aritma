@@ -1,4 +1,4 @@
-## PATRÓN STATE — Cayendo a un foso: sin control; el nivel la devuelve al punto seguro.
+## Patrón State: cayendo a un foso.
 class_name FallState
 extends MoveState
 
