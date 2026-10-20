@@ -14,6 +14,7 @@ var on_result: Callable            # (ScriptSandbox.Result) -> String: mensaje p
 var max_steps := 200000
 var close_after_run := false       # cerrar el Códice al ejecutar sin errores (para ver el resultado)
 var machine: CodeMachine = null    # si la sesión es de una máquina: ella corre y muestra el programa
+var log: Array = []                # lo que mostró la consola (sigue ahí al volver, p. ej. tras pelear)
 
 
 ## Cuántas líneas cuentan para el límite (sin vacías ni comentarios).

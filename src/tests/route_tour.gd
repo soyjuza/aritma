@@ -151,6 +151,12 @@ func _vortex_room() -> void:
 	while game.rig.is_gliding():
 		await _wait(0.1)
 	await _wait(0.4)
+	game.codex.editor.text = "luces.encender(\n"
+	game.machine.current.run()
+	game.machine.change("play")
+	game.open_codex(lvl.machine.session)
+	await _wait(0.6)
+	await _shot("31a_error_conservado")
 	game.codex.editor.text = lvl.machine.session.code + "luces.encender()\n"
 	await _shot("31_codice_luces")
 	game.machine.current.run()

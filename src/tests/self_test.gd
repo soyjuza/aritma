@@ -561,6 +561,15 @@ func _test_vortex() -> void:
 		await _wait(0.2)
 		t += 0.2
 	_check(not lvl.machine.is_solved and not lvl.board.powered and game.machine.current is CodexState, "Faro: un programa que no enciende las luces no enciende el tablero (y no despierta guardianes)")
+	# Un error de escritura: al salir y volver a la terminal, el error sigue en la consola
+	game.codex.editor.text = "luces.encender(\n"
+	game.machine.current.run()
+	await _wait(0.3)
+	var before: String = game.codex.console.get_parsed_text()
+	game.machine.change("play")
+	game.open_codex(lvl.machine.session)
+	await _wait(0.3)
+	_check(game.codex.console.get_parsed_text() == before and before.count("\n") > 3, "Códice: al salir y volver, la consola conserva los errores")
 	game.codex.editor.text = "luces.encender()\n"
 	game.machine.current.run()
 	t = 0.0

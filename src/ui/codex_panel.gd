@@ -174,6 +174,9 @@ func open(session: CodexSession, keys_text: String, side := false) -> void:
 	editor.text = session.code
 	console.clear()
 	console.append_text("[color=#8d97a8]Escribe tu programa y presiona EJECUTAR.[/color]\n")
+	# Lo que la consola mostraba antes (los errores no se pierden al salir a pelear)
+	for line in session.log:
+		console.append_text(line)
 	var help := "[color=#e2b44f][b]FUNCIONES DE ESTA SALA[/b][/color]\n" + ("" if side else "\n")
 	for entry in session.help:
 		if side:
@@ -196,7 +199,12 @@ func close() -> String:
 
 
 func log_line(text: String, color := "c9d4e2") -> void:
-	console.append_text("[color=#%s]%s[/color]\n" % [color, text.replace("[", "[lb]")])
+	var line := "[color=#%s]%s[/color]\n" % [color, text.replace("[", "[lb]")]
+	console.append_text(line)
+	if _session:
+		_session.log.append(line)
+		if _session.log.size() > 80:
+			_session.log.pop_front()
 
 
 func _update_counter() -> void:
