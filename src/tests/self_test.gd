@@ -6,6 +6,10 @@ extends RefCounted
 const ROOTS_OK := "def despejar(a, b, c):\n    return (c - b) / a\n"
 const CRIBA_OK := "while tolva.quedan() > 0:\n    n = tolva.soltar()\n    if n % 2 == 0:\n        caliz.recibir()\n    else:\n        crisol.desintegrar()\n"
 
+const LOCK_OK := "nivel = sensor.leer()\nnivel = nivel + 3\ncompuerta.subir(nivel)\n"
+## Orden de antes: el resto de la prueba recorre Criba → Mural → Vórtice...
+const OLD_ORDER := ["filter", "roots", "vortex", "figures", "core", "throne"]
+
 var game: Game
 var _failures := 0
 
@@ -34,7 +38,9 @@ func run() -> void:
 	_test_boss_quiz()
 	await _test_core()
 	await _test_save_and_load()
-	await _test_game_over_without_lives()
+	await _test_mine_practices()
+	await _test_quests()
+	await _test_forest()
 	print("SELFTEST ", "OK" if _failures == 0 else "FALLO (%d)" % _failures)
 	game.get_tree().quit(0 if _failures == 0 else 1)
 
@@ -131,7 +137,21 @@ func _test_town_and_gate() -> void:
 	seen.interact()
 	await _wait(0.8)
 	_check(game.machine.current is CodexState and game.codex.docked and game.rig.fixed_shot, "Códice: se abre al costado y la cámara encuadra la puerta")
-	game.codex.editor.text = "puerta.abrir()\n"
+	# Bloques: arrastrar la pieza con el ratón
+	var board := game.codex.board
+	_check(board.visible and not game.codex.editor.visible and town.gate.session.blocks.size() == 2, "Bloques: el Códice abre con las piezas y sin el editor de texto")
+	var piece: int = town.gate.session.blocks.find("puerta.abrir()")
+	var from: Vector2 = (board.tray_layout()[piece] as Rect2).get_center()
+	var origin := board.get_global_rect().position
+	_mouse(origin + from, true)
+	_mouse(origin + Vector2(80, BlockBoard.HEADER + 40), false, true)
+	_mouse(origin + Vector2(80, BlockBoard.HEADER + 40), false)
+	await _wait(0.1)
+	_check(game.codex.source() == "puerta.abrir()\n" and board.session.free_pieces().size() == 1, "Bloques: arrastrar «puerta.abrir()» al programa lo arma")
+	game.codex.toggle_mode()
+	_check(game.codex.editor.visible and game.codex.editor.text == "puerta.abrir()\n", "Bloques: «Escribir a mano» pasa el programa al editor")
+	game.codex.toggle_mode()
+	_check(board.visible and game.codex.source() == "puerta.abrir()\n", "Bloques: «Usar bloques» vuelve con las piezas como estaban")
 	game.machine.current.run()
 	var t := 0.0
 	while not town.gate.is_solved and t < 5.0:
@@ -142,9 +162,51 @@ func _test_town_and_gate() -> void:
 	_check(town.gate.gate_open and game.machine.current is PlayState, "Códice + Adapter: puerta.abrir() abre la puerta del templo")
 	# Entrar al templo
 	game.player.place(town.get_node("Zonas/EntradaTemplo").global_position + Vector2(0, 80), Vector2.UP)
-	await _walk_up_until(func(): return game.level is FilterLevel, 6.0)
+	await _walk_up_until(func(): return game.level is PracticeLevel, 6.0)
 	await _wait(0.8)
-	_check(game.level is FilterLevel and game.timer.active, "Entrar al templo: se carga la Sala 1 y empiezan los 15 minutos")
+	_check(game.level is PracticeLevel, "Entrar al templo: primero la práctica")
+	game.dialog.close()
+	# El resto de la prueba va sin prácticas
+	for key in game.data.practices.keys():
+		game.practices_done[key] = true
+	game.skip_practice()
+	await _walk_up_until(func(): return game.level is LockLevel, 4.0)
+	_release_all()
+	await _wait(0.8)
+	_check(game.level is LockLevel, "Saltar la práctica: se carga la Sala 1, la Compuerta")
+	await _test_lock()
+	game.data.use_order(OLD_ORDER)
+	game.load_chamber(0)
+	await _wait(0.6)
+	game.dialog.close()
+	_check(game.level is FilterLevel, "Orden viejo para las pruebas: la Criba carga sola")
+
+
+## Sala 1 del capítulo 1: variables.
+func _test_lock() -> void:
+	var lvl := game.level as LockLevel
+	game.dialog.close()
+	var m := lvl.machine
+	var sandbox := ScriptSandbox.new()
+	var fixed := m.evaluate("compuerta.subir(5)\n", sandbox)
+	var still := m.evaluate("nivel = sensor.leer()\n", sandbox)
+	var bad := m.evaluate("compuerta.subir(\"alto\")\n", sandbox)
+	_check(not fixed.success or fixed.commands.all(func(c): return c.sensor == 2), "Compuerta: un número fijo no sirve en las 3 rondas")
+	_check(not still.success and "no se movió" in still.message, "Compuerta: sin compuerta.subir() avisa que no se movió")
+	_check(not bad.ok, "Compuerta: subir() con texto es un error del código")
+	var good := m.evaluate(LOCK_OK, sandbox)
+	_check(good.success and good.commands.size() == 3, "Compuerta: nivel = sensor.leer(); nivel = nivel + 3; compuerta.subir(nivel) pasa las 3 rondas")
+	await m.perform(good)
+	_check(lvl.solved and m.is_solved, "Compuerta: al acertar se abre el sello de la salida")
+	# Capítulos
+	var kinds := game.data.chambers.map(func(c): return c.kind)
+	_check(kinds == ["lock", "vortex", "figures", "core", "throne"], "Capítulo 1: Compuerta, Faro, Figuras, Sendero y Jefe, sin bucles")
+	var all_ok := true
+	for chapter in game.data.chapters:
+		for id in chapter.chambers:
+			var room: Array = game.data._all_chambers.filter(func(r): return DataRepository.room_id(r) == id)
+			all_ok = all_ok and room.size() == 1 and ChamberRegistry._builders.has(room[0].kind)
+	_check(game.data.chapters.size() == 5 and all_ok, "Capítulos: 5, y cada sala que nombran existe")
 
 
 func _test_corridor() -> void:
@@ -159,7 +221,7 @@ func _test_corridor() -> void:
 	# Caminando no alcanza el salto
 	game.player.place(below, Vector2.UP)
 	await _wait(0.2)
-	var before_fall := game.timer.remaining
+	var before_fall := game.health.halves
 	_key("move_up", true)
 	await _wait(0.35)
 	_key("jump", true)
@@ -169,8 +231,8 @@ func _test_corridor() -> void:
 	_release_all()
 	await _wait(0.4)
 	_check(game.player.global_position.y > pit.position.y + 8, "Pasillo: caminando, el foso no se cruza (cae y vuelve)")
-	var lost := before_fall - game.timer.remaining - 2.45
-	_check(lost > 6.5 and lost < 8.0, "Caída: el foso cuesta 7 segundos (perdió %.1f)" % lost)
+	var lost := before_fall - game.health.halves
+	_check(lost == 1, "Caída: el foso cuesta medio corazón (perdió %d mitades)" % lost)
 	# Corriendo sí
 	game.player.place(below + Vector2(0, 20), Vector2.UP)
 	await _wait(0.2)
@@ -237,7 +299,7 @@ func _test_criba() -> void:
 	var first_round: Array = machine.rules.rounds[0].duplicate()
 	game.open_codex(machine.session)
 	await _wait(0.8)
-	game.codex.editor.text = "while tolva.quedan() > 0:\n    tolva.soltar()\n    caliz.recibir()\n"
+	game.codex.write("while tolva.quedan() > 0:\n    tolva.soltar()\n    caliz.recibir()\n")
 	Engine.time_scale = 4.0
 	game.machine.current.run()
 	await _wait(0.2)
@@ -255,7 +317,8 @@ func _test_criba() -> void:
 	game.open_codex(machine.session)
 	await _wait(0.8)
 	Engine.time_scale = 4.0
-	game.codex.editor.text = CRIBA_OK
+	_arm_blocks(CRIBA_OK)
+	_check(game.codex.source() == CRIBA_OK, "Bloques: la Criba se arma con las piezas y su sangría")
 	game.machine.current.run()
 	t = 0.0
 	while not machine.is_solved and t < 60.0:
@@ -306,13 +369,11 @@ func _test_guardians(lvl: FilterLevel) -> void:
 			other.take_hit(5, Vector2.UP)
 	await _wait(0.4)
 	_check(not lvl.alarm.fighting() and not lvl.machine.locked and not lvl.machine_blocked(), "Guardianes: vencidos todos, la Criba vuelve a aceptar código")
-	# Sin corazones: un minuto menos y vuelve a la entrada
-	var before := game.timer.remaining
+	# Sin corazones: vuelve a la entrada con la vida llena
 	game.health.damage(game.health.halves)
 	await _wait(2.4)
-	var lost := before - game.timer.remaining
 	var dormant := lvl.nodes_of(Guardian).filter(func(x): return x.state_name == "dormant")
-	_check(lost > 59.9 and lost < 63.5 and game.health.halves == game.health.max_halves, "Sin corazones: se pierde 1 minuto y vuelven los 5 corazones (perdió %.1f)" % lost)
+	_check(game.health.halves == game.health.max_halves, "Sin corazones: vuelven los 5 corazones")
 	_check(game.player.global_position.distance_to(lvl.room_entrance()) < 4.0 and dormant.size() == 2 and lvl.alarm.level == 1, "Sin corazones: vuelve a la entrada de la sala, las estatuas a su pedestal y la alarma sigue en 1")
 
 
@@ -387,10 +448,9 @@ func _test_formation_orbs_and_pause(lvl: FilterLevel) -> void:
 	# En pausa nada se mueve
 	game.machine.change("pause")
 	await _wait(0.1)
-	var before_time := game.timer.remaining
 	var before_pos: Vector2 = made[2].global_position
 	await _wait(1.0)
-	_check(is_equal_approx(game.timer.remaining, before_time) and made[2].global_position == before_pos, "Pausa: el reloj y los guardianes se detienen")
+	_check(made[2].global_position == before_pos, "Pausa: los guardianes se detienen")
 	game.machine.change("play")
 	for g in made:
 		g.queue_free()
@@ -456,19 +516,6 @@ func _test_health_and_alarm_rules() -> void:
 		repeats = repeats or hard.keys[i] == hard.keys[i - 1]
 	_check(not repeats and hard.keys.all(func(k): return k in ["A", "S", "D", "F", "J", "K", "L"]), "Reto de teclas: teclas A S D F J K L, sin repetir dos seguidas")
 	alarm.free()
-
-
-## Sin corazones y con un minuto o menos se acaba el juego.
-func _test_game_over_without_lives() -> void:
-	game.machine.change("play", {"mode": "new"})
-	await _wait(0.5)
-	game.dialog.close()
-	game.load_chamber(0)
-	game.timer.start()
-	game.timer.remaining = 50.0
-	game.health.damage(game.health.halves)
-	await _wait(2.2)
-	_check(game.machine.current is EndState and game.machine.current._key == "ending_no_lives", "Sin corazones y con menos de 1 minuto: fin del juego")
 
 
 ## Vence a todos los guardianes que queden.
@@ -543,7 +590,7 @@ func _test_vortex() -> void:
 	game.open_codex(lvl.machine.session)
 	await _wait(0.6)
 	Engine.time_scale = 4.0
-	game.codex.editor.text = "luces.apagar()\n"
+	game.codex.write("luces.apagar()\n")
 	game.machine.current.run()
 	await _wait(0.3)
 	var t := 0.0
@@ -552,7 +599,7 @@ func _test_vortex() -> void:
 		t += 0.2
 	_check(not lvl.machine.is_solved and not lvl.board.powered and game.machine.current is CodexState, "Faro: un programa que no enciende las luces no enciende el tablero (y no despierta guardianes)")
 	# El error sigue en la consola al volver
-	game.codex.editor.text = "luces.encender(\n"
+	game.codex.write("luces.encender(\n")
 	game.machine.current.run()
 	await _wait(0.3)
 	var before: String = game.codex.console.get_parsed_text()
@@ -560,7 +607,7 @@ func _test_vortex() -> void:
 	game.open_codex(lvl.machine.session)
 	await _wait(0.3)
 	_check(game.codex.console.get_parsed_text() == before and before.count("\n") > 3, "Códice: al salir y volver, la consola conserva los errores")
-	game.codex.editor.text = "luces.encender()\n"
+	game.codex.write("luces.encender()\n")
 	game.machine.current.run()
 	t = 0.0
 	while not lvl.board.powered and t < 30.0:
@@ -693,15 +740,16 @@ func _test_boss(lvl: ThroneLevel) -> void:
 		await _wait(0.2)
 		t += 0.2
 	var waited := 0.0
-	while game.machine.current is QuizState and waited < 20.0:
+	while game.machine.current is QuizState and waited < 26.0:
 		await _wait(0.5)
 		waited += 0.5
-	_check(waited >= 15.0 and lvl.alarm.fighting() and lvl.alarm.alive_count() == 6, "Jefe: sin responder, a los 15 s llama a 6 guardianes")
+	_check(waited >= 20.0 and lvl.alarm.fighting() and lvl.alarm.alive_count() == 6, "Jefe: sin responder, a los 20 s llama a 6 guardianes")
 	# Tala cae: la pelea empieza de nuevo
 	lvl.restart_after_death()
 	await _wait(0.5)
 	_check(boss.hp == boss.max_hp and boss.phase == 0 and not lvl.alarm.fighting() and boss.can_be_hit() and game.get_tree().get_nodes_in_group("potions").is_empty(), "Jefe: si Tala cae, el jefe recupera toda la vida y vuelve a la fase 1")
 	game.health.refill()
+	var points_before: int = game.skills.earned
 	while boss.hp > 0:
 		if game.machine.current is QuizState:
 			(game.machine.current as QuizState).choose(int((game.machine.current as QuizState).quiz.answer))
@@ -719,16 +767,19 @@ func _test_boss(lvl: ThroneLevel) -> void:
 		await _wait(0.2)
 		t += 0.2
 	_check(game.machine.current is EndState and game.machine.current._won, "Jefe: al vencerlo se gana el juego")
+	_check(game.skills.earned == points_before + 2, "Habilidades: vencer al jefe da 2 puntos")
 
 
 ## Cada problema tiene una sola respuesta buena.
 func _test_boss_quiz() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 9
-	var quiz := BossQuiz.new(game.data.message)
+	var settings: Dictionary = game.data.chamber_data(5).get("quiz", {}).get("problems", {})
+	var quiz := BossQuiz.new(game.data.message, settings)
 	var ok := true
-	for i in 300:
-		var kind: String = ["paridad", "multiplo", "despejar"][i % 3]
+	var all_kinds := ["variable", "orden", "paridad", "multiplo", "despejar", "si", "si_sino"]
+	for i in 500:
+		var kind: String = all_kinds[i % all_kinds.size()]
 		var q := quiz.make(kind, rng)
 		var options: Array = q.options
 		var unique := {}
@@ -736,7 +787,16 @@ func _test_boss_quiz() -> void:
 			unique[o] = true
 		ok = ok and unique.size() == options.size() and q.answer >= 0 and q.answer < options.size()
 		ok = ok and options.size() == (2 if kind == "paridad" else 4)
-	_check(ok, "Prueba del jefe: 300 problemas, opciones distintas y una sola buena")
+	_check(ok, "Prueba del jefe: 500 problemas, opciones distintas y una sola buena")
+	# La respuesta de "orden" arma el programa en su orden
+	var o := quiz.make("orden", rng)
+	var lines: Array = []
+	for letter in String(o.options[o.answer]).split(", "):
+		lines.append(String(o.code[OrderProblem.LETTERS.find(letter)]).substr(4))
+	var programs: Array = settings.orden.programs
+	_check(lines in programs, "Prueba del jefe: el orden correcto arma el programa")
+	var v := quiz.make("variable", rng)
+	_check(v.code.size() >= 2 and int(v.options[v.answer]) >= 0, "Prueba del jefe: variable muestra código y su valor")
 	var p := quiz.make("despejar", rng)
 	var parts := String(p.question).split(" = ")
 	_check(p.options[p.answer] != "" and "x" in parts[0], "Prueba del jefe: despejar muestra ax + b = c")
@@ -816,7 +876,7 @@ func _test_mural() -> void:
 	var cases_before: Array = machine.trial.cases.duplicate(true)
 	game.open_codex(machine.session)
 	await _wait(0.6)
-	game.codex.editor.text = "def despejar(a, b, c):\n    return c - b\n"
+	game.codex.write("def despejar(a, b, c):\n    return c - b\n")
 	Engine.time_scale = 4.0
 	game.machine.current.run()
 	await _wait(0.2)
@@ -830,7 +890,7 @@ func _test_mural() -> void:
 	await _clear_guardians(lvl)
 	game.open_codex(machine.session)
 	await _wait(0.6)
-	game.codex.editor.text = "def despejar(a, b, c):\n    return %d\n" % machine.trial.cases[0].x
+	game.codex.write("def despejar(a, b, c):\n    return %d\n" % machine.trial.cases[0].x)
 	game.machine.current.run()
 	t = 0.0
 	await _wait(0.2)
@@ -842,7 +902,7 @@ func _test_mural() -> void:
 	game.open_codex(machine.session)
 	await _wait(0.6)
 	Engine.time_scale = 4.0
-	game.codex.editor.text = ROOTS_OK
+	game.codex.write(ROOTS_OK)
 	game.machine.current.run()
 	t = 0.0
 	while not machine.is_solved and t < 40.0:
@@ -897,6 +957,18 @@ func _test_save_and_load() -> void:
 	game.dialog.close()
 	game.saves.clear()
 	game.saves.path = SaveRepository.PATH
+
+
+## Arma el programa con las piezas, en orden y con su sangría.
+func _arm_blocks(code: String) -> void:
+	var board := game.codex.board
+	board.session.use_blocks = true
+	board.session.placed.clear()
+	for line in code.split("\n"):
+		if line.strip_edges() != "":
+			var indent := (line.length() - line.strip_edges(true, false).length()) / 4
+			board.place(board.session.blocks.find(line.strip_edges()), board.session.placed.size(), indent)
+	game.codex.show_mode()
 
 
 ## Evento del mouse.
@@ -1091,11 +1163,10 @@ func _test_core() -> void:
 		if not stones.is_safe(Vector2i(x, stones.rows - 1)):
 			bad = Vector2i(x, stones.rows - 1)
 			break
-	var before := game.timer.remaining
+	var before := game.health.halves
 	game.player.place(stones.cell_center_global(bad), Vector2.UP)
 	await _wait(1.6)
-	var lost := before - game.timer.remaining - 1.6
-	_check(stones.broken.has(bad) and lost > 6.5 and lost < 8.0, "Sendero: una losa mala se rompe y Tala cae (−7 s)")
+	_check(stones.broken.has(bad) and game.health.halves == before - 1, "Sendero: una losa mala se rompe y Tala cae (−½ corazón)")
 	_check(game.player.global_position.distance_to(lvl.room_entrance()) < 4.0, "Sendero: después de caer, Tala vuelve a la entrada")
 	# El borde de una losa buena no rompe nada
 	var start: Vector2i = stones.path[0]
@@ -1115,3 +1186,239 @@ func _test_core() -> void:
 		t += 0.2
 	_check(game.level is ThroneLevel and game.chamber_index == 5, "Núcleo: por el camino bueno se llega al núcleo y a la Sala 6 (Factory: ThroneBuilder)")
 	await _test_boss(game.level as ThroneLevel)
+
+
+## Las 4 prácticas del buscaminas se terminan siguiendo sus pasos.
+func _test_mine_practices() -> void:
+	game.machine.change("play")
+	for key in game.data.chamber_data(2).get("practices", []):
+		game.load_practice(key, 2)
+		await _wait(0.3)
+		game.dialog.close()
+		var lvl := game.level as PracticeMinesLevel
+		var board := lvl.board
+		var walls := lvl.get_node("Muros") as TileMapLayer
+		var inside := true
+		for c in [Vector2i(0, 0), Vector2i(board.cols - 1, board.rows - 1)]:
+			var tile := walls.local_to_map(walls.to_local(board.cell_center(c)))
+			inside = inside and walls.get_cell_source_id(tile) == -1
+		_check(inside, "Práctica %s: el tablero cabe en la sala" % key)
+		var wrong_flag_ok := true
+		for info in lvl.steps():
+			var action := "flag" if info.get("do") == "flag" else "interact"
+			if info.get("do") == "clear":
+				for c in board.cells():
+					if not board.mines.has(c) and not board.revealed.has(c):
+						game.player.global_position = board.cell_center(c)
+						lvl.handle_action(["interact"])
+				continue
+			var cell := Vector2i(int(info.cell[0]), int(info.cell[1]))
+			# Con "pick" una bandera mal puesta no cuenta
+			if info.get("pick", false) and action == "flag":
+				for n in board.neighbors(Vector2i(int(info.clue[0]), int(info.clue[1]))):
+					if not board.mines.has(n) and not board.revealed.has(n):
+						game.player.global_position = board.cell_center(n)
+						var before := lvl.step
+						lvl.handle_action(["flag"])
+						wrong_flag_ok = wrong_flag_ok and lvl.step == before
+						lvl.handle_action(["flag"])
+						break
+			game.player.global_position = board.cell_center(cell)
+			lvl.handle_action([action])
+		_check(lvl.finished and board.is_cleared() and wrong_flag_ok, "Práctica %s: siguiendo los pasos se termina" % key)
+	game.dialog.close()
+
+
+## Pasa todas las páginas del diálogo (y sus callbacks).
+func _finish_dialog() -> void:
+	var t := 0
+	while game.dialog.is_open() and t < 40:
+		game.dialog.advance()
+		game.dialog.advance()
+		t += 1
+	await _wait(0.2)
+
+
+func _answer_quiz(right: bool) -> void:
+	var quiz := game.machine.current as QuizState
+	if quiz == null:
+		return
+	var answer := int(quiz.quiz.answer)
+	quiz.choose(answer if right else (answer + 1) % quiz.quiz.options.size())
+	await _wait(QuizState.RESULT_TIME + 0.4)
+
+
+## Misiones secundarias: Mila, Tuerca y los engranajes de Brasa.
+func _test_quests() -> void:
+	game.data.use_chapter(0)
+	game.machine.change("play", {"mode": "new"})
+	await _wait(0.5)
+	game.dialog.close()
+	var town := game.level as TownLevel
+	var mila: Npc = town.get_node("Actores/Mila")
+	_check(String(mila.quest_state.call()) == "", "Misiones: Mila tiene una misión para dar («!»)")
+	game.talk_to(mila)
+	await _finish_dialog()
+	_check(game.quests.state("cuentas") == "active" and game.machine.current is QuizState, "Misiones: al hablar con Mila empieza su misión y sale la primera cuenta")
+	await _answer_quiz(false)
+	await _finish_dialog()
+	_check(game.quests.state("cuentas") == "active" and game.machine.current is PlayState, "Misiones: si falla no pasa nada malo; se vuelve a hablar con ella")
+	game.talk_to(mila)
+	await _finish_dialog()
+	for i in 3:
+		await _answer_quiz(true)
+	await _finish_dialog()
+	_check(game.quests.state("cuentas") == "done" and game.skills.free_points() == 1, "Misiones: 3 cuentas bien → 1 punto de habilidad")
+	game.quests.talk("tuerca")
+	await _finish_dialog()
+	var q := game.machine.current as QuizState
+	_check(q != null and "tuerca." in str(q.quiz.get("code", [])), "Misiones: Tuerca pide ordenar sus propias órdenes")
+	for i in 2:
+		await _answer_quiz(true)
+	await _finish_dialog()
+	_check(game.quests.state("tuerca") == "done" and game.skills.free_points() == 2, "Misiones: Tuerca ordenado → otro punto")
+	for i in 3:
+		game.quests.pick("engranaje_%d" % (i + 1), "engranajes")
+	await _finish_dialog()
+	_check(game.quests.state("engranajes") == "done", "Misiones: con 3 engranajes se cumple la de Brasa (aunque no se haya hablado con ella)")
+	for key in game.data.practices.keys():
+		game.practices_done[key] = true
+	_check(game.skills.free_points() == 3, "Misiones: los engranajes de Brasa dan el tercer punto")
+	# Gastar puntos en la pausa
+	game.machine.change("pause")
+	game.machine.current.handle_input(["ui_down"])
+	game.machine.current.handle_input(["accept"])
+	_check(game.machine.current is SkillsState, "Habilidades: la pausa tiene el apartado HABILIDADES")
+	game.machine.current.handle_input(["accept"])
+	_check(game.health.max_halves == 12 and game.skills.free_points() == 2, "Habilidades: VIDA nivel 1 → 6 corazones")
+	game.machine.current.handle_input(["ui_down"])
+	game.machine.current.handle_input(["accept"])
+	_check(game.player.attack_damage == 2, "Habilidades: FUERZA nivel 1 → el garrote golpea 2")
+	game.machine.current.handle_input(["accept"])
+	game.machine.current.handle_input(["accept"])
+	_check(game.player.attack_damage == 3 and game.skills.free_points() == 0, "Habilidades: FUERZA llega a su máximo y sin puntos no sube más")
+	game.machine.current.handle_input(["cancel"])
+	game.machine.change("play")
+	game.enter_chamber(0)
+	await _wait(1.5)
+	game.dialog.close()
+	var lock := game.level as LockLevel
+	_check(lock != null and lock.nodes_of(GearPickup).is_empty(), "Misiones: un engranaje ya recogido no vuelve a aparecer")
+	# Guardar y cargar
+	game.saves.path = "user://save_prueba.cfg"
+	game.save_game()
+	game.start_new_game()
+	_check(game.quests.states.is_empty() and game.health.max_halves == 10 and game.player.attack_damage == 1 and game.skills.earned == 0, "Misiones: partida nueva = sin misiones, puntos ni mejoras")
+	game.load_game()
+	await _wait(0.3)
+	game.dialog.close()
+	_check(game.quests.state("cuentas") == "done" and game.health.max_halves == 12 and game.player.attack_damage == 3, "Misiones: se guardan y vuelven al cargar, con las habilidades")
+	# Cada engranaje está en piso libre
+	var on_floor := true
+	for i in game.data.chamber_count():
+		game.load_chamber(i)
+		for gear in game.level.nodes_of(GearPickup):
+			var cell: Vector2i = game.level.ground.local_to_map(game.level.ground.to_local(gear.global_position))
+			on_floor = on_floor and game.level.ground.get_cell_source_id(cell) != -1 and game.level.walls.get_cell_source_id(cell) == -1
+	game.quests.reset()
+	_check(on_floor, "Misiones: los engranajes están sobre piso, no en muros")
+
+
+## Capítulo 2: el Bosque (if / else).
+func _test_forest() -> void:
+	# Preguntas de if: la respuesta buena es lo que de verdad imprime el programa
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 21
+	var quiz := BossQuiz.new(game.data.message)
+	var sandbox := ScriptSandbox.new()
+	var ok := true
+	for i in 200:
+		var q := quiz.make("si" if i % 2 == 0 else "si_sino", rng)
+		var result := sandbox.run("\n".join(q.code) + "\n", {})
+		var printed := " ".join(result.output) if not result.output.is_empty() else game.data.message("quiz_if_nothing")
+		ok = ok and result.ok and String(q.options[q.answer]).replace("−", "-") == printed and q.options.size() == 4
+	_check(ok, "Bosque: 200 preguntas de if, la respuesta buena es lo que imprime el programa")
+	# Las máquinas
+	game.data.use_chapter(1)
+	_check(game.data.chambers.map(func(c): return DataRepository.room_id(c)) == ["bridge", "garden", "throne_forest"], "Bosque: capítulo 2 = Puente, Jardín y Guardián del Bosque")
+	game.load_chamber(0)
+	await _wait(0.5)
+	game.dialog.close()
+	var bridge := game.level as RoundsLevel
+	var good := "peso = carreta.peso()\nif peso > 10:\n    puente.reforzar()\n"
+	_check(bridge != null and bridge.machine.evaluate(good, sandbox).success, "Puente: if peso > 10: puente.reforzar() pasa las 3 rondas")
+	_check(not bridge.machine.evaluate("puente.reforzar()\n", sandbox).success, "Puente: reforzar siempre (sin if) no sirve")
+	var report := bridge.machine.evaluate(good, sandbox)
+	await bridge.machine.perform(report)
+	_check(bridge.solved, "Puente: al acertar se abre la salida")
+	game.load_chamber(1)
+	await _wait(0.5)
+	game.dialog.close()
+	var garden := game.level as RoundsLevel
+	var good2 := "agua = maceta.medir()\nif agua < 5:\n    maceta.regar()\nelse:\n    maceta.asolear()\n"
+	_check(garden != null and garden.machine.evaluate(good2, sandbox).success, "Jardín: if/else con regar y asolear pasa las 3 rondas")
+	var only_if := garden.machine.evaluate("agua = maceta.medir()\nif agua < 5:\n    maceta.regar()\n", sandbox)
+	_check(not only_if.success and "nada" in only_if.message, "Jardín: sin else, la maceta mojada se queda sin sol (avisa «nada»)")
+	game.load_chamber(2)
+	await _wait(0.5)
+	game.dialog.close()
+	var boss_room := game.level as ThroneLevel
+	_check(boss_room != null and boss_room.boss.title == "EL GUARDIÁN DEL BOSQUE", "Bosque: el jefe del capítulo 2 es el Guardián del Bosque")
+	# Pasar del capítulo 1 al Bosque
+	game.data.use_chapter(0)
+	game.machine.change("play", {"mode": "new"})
+	await _wait(0.5)
+	game.dialog.close()
+	game.load_chamber(4)
+	await _wait(0.3)
+	await game.chapter_done()
+	await _wait(0.6)
+	_check(game.level is HubLevel and game.data.chapter == 1 and game.dialog.is_open(), "Capítulos: vencer al Guardián del Cero lleva al Bosque")
+	await _finish_dialog()
+	var hub := game.level as HubLevel
+	for n in ["Sauce", "Ramas", "Lia", "Letrero", "Hongo"]:
+		_check(hub.has_node("Actores/" + n), "Bosque: en el mapa está " + n)
+	# Guardar en el Bosque
+	game.saves.path = "user://save_prueba.cfg"
+	game.save_game()
+	game.data.use_chapter(0)
+	game.load_game()
+	await _wait(0.4)
+	_check(game.level is HubLevel and game.data.chapter == 1, "Capítulos: guardar en el Bosque y cargar vuelve al Bosque")
+	# Entrar a las ruinas
+	hub = game.level as HubLevel
+	game.player.place(hub.get_node("Zonas/EntradaRuinas").global_position + Vector2(0, 60), Vector2.UP)
+	await _walk_up_until(func(): return game.level is RoundsLevel, 6.0)
+	_release_all()
+	_check(game.level is RoundsLevel and game.chamber_index == 0, "Bosque: la entrada de las ruinas lleva al Puente")
+	# Misiones del Bosque
+	game.quests.reset()
+	game.skills.reset()
+	game.apply_skills()
+	var stamina := game.player.stamina_max
+	game.quests.talk("ramas")
+	await _finish_dialog()
+	for i in 3:
+		await _answer_quiz(true)
+	await _finish_dialog()
+	_check(game.quests.state("ramas") == "done" and game.skills.free_points() == 1, "Misiones: Ramas → 1 punto")
+	game.skills.raise("aliento")
+	game.apply_skills()
+	_check(is_equal_approx(game.player.stamina_max, stamina * 1.5), "Habilidades: ALIENTO nivel 1 → +50 % de energía")
+	for i in 3:
+		game.quests.pick("hongo_%d" % (i + 1), "hongos")
+	await _finish_dialog()
+	_check(game.quests.state("hongos") == "done" and game.skills.free_points() == 1, "Misiones: 3 hongos de Lía → 1 punto")
+	var on_floor := true
+	for i in game.data.chamber_count():
+		game.load_chamber(i)
+		for item in game.level.nodes_of(GearPickup):
+			var cell: Vector2i = game.level.ground.local_to_map(game.level.ground.to_local(item.global_position))
+			on_floor = on_floor and game.level.ground.get_cell_source_id(cell) != -1 and game.level.walls.get_cell_source_id(cell) == -1
+	_check(on_floor, "Bosque: los hongos de las salas están sobre piso")
+	# Fin del capítulo 2
+	await game.chapter_done()
+	await _wait(0.3)
+	_check(game.machine.current is EndState and game.machine.current._key == "ending_chapter2", "Capítulos: vencer al Guardián del Bosque cierra el capítulo 2")
+	game.quests.reset()
+	game.data.use_chapter(0)

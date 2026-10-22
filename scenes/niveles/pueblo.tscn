@@ -1,4 +1,4 @@
-[gd_scene load_steps=69 format=4 uid="uid://cqy8kkyln35b7"]
+[gd_scene load_steps=71 format=4 uid="uid://cqy8kkyln35b7"]
 
 [ext_resource type="Script" uid="uid://dhxbaqfcloxvl" path="res://src/world/town_level.gd" id="1_1b635"]
 [ext_resource type="TileSet" uid="uid://bdqhxdehwjdgo" path="res://assets/tiles/suelo.tres" id="2_2qo4h"]
@@ -16,6 +16,8 @@
 [ext_resource type="Texture2D" uid="uid://dvi7lhp4dp05c" path="res://assets/pack/backgrounds/Tilesets/Interior/TilesetWallSimple.png" id="16_ackna"]
 [ext_resource type="Texture2D" uid="uid://6nmudm1ujvu6" path="res://assets/pack/backgrounds/Tilesets/Interior/TilesetInteriorFloor.png" id="17_52x55"]
 [ext_resource type="Texture2D" uid="uid://ds4i5gcvgogx5" path="res://assets/pack/fx/Smoke/Smoke/SpriteSheet.png" id="18_c41ld"]
+[ext_resource type="PackedScene" path="res://scenes/personajes/mila.tscn" id="30_mila"]
+[ext_resource type="PackedScene" path="res://scenes/personajes/brasa.tscn" id="31_brasa"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bw7kd"]
 atlas = ExtResource("8_pokif")
@@ -239,6 +241,13 @@ tile_set = ExtResource("3_ise8e")
 
 [node name="Actores" type="Node2D" parent="."]
 y_sort_enabled = true
+
+[node name="Brasa" parent="Actores" instance=ExtResource("31_brasa")]
+position = Vector2(176, 290)
+
+[node name="Mila" parent="Actores" instance=ExtResource("30_mila")]
+position = Vector2(112, 200)
+
 
 [node name="Estatua" parent="Actores" instance=ExtResource("4_xanbb")]
 position = Vector2(232, 88)

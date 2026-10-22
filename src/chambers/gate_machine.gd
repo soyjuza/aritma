@@ -19,6 +19,7 @@ func setup(data: Dictionary, text: Callable, open_fn: Callable, close_fn: Callab
 	session.file_name = "puerta.py"
 	session.code = String(data.get("gate_code", ""))
 	session.help = data.get("gate_help", [])
+	session.set_blocks(data.get("gate_blocks", []))
 	session.machine = self
 	connect_console(open_codex)
 

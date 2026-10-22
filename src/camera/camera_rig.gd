@@ -5,6 +5,7 @@ extends Camera2D
 
 var target: Node2D
 var base_zoom := 3.0
+var frame_zoom := 3.0    # para encuadrar máquinas (en el celular base_zoom es mayor)
 var fixed_shot := false
 
 var _bounds := Rect2i()    # límites del nivel en píxeles
@@ -64,7 +65,7 @@ func frame(at: Vector2, zoom_factor := 1.0, seconds := 0.6) -> void:
 	_frame_to = at
 	_zoom_from = zoom.x
 	var stretch := get_viewport().get_final_transform().get_scale().x
-	_zoom_to = maxf(1.0, roundf(base_zoom * zoom_factor * stretch)) / stretch
+	_zoom_to = maxf(1.0, roundf(frame_zoom * zoom_factor * stretch)) / stretch
 	_glide_time = maxf(seconds, 0.01)
 	_t = 0.0
 

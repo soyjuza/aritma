@@ -18,8 +18,15 @@ static func register(controls: Dictionary) -> void:
 static var mouse_names: Dictionary = {}
 
 
+## Nombres de los botones táctiles (texts.json "touch_names").
+static var touch_names: Dictionary = {}
+static var touch := false
+
+
 ## Nombre de la primera tecla de una acción.
 static func key_name(action: String) -> String:
+	if touch and touch_names.has(action):
+		return String(touch_names[action])
 	if not InputMap.has_action(action):
 		return "?"
 	for event in InputMap.action_get_events(action):
@@ -29,6 +36,14 @@ static func key_name(action: String) -> String:
 			var names := {MOUSE_BUTTON_LEFT: "left", MOUSE_BUTTON_RIGHT: "right"}
 			return String(mouse_names.get(names.get(event.button_index, "other"), "?"))
 	return "?"
+
+
+## Sin ratón real el clic no golpea ni gira: eso lo hacen los botones.
+static func drop_mouse_bindings() -> void:
+	for action in InputMap.get_actions():
+		for event in InputMap.action_get_events(action):
+			if event is InputEventMouseButton:
+				InputMap.action_erase_event(action, event)
 
 
 static func _event_for(binding: String) -> InputEvent:

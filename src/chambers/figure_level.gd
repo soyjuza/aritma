@@ -27,9 +27,10 @@ func wire() -> void:
 
 func _on_crushed() -> void:
 	_game.bus.publish(GameEvents.PLAYER_FELL)
-	_game.penalize(float(_game.combat("fall_penalty_sec", 7)))
+	_game.fall_damage()
 	_game.notify([_game.data.message("player_crushed")], 2.5)
-	respawn_player()
+	if not _game.health.is_dead():
+		respawn_player()
 
 
 func _on_hall_entered() -> void:

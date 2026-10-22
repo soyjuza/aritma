@@ -45,7 +45,23 @@ func freezes_world() -> bool:
 	return false
 
 
-## ¿Corre el reloj?
-func timer_runs() -> bool:
+# En el celular: qué controles táctiles muestra cada estado
+
+## Botones (acciones de config.json).
+func touch_buttons() -> Array:
+	return []
+
+
+## Acción al tocar fuera de los botones ("" = ninguna).
+func touch_tap() -> String:
+	return ""
+
+
+## ¿Se muestra la palanca?
+func touch_stick() -> bool:
 	return false
 
+
+## Teclas en pantalla (reto del rúnico).
+func touch_keys() -> Array:
+	return []

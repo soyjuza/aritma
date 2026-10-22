@@ -60,6 +60,7 @@ func save_state() -> Dictionary:
 	if not machines.is_empty():
 		out["code"] = machines[0].session.code
 		out["machine_solved"] = machines[0].is_solved
+		out["blocks"] = machines[0].session.blocks_state()
 	return out
 
 
@@ -67,6 +68,7 @@ func save_state() -> Dictionary:
 func resume_from_save(state: Dictionary) -> void:
 	for machine in nodes_of(CodeMachine):
 		machine.session.code = String(state.get("code", machine.session.code))
+		machine.session.restore_blocks(state.get("blocks", {}))
 		machine.show_code(machine.session.code)
 	var zone := get_node_or_null("Zonas/EntradaSala") as TriggerZone
 	if zone:

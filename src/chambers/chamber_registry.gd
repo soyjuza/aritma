@@ -18,9 +18,12 @@ static func create(data: Dictionary) -> ChamberLevel:
 
 
 static func _register_defaults() -> void:
+	register("lock", LockBuilder.new())
 	register("filter", FilterBuilder.new())
 	register("roots", RootsBuilder.new())
 	register("vortex", VortexBuilder.new())
 	register("figures", FigureBuilder.new())
 	register("core", CoreBuilder.new())
 	register("throne", ThroneBuilder.new())
+	register("bridge", SceneBuilder.new("res://scenes/niveles/bosque_1_puente.tscn"))
+	register("garden", SceneBuilder.new("res://scenes/niveles/bosque_2_jardin.tscn"))

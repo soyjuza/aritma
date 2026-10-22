@@ -7,6 +7,7 @@ const ROW_H := 52.0
 var options: Array
 var index := 0
 var _enabled: Callable
+var _drawn := Rect2()    # dónde se dibujó, para tocar las opciones
 
 
 func _init(p_options: Array, enabled: Callable = Callable()) -> void:
@@ -44,7 +45,28 @@ func height() -> float:
 	return options.size() * ROW_H
 
 
+## Opción bajo un punto de la pantalla, o -1.
+func index_at(point: Vector2) -> int:
+	if not _drawn.has_point(point):
+		return -1
+	var i := int((point.y - _drawn.position.y) / ROW_H)
+	return i if i < options.size() and is_enabled(i) else -1
+
+
+## Clic o toque sobre una opción: la elige. true si la tocó.
+func clicked(event: InputEventMouse, point: Vector2) -> bool:
+	var button := event as InputEventMouseButton
+	if button == null or not button.pressed or button.button_index != MOUSE_BUTTON_LEFT:
+		return false
+	var i := index_at(point)
+	if i < 0:
+		return false
+	index = i
+	return true
+
+
 func draw(ui: UIKit, at: Vector2, width: float) -> void:
+	_drawn = Rect2(at, Vector2(width, height()))
 	for i in options.size():
 		var y := at.y + i * ROW_H
 		if i == index:

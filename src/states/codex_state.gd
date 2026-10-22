@@ -12,9 +12,11 @@ func enter(params: Dictionary = {}) -> void:
 	_session = params.get("session")
 	_watching = false
 	var machine := _session.machine
-	if machine:
-		game.rig.frame(machine.view_center(), machine.view_zoom, 0.6)
 	game.codex.open(_session, game.data.message("codex_keys", game.key_names()), machine != null)
+	if machine:
+		# Sin Códice al costado, la máquina va al centro
+		var at := machine.view_center() if game.codex.docked else machine.to_global(machine.view_focus)
+		game.rig.frame(at, machine.view_zoom * game.machine_zoom, 0.6)
 	if not game.codex.run_requested.is_connected(run):
 		game.codex.run_requested.connect(run)
 
@@ -25,8 +27,8 @@ func exit() -> void:
 		_session.machine.show_code(_session.code)
 
 
-func timer_runs() -> bool:
-	return true
+func touch_buttons() -> Array:
+	return [] if _watching else ["cancel:close"]
 
 
 func handle_input(actions: Array) -> void:
@@ -43,7 +45,7 @@ func handle_input(actions: Array) -> void:
 func run() -> void:
 	if _watching:
 		return
-	var source: String = game.codex.editor.text
+	var source: String = game.codex.source()
 	_session.code = source
 	var used := CodexSession.count_lines(source)
 	if _session.max_lines > 0 and used > _session.max_lines:
@@ -108,8 +110,6 @@ func _machine_failed(message: String) -> void:
 
 
 func draw(ui: UIKit) -> void:
-	if game.timer.active:
-		Hud.new().draw_timer(ui, game.timer)
 	if _watching and _session.machine:
 		var s := ui.size()
 		ui.text_centered(_session.machine.status_text(), s.y - 70, 22, UIKit.CYAN)

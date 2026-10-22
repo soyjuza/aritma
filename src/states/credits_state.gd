@@ -3,6 +3,10 @@ class_name CreditsState
 extends GameState
 
 
+func touch_tap() -> String:
+	return "accept"
+
+
 func handle_input(actions: Array) -> void:
 	if "accept" in actions or "cancel" in actions:
 		game.bus.publish(GameEvents.MENU_MOVE)

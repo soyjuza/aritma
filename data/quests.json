@@ -1,0 +1,168 @@
+{
+	"main": {
+		"title": "El Templo de Aritma",
+		"goal": "Supera las salas del templo y vence al Guardián del Cero"
+	},
+	"quests": [
+		{
+			"id": "cuentas",
+			"title": "Las cuentas de Mila",
+			"goal": "Ayuda a Mila con 3 cuentas de variables",
+			"kind": "quiz",
+			"problem": "variable",
+			"count": 3,
+			"seconds": 60,
+			"settings": {
+				"min_lines": 2,
+				"max_lines": 3,
+				"max_start": 9,
+				"options": 4
+			},
+			"points": 1,
+			"offer": [
+				"MILA: ¡Hola! Orun me dejó tareas de variables y me enredo con tantos cambios.",
+				"MILA: Si n vale 4 y después escribo n = n + 3... ¿n sigue valiendo 4? ¡Ayúdame con tres cuentas!"
+			],
+			"again": [
+				"MILA: ¿Probamos otra vez? Lee las líneas de arriba abajo, una por una."
+			],
+			"fail": [
+				"MILA: Mmm, creo que esa no era. Cada línea cambia la variable, y la siguiente usa el valor nuevo.",
+				"MILA: Háblame otra vez cuando quieras."
+			],
+			"done": [
+				"MILA: ¡Las tres bien! Toma el amuleto de mi abuela: te da un punto de habilidad."
+			],
+			"thanks": [
+				"MILA: Ya entendí: la variable guarda el último valor que le diste."
+			]
+		},
+		{
+			"id": "tuerca",
+			"title": "Las órdenes de Tuerca",
+			"goal": "Ordena 2 programas desordenados de Tuerca",
+			"kind": "quiz",
+			"problem": "orden",
+			"count": 2,
+			"seconds": 60,
+			"settings": {
+				"options": 4,
+				"programs": [
+					[
+						"pasos = 2",
+						"pasos = pasos + 1",
+						"tuerca.avanzar(pasos)"
+					],
+					[
+						"carga = 5",
+						"carga = carga * 2",
+						"tuerca.levantar(carga)"
+					],
+					[
+						"giro = 1",
+						"giro = giro + 2",
+						"tuerca.girar(giro)"
+					],
+					[
+						"luz = 3",
+						"luz = luz - 1",
+						"tuerca.brillar(luz)"
+					]
+				]
+			},
+			"points": 1,
+			"offer": [
+				"TUERCA: BZZT. UNIDAD TUERCA. MIS ÓRDENES ESTÁN... DESORDENADAS.",
+				"TUERCA: UN PROGRAMA CORRE DE ARRIBA ABAJO. SI LAS LÍNEAS VAN EN DESORDEN, NO FUNCIONO. ¿ME AYUDAS A ORDENAR DOS?"
+			],
+			"again": [
+				"TUERCA: REINTENTANDO. PRIMERO SE CREA LA VARIABLE, LUEGO SE CAMBIA Y AL FINAL SE USA."
+			],
+			"fail": [
+				"TUERCA: ERROR. ESE ORDEN USA UNA VARIABLE ANTES DE CREARLA.",
+				"TUERCA: HÁBLAME OTRA VEZ PARA REINTENTAR."
+			],
+			"done": [
+				"TUERCA: ÓRDENES CORRECTAS. GRACIAS. TE INSTALO UNA MEJORA: UN PUNTO DE HABILIDAD."
+			],
+			"thanks": [
+				"TUERCA: FUNCIONANDO AL CIEN POR CIENTO. BIP."
+			]
+		},
+		{
+			"id": "engranajes",
+			"title": "Los engranajes de Brasa",
+			"goal": "Encuentra 3 engranajes de bronce en el templo",
+			"kind": "collect",
+			"count": 3,
+			"points": 1,
+			"offer": [
+				"BRASA: Yo arreglaba las máquinas del templo antes de que se apagaran. Allá adentro perdí tres engranajes de bronce.",
+				"BRASA: Si los encuentras, ponlos en tu Códice: encajan solos y lo harán más fuerte."
+			],
+			"progress": [
+				"BRASA: Llevas {n} de {of} engranajes. Están escondidos en las salas del templo."
+			],
+			"done": [
+				"Los tres engranajes encajan en el Códice y se ponen a girar. Tala gana un punto de habilidad."
+			],
+			"thanks": [
+				"BRASA: ¡Mis engranajes! Ese Códice ahora suena como las máquinas de antes."
+			],
+			"item": "Engranaje de bronce"
+		},
+		{
+			"id": "ramas",
+			"title": "Las preguntas de Ramas",
+			"goal": "Responde 3 preguntas de if que Ramas no entiende",
+			"kind": "quiz",
+			"problem": "si_sino",
+			"count": 3,
+			"seconds": 60,
+			"settings": {
+				"with_else": 1,
+				"options": 4
+			},
+			"points": 1,
+			"offer": [
+				"RAMAS: Cuido este bosque desde niño, pero los letreros de las ruinas me marean.",
+				"RAMAS: Dicen «if» por aquí, «else» por allá... ¿Me dices qué imprimen tres de ellos?"
+			],
+			"again": [
+				"RAMAS: Otra vez, despacio: primero mira si la pregunta del if da sí o no."
+			],
+			"fail": [
+				"RAMAS: Hmm, el letrero decía otra cosa. Fíjate: si la pregunta da no, se salta lo del if y pasa lo del else.",
+				"RAMAS: Vuelve cuando quieras."
+			],
+			"done": [
+				"RAMAS: ¡Ahora sí lo entiendo! Toma estas botas de corredor: valen un punto de habilidad."
+			],
+			"thanks": [
+				"RAMAS: if pregunta, else responde cuando es que no. ¡Qué fácil era!"
+			]
+		},
+		{
+			"id": "hongos",
+			"title": "Los hongos de Lía",
+			"goal": "Encuentra 3 hongos luminosos en el Bosque",
+			"kind": "collect",
+			"count": 3,
+			"item": "Hongo luminoso",
+			"points": 1,
+			"offer": [
+				"LÍA: ¿Viste los hongos que brillan? Con ellos preparo una medicina que da fuerzas.",
+				"LÍA: Hay uno escondido entre los árboles y dos en las ruinas. Si los recoges, la medicina es tuya."
+			],
+			"progress": [
+				"LÍA: Llevas {n} de {of} hongos. Uno está entre los árboles y dos en las ruinas."
+			],
+			"done": [
+				"Los tres hongos brillan juntos y se vuelven una medicina tibia. Tala gana un punto de habilidad."
+			],
+			"thanks": [
+				"LÍA: ¡Con esa medicina aguantarás lo que venga!"
+			]
+		}
+	]
+}

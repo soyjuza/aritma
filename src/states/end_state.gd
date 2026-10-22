@@ -4,7 +4,6 @@ extends GameState
 
 var _won := false
 var _key := ""
-var _time_used := 0.0
 var _shown := 0.0
 
 
@@ -12,11 +11,14 @@ func enter(params: Dictionary = {}) -> void:
 	_won = bool(params.get("won", false))
 	_key = String(params.get("ending", ""))
 	if _key == "":
-		_key = "ending_won" if _won else "ending_lost"
-	_time_used = game.timer.elapsed()
+		_key = "ending_won"
 	_shown = 0.0
 	game.player.controls_enabled = false
 	game.bus.publish(GameEvents.MENU_CONFIRM)
+
+
+func touch_tap() -> String:
+	return "accept"
 
 
 func handle_input(actions: Array) -> void:
@@ -42,9 +44,6 @@ func draw(ui: UIKit) -> void:
 	var y := s.y * 0.18
 	ui.text_centered(game.data.message(key + "_title"), y, 46, UIKit.GOLD if _won else UIKit.ALERT, "title")
 	y += 64
-	if _won:
-		ui.text_centered(game.data.message("ending_time", {"time": CountdownTimer.format(_time_used)}), y, 24, UIKit.CYAN)
-		y += 50
 	for line in lines:
 		for row in ui.wrap(String(line), w, 22):
 			ui.text(row, Vector2(x, y), 22)

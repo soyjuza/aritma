@@ -3,8 +3,6 @@
 	"subtitle": "La Cámara de los Aritmanos",
 	"author": "JUAN JOSE ZAPATA",
 	"version": "v3.0",
-	"time_limit_sec": 900,
-	"time_warning_sec": 60,
 	"secret_code": "PROFE",
 	"text_speeds": [
 		30,
@@ -206,12 +204,20 @@
 	},
 	"tile": 16,
 	"zoom": 3,
+	"touch_zoom": 4,
+	"touch_codex_zoom": 1.45,
+	"touch_machine_zoom": 1.3,
+	"skills": [
+		{"id": "vida", "name": "VIDA", "max": 3, "desc": "+1 corazón por nivel."},
+		{"id": "fuerza", "name": "FUERZA", "max": 2, "desc": "El garrote golpea más fuerte: +1 de daño por nivel."},
+		{"id": "aliento", "name": "ALIENTO", "max": 2, "desc": "+50 % de energía para correr y saltar por nivel."},
+		{"id": "pensar", "name": "TIEMPO DE PENSAR", "max": 3, "desc": "+5 segundos por nivel en las preguntas de los jefes."}
+	],
 	"combat": {
 		"hearts": 5,
 		"invulnerable_sec": 1.0,
 		"knockback": 170.0,
-		"fall_penalty_sec": 7,
-		"death_penalty_sec": 60,
+		"fall_damage_halves": 1,
 		"heal_on_solve": 0,
 		"attack_time": 0.28,
 		"attack_cooldown": 0.12,
@@ -307,5 +313,6 @@
 			5,
 			6
 		]
-	}
+	},
+	"practices_on": true
 }

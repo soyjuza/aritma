@@ -18,6 +18,13 @@ func enter(_params: Dictionary = {}) -> void:
 	_menu.first_enabled()
 
 
+func handle_mouse(event: InputEventMouse) -> bool:
+	if _menu.clicked(event, (game.overlay as Control).make_input_local(event).position):
+		handle_input(["accept"])
+		return true
+	return false
+
+
 func handle_input(actions: Array) -> void:
 	if _menu.move(actions):
 		game.bus.publish(GameEvents.MENU_MOVE)
@@ -53,4 +60,3 @@ func draw(ui: UIKit) -> void:
 			ui.text(String(blurb[i]), info.position + Vector2(24, 24 + i * 34), 22)
 		return
 	ui.text(game.data.message("saved_game"), info.position + Vector2(24, 16), 20, UIKit.GOLD, "title")
-	ui.text(game.data.message("saved_time", {"time": CountdownTimer.format(float(_snapshot.get("time_left", 0)))}), info.position + Vector2(24, 58), 22)

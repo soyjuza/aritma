@@ -39,6 +39,9 @@ var flags: Dictionary = {}
 var boom_cell := Vector2i(-1, -1)
 var highlight := Vector2i(-1, -1)
 var defused := false
+var preset: Dictionary = {}    # minas fijas (práctica)
+var guide := Vector2i(-1, -1)    # baldosa que hay que usar (práctica)
+var clue := Vector2i(-1, -1)    # número que hay que mirar (práctica)
 
 var _generator := MinefieldGenerator.new("king")
 var _previous: Dictionary = {}
@@ -142,6 +145,9 @@ func count_around(c: Vector2i) -> int:
 
 
 func _place_mines(first: Vector2i) -> void:
+	if not preset.is_empty():
+		mines = preset.duplicate()
+		return
 	for attempt in 50:
 		mines = _generator.generate(cells(), mine_count, first)
 		if mines != _previous:
@@ -182,6 +188,10 @@ func _draw() -> void:
 		draw_rect(Rect2(Vector2(-7, -7), size + Vector2(14, 14)), Color(GREEN, glow * 0.35), false, 2.0)
 	for c in cells():
 		_draw_cell(c)
+	for mark in [[clue, CYAN], [guide, GREEN]]:
+		if in_board(mark[0]):
+			var glow := 0.55 + 0.45 * sin(_time * 5.0)
+			draw_rect(Rect2(Vector2(mark[0]) * CELL, Vector2(CELL, CELL)).grow(-1), Color(mark[1], glow), false, 2.0)
 	if powered and highlight != Vector2i(-1, -1):
 		var r := Rect2(Vector2(highlight) * CELL, Vector2(CELL, CELL))
 		var pulse := 0.6 + 0.4 * sin(_time * 7.0)

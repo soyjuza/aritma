@@ -5,6 +5,7 @@ extends GameState
 const RESULT_TIME := 1.4
 const KEYS := [KEY_1, KEY_2, KEY_3, KEY_4]
 const KEYPAD := [KEY_KP_1, KEY_KP_2, KEY_KP_3, KEY_KP_4]
+const CODE_LINE := 38.0
 
 var quiz: Dictionary = {}
 var seconds := 15.0
@@ -26,10 +27,6 @@ func enter(params: Dictionary = {}) -> void:
 	_finished = false
 	_result_t = 0.0
 	game.player.controls_enabled = false
-
-
-func timer_runs() -> bool:
-	return true
 
 
 func freezes_world() -> bool:
@@ -91,7 +88,14 @@ func update(delta: float) -> void:
 
 func _panel(ui: UIKit) -> Rect2:
 	var s := ui.size()
-	return Rect2((s.x - 820) / 2.0, s.y * 0.2, 820, 400)
+	var h := 400.0 + _code_height()
+	return Rect2((s.x - 820) / 2.0, maxf(20.0, (s.y - h) / 2.0), 820, h)
+
+
+## Alto del bloque de código (0 si el problema no trae código).
+func _code_height() -> float:
+	var code: Array = quiz.get("code", [])
+	return 0.0 if code.is_empty() else code.size() * CODE_LINE + 28.0
 
 
 func _option_rect(ui: UIKit, i: int) -> Rect2:
@@ -100,20 +104,29 @@ func _option_rect(ui: UIKit, i: int) -> Rect2:
 	var w := 150.0
 	var gap := 24.0
 	var left := p.get_center().x - (count * w + (count - 1) * gap) / 2.0
-	return Rect2(left + i * (w + gap), p.position.y + 196, w, 84)
+	return Rect2(left + i * (w + gap), p.position.y + 196 + _code_height(), w, 84)
 
 
 func draw(ui: UIKit) -> void:
 	ui.dim(0.5)
-	ui.vignette(0.5, Color(0.6, 0.05, 0.05))
+	# Las misiones van sin el rojo del jefe
+	var calm := bool(quiz.get("calm", false))
+	if not calm:
+		ui.vignette(0.5, Color(0.6, 0.05, 0.05))
 	var hud := Hud.new()
-	hud.draw_timer(ui, game.timer)
 	hud.draw_hearts(ui, game.health, 0.0)
 	var p := _panel(ui)
 	ui.panel(p)
-	ui.text_centered(game.data.message("quiz_title"), p.position.y + 22, 30, UIKit.ALERT, "title")
+	ui.text_centered(String(quiz.get("header", game.data.message("quiz_title"))), p.position.y + 22, 30, UIKit.GOLD if calm else UIKit.ALERT, "title")
 	ui.text_centered(game.data.message("quiz_subtitle", {"sala": quiz.get("title", "")}), p.position.y + 70, 19, UIKit.MUTED)
 	ui.text_centered(String(quiz.get("question", "")), p.position.y + 118, 32, UIKit.TEXT, "bold")
+	var code: Array = quiz.get("code", [])
+	if not code.is_empty():
+		var box := Rect2(p.get_center().x - 230, p.position.y + 172, 460, code.size() * CODE_LINE + 12)
+		ui.rect(box, Color(0.02, 0.03, 0.05, 0.95))
+		ui.frame(box, Color("3a4556"), 2.0)
+		for i in code.size():
+			ui.text(String(code[i]), box.position + Vector2(28, 6 + i * CODE_LINE), 30, UIKit.CYAN, "bold")
 	var options: Array = quiz.get("options", [])
 	for i in options.size():
 		var r := _option_rect(ui, i)
@@ -138,6 +151,8 @@ func draw(ui: UIKit) -> void:
 	ui.rect(Rect2(bar.position, Vector2(bar.size.x * frac, bar.size.y)), UIKit.GOLD if frac > 0.33 else UIKit.ALERT)
 	if _finished:
 		var key := "quiz_right" if right() else ("quiz_timeout" if _chosen < 0 else "quiz_wrong")
+		if calm:
+			key = key.replace("quiz_", "quest_quiz_")
 		ui.text_centered(game.data.message(key), p.end.y - 44, 24, UIKit.GOOD if right() else UIKit.ALERT, "bold")
 	else:
 		ui.text_centered(game.data.message("quiz_hint", {"s": ceili(_left), "keys": _keys_text()}), p.end.y - 44, 19, UIKit.MUTED)

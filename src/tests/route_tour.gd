@@ -3,6 +3,12 @@
 class_name RouteTour
 extends RefCounted
 
+const CRIBA := "while tolva.quedan() > 0:\n    n = tolva.soltar()\n    if n % 2 == 0:\n        caliz.recibir()\n    else:\n        crisol.desintegrar()\n"
+
+## Orden de antes (Criba → Mural → ...): los recorridos viejos usan estos números
+const OLD_ORDER := ["filter", "roots", "vortex", "figures", "core", "throne"]
+const LOCK_OK := "nivel = sensor.leer()\nnivel = nivel + 3\ncompuerta.subir(nivel)\n"
+
 var game: Game
 var folder := ""
 
@@ -16,12 +22,28 @@ func run(arg: String) -> void:
 	folder = parts[0]
 	DirAccess.make_dir_recursive_absolute(folder)
 	game.set_process_unhandled_input(false)
+	if parts.size() > 1 and parts[1] == "compuerta":
+		game.machine.change("play", {"mode": "new"})
+		await _wait(0.5)
+		game.dialog.close()
+		game.load_chamber(0)
+		await _lock_room()
+		game.get_tree().quit()
+		return
+	if parts.size() > 1 and parts[1] == "bosque":
+		await _forest_tour()
+		game.get_tree().quit()
+		return
+	if parts.size() > 1 and parts[1] == "misiones":
+		await _quests_tour()
+		game.get_tree().quit()
+		return
+	game.data.use_order(OLD_ORDER)
 	if parts.size() > 1 and parts[1] == "sala2":
 		game.machine.change("play", {"mode": "new"})
 		await _wait(0.5)
 		game.dialog.close()
 		game.load_chamber(1)
-		game.timer.start()
 		await _roots_room()
 		game.get_tree().quit()
 		return
@@ -31,8 +53,19 @@ func run(arg: String) -> void:
 		await _wait(0.5)
 		game.dialog.close()
 		game.load_chamber(rooms[parts[1]][0])
-		game.timer.start()
 		await rooms[parts[1]][1].call()
+		game.get_tree().quit()
+		return
+	if parts.size() > 1 and parts[1] == "practicas":
+		await _practice_tour()
+		game.get_tree().quit()
+		return
+	if parts.size() > 1 and parts[1] == "celular":
+		await _phone_tour()
+		game.get_tree().quit()
+		return
+	if parts.size() > 1 and parts[1] == "bloques":
+		await _blocks_tour()
 		game.get_tree().quit()
 		return
 	if parts.size() > 1 and parts[1] == "jefe":
@@ -40,7 +73,6 @@ func run(arg: String) -> void:
 		await _wait(0.5)
 		game.dialog.close()
 		game.load_chamber(5)
-		game.timer.start()
 		await _boss_fight()
 		game.get_tree().quit()
 		return
@@ -58,12 +90,17 @@ func run(arg: String) -> void:
 	game.player.place(town.gate.global_position + Vector2(0, 16), Vector2.UP)
 	game.open_codex(town.gate.session)
 	await _wait(1.2)
-	game.codex.editor.text = "puerta.abrir()\n"
+	await _shot("05_codice_puerta_vacio")
+	_arm("puerta.abrir()\n")
 	await _shot("05_codice_puerta")
 	game.machine.current.run()
 	await _wait(2.0)
 	game.dialog.close()
 	await _shot("06_puerta_abierta")
+	# Este recorrido va sin prácticas (tienen el suyo: practicas)
+	for i in game.data.chamber_count():
+		for key in game.data.chamber_data(i).get("practices", []):
+			game.practices_done[key] = true
 	await game.enter_temple()
 	await _wait(1.0)
 	game.dialog.close()
@@ -84,7 +121,9 @@ func run(arg: String) -> void:
 	while game.rig.is_gliding():
 		await _wait(0.1)
 	await _wait(0.4)
-	game.codex.editor.text = "while tolva.quedan() > 0:\n    n = tolva.soltar()\n    if n % 2 == 0:\n        caliz.recibir()\n    else:\n        crisol.desintegrar()\n"
+	_arm(CRIBA, 3)
+	await _shot("11_codice_criba_a_medias")
+	_arm(CRIBA)
 	await _shot("11_codice_criba")
 	game.machine.current.run()
 	await _wait(1.4)
@@ -127,7 +166,7 @@ func _roots_room() -> void:
 	while game.rig.is_gliding():
 		await _wait(0.1)
 	await _wait(0.4)
-	game.codex.editor.text = "def despejar(a, b, c):\n    return (c - b) / a\n"
+	game.codex.write("def despejar(a, b, c):\n    return (c - b) / a\n")
 	await _shot("24_codice_mural")
 	game.machine.current.run()
 	await _wait(1.6)
@@ -151,13 +190,13 @@ func _vortex_room() -> void:
 	while game.rig.is_gliding():
 		await _wait(0.1)
 	await _wait(0.4)
-	game.codex.editor.text = "luces.encender(\n"
+	game.codex.write("luces.encender(\n")
 	game.machine.current.run()
 	game.machine.change("play")
 	game.open_codex(lvl.machine.session)
 	await _wait(0.6)
 	await _shot("31a_error_conservado")
-	game.codex.editor.text = "luces.encender()\n"
+	game.codex.write("luces.encender()\n")
 	await _shot("31_codice_luces")
 	game.machine.current.run()
 	await _wait(2.5)
@@ -331,3 +370,440 @@ func _shot(name: String) -> void:
 	await RenderingServer.frame_post_draw
 	game.get_viewport().get_texture().get_image().save_png(folder.path_join(name + ".png"))
 	print("recorrido ", name)
+
+
+## Arma con las piezas las primeras lines líneas del programa.
+func _arm(code: String, lines := 99) -> void:
+	var board := game.codex.board
+	board.session.use_blocks = true
+	board.session.placed.clear()
+	for line in code.split("\n").slice(0, lines):
+		if line.strip_edges() != "":
+			var indent := (line.length() - line.strip_edges(true, false).length()) / 4
+			board.place(board.session.blocks.find(line.strip_edges()), board.session.placed.size(), indent)
+	game.codex.show_mode()
+
+
+## Solo el Códice con bloques en la puerta, la Criba y el Mural.
+func _blocks_tour() -> void:
+	game.machine.change("play", {"mode": "new"})
+	await _wait(0.5)
+	game.dialog.close()
+	var town := game.level as TownLevel
+	game.player.place(town.gate.global_position + Vector2(0, 16), Vector2.UP)
+	game.open_codex(town.gate.session)
+	await _wait(1.2)
+	await _shot("b1_puerta_vacia")
+	_arm("puerta.abrir()\n")
+	await _shot("b2_puerta_armada")
+	game.machine.change("play")
+	game.load_chamber(0)
+	await _wait(0.5)
+	game.dialog.close()
+	var lvl := game.level as FilterLevel
+	game.player.place(Level.cell_center(Vector2i(15, 9)), Vector2.UP)
+	game.open_codex(lvl.machine.session)
+	while game.rig.is_gliding():
+		await _wait(0.1)
+	await _wait(0.4)
+	await _shot("b3_criba_vacia")
+	_arm(CRIBA, 3)
+	await _shot("b4_criba_a_medias")
+	_arm(CRIBA)
+	await _shot("b5_criba_armada")
+	game.codex.toggle_mode()
+	await _wait(0.2)
+	await _shot("b6_criba_texto")
+	game.codex.toggle_mode()
+	game.machine.change("play")
+	game.load_chamber(1)
+	await _wait(0.5)
+	game.dialog.close()
+	var mural := game.level as RootsLevel
+	game.player.place(mural.machine.global_position + Vector2(0, 30), Vector2.UP)
+	game.open_codex(mural.machine.session)
+	while game.rig.is_gliding():
+		await _wait(0.1)
+	await _wait(0.4)
+	await _shot("b7_mural_vacio")
+	_arm("def despejar(a, b, c):\n    return (c - b) / a\n")
+	await _shot("b8_mural_armado")
+
+
+## La Compuerta (Sala 1 del capítulo 1).
+func _lock_room() -> void:
+	var lvl := game.level as LockLevel
+	game.player.place(lvl.get_node("Zonas/EntradaSala").point(), Vector2.UP)
+	lvl._on_hall_entered()
+	await _wait(1.0)
+	await _shot("l0_compuerta_intro")
+	game.dialog.close()
+	game.player.place(lvl.machine.global_position + Vector2(0, 40), Vector2.UP)
+	await _wait(0.6)
+	await _shot("l1_compuerta_sala")
+	game.open_codex(lvl.machine.session)
+	while game.rig.is_gliding():
+		await _wait(0.1)
+	await _wait(0.4)
+	await _shot("l2_codice_vacio")
+	game.codex.write("nivel = sensor.leer()\ncompuerta.subir(nivel)\n")
+	game.machine.current.run()
+	await _wait(1.6)
+	await _shot("l3_ronda_mal")
+	await _wait(1.5)
+	await _shot("l4_mensaje_mal")
+	# Vence a los guardianes para volver a usar el atril
+	await _wait(3.0)
+	for g in lvl.nodes_of(Guardian):
+		if g.is_active():
+			g.take_hit(99, Vector2.UP)
+	await _wait(2.0)
+	game.dialog.close()
+	game.open_codex(lvl.machine.session)
+	while game.rig.is_gliding():
+		await _wait(0.1)
+	await _wait(0.4)
+	game.codex.write(LOCK_OK)
+	game.machine.current.run()
+	await _wait(1.4)
+	await _shot("l5_ronda_bien")
+	await _wait(4.0)
+	await _shot("l6_compuerta_abierta")
+	game.dialog.close()
+
+
+## Las cinco prácticas, paso a paso.
+func _practice_tour() -> void:
+	game.data.use_order(["lock", "roots", "vortex"])
+	game.machine.change("play", {"mode": "new"})
+	await _wait(0.5)
+	game.dialog.close()
+	await game.enter_temple()
+	await _wait(1.0)
+	await _shot("p1_pasos_intro")
+	game.dialog.close()
+	var move := game.level as PracticeMoveLevel
+	await _wait(0.4)
+	await _shot("p1_pasos_1")
+	for id in ["caminar", "correr", "saltar"]:
+		game.player.place(move.get_node("Marcas/" + id).global_position, Vector2.UP)
+		move.complete(id)
+		await _wait(0.6)
+	game.player.place(move.get_node("Marcas/saltar").global_position + Vector2(0, -8), Vector2.UP)
+	await _wait(0.6)
+	await _shot("p1_pasos_foso_largo")
+	move.complete("foso_largo")
+	await _wait(0.8)
+	await _shot("p1_pasos_fin")
+	game.dialog.close()
+	game.leave_practice()
+	await _until(func(): return game.level is PracticeFightLevel)
+	game.dialog.close()
+	var fight := game.level as PracticeFightLevel
+	game.player.place(fight.dummy.global_position + Vector2(0, 18), Vector2.UP)
+	await _wait(0.5)
+	await _shot("p2_pelea_muneco")
+	for i in 3:
+		fight.dummy.take_hit(1, Vector2.UP)
+	await _wait(1.2)
+	await _shot("p2_pelea_caballero")
+	for g in fight.nodes_of(Guardian):
+		g.take_hit(99, Vector2.UP)
+	await _wait(2.5)
+	await _shot("p2_pelea_hechicero")
+	for g in fight.nodes_of(Guardian):
+		g.take_hit(99, Vector2.UP)
+	await _wait(2.0)
+	await _shot("p2_pelea_fin")
+	game.dialog.close()
+	game.leave_practice()
+	await _until(func(): return game.level is PracticeCodeLevel)
+	game.dialog.close()
+	var blocks := game.level as PracticeCodeLevel
+	game.player.place(blocks.machine.global_position + Vector2(0, 18), Vector2.UP)
+	await _wait(0.5)
+	await _shot("p3_bloques_atril")
+	await _code_stage(blocks, "p3_bloques_etapa1", "antorchas.encender()\n")
+	await _code_stage(blocks, "p3_bloques_etapa2", "antorchas.encender()\nantorchas.encender()\nantorchas.encender()\n")
+	await _shot("p3_bloques_fin")
+	game.dialog.close()
+	game.leave_practice()
+	await _until(func(): return game.level is LockLevel)
+	await _wait(1.0)
+	await _shot("p4_sala1_llega")
+	game.dialog.close()
+	game.enter_chamber(1)
+	await _until(func(): return game.level is PracticeCodeLevel)
+	game.dialog.close()
+	var funcs := game.level as PracticeCodeLevel
+	game.player.place(funcs.machine.global_position + Vector2(0, 18), Vector2.UP)
+	await _wait(0.5)
+	await _shot("p4_funciones_atril")
+	await _code_stage(funcs, "p4_funciones_etapa1", "def doble(n):\n    return n * 2\n")
+	await _code_stage(funcs, "p4_funciones_etapa2", "def restar(a, b):\n    return a - b\n")
+	await _shot("p4_funciones_fin")
+	game.dialog.close()
+	game.enter_chamber(2)
+	await _until(func(): return game.level is PracticeMinesLevel)
+	game.dialog.close()
+	var mines := game.level as PracticeMinesLevel
+	game.player.place(mines.board.cell_center(Vector2i(1, 3)), Vector2.UP)
+	await _wait(0.5)
+	await _shot("p5_minas_1")
+	game.player.place(mines.board.cell_center(Vector2i(1, 2)), Vector2.UP)
+	mines.handle_action(["interact"])
+	await _wait(0.6)
+	await _shot("p5_minas_2")
+	game.player.place(mines.board.cell_center(Vector2i(4, 1)), Vector2.UP)
+	mines.handle_action(["flag"])
+	await _wait(0.6)
+	await _shot("p5_minas_3")
+	game.player.place(mines.board.cell_center(Vector2i(4, 0)), Vector2.UP)
+	mines.handle_action(["interact"])
+	await _wait(0.8)
+	await _shot("p5_minas_fin")
+
+
+## Abre el atril, arma el programa, lo corre y espera.
+func _code_stage(lvl: PracticeCodeLevel, shot_name: String, code: String) -> void:
+	# Como si presionara E en el atril
+	lvl._open_machine()
+	while game.rig.is_gliding():
+		await _wait(0.1)
+	await _wait(0.4)
+	await _shot(shot_name + "_vacio")
+	_arm(code)
+	await _shot(shot_name + "_armado")
+	game.machine.current.run()
+	await _wait(2.5)
+	await _shot(shot_name + "_resultado")
+	game.dialog.close()
+
+
+func _until(done: Callable) -> void:
+	var t := 0.0
+	while not done.call() and t < 20.0:
+		await _wait(0.2)
+		t += 0.2
+	await _wait(0.6)
+
+
+## Pantallas con los controles táctiles (correr con --tactil).
+func _phone_tour() -> void:
+	var touch := game.touch
+	await _wait(0.8)
+	await _shot("c00_titulo")
+	game.machine.change("menu")
+	await _wait(0.4)
+	await _shot("c01_menu")
+	game.machine.change("intro")
+	await _wait(1.0)
+	await _shot("c02_historia")
+	game.machine.change("play", {"mode": "new"})
+	await _wait(1.0)
+	await _shot("c03_llegada_dialogo")
+	game.dialog.close()
+	await _wait(0.3)
+	await _shot("c04_pueblo")
+	# Palanca a medias caminando; luego CORRER prendido
+	var base := Vector2(230, touch.size.y - 215)
+	touch._finger_down(1, base)
+	touch._finger_move(1, base + Vector2(0, -70))
+	await _wait(0.6)
+	await _shot("c05a_palanca_caminando")
+	touch._finger_down(2, touch._button_center("run"))
+	touch._finger_up(2)
+	await _wait(0.6)
+	await _shot("c05b_corriendo")
+	touch._finger_up(1)
+	touch._finger_down(2, touch._button_center("run"))
+	touch._finger_up(2)
+	var town := game.level as TownLevel
+	game.player.place(town.gate.global_position + Vector2(0, 16), Vector2.UP)
+	await _wait(0.5)
+	await _shot("c06_frente_al_atril")
+	game.open_codex(town.gate.session)
+	await _wait(0.6)
+	await _shot("c07_codice_bloques")
+	game.machine.change("play")
+	game.machine.change("pause")
+	await _wait(0.3)
+	await _shot("c08_pausa")
+	game.machine.change("settings", {"return_to": "pause"})
+	await _wait(0.3)
+	await _shot("c09_ajustes")
+	game.machine.change("book", {"return_to": "play"})
+	await _wait(0.3)
+	await _shot("c10_libro_ultima")
+	game.machine.current._page = 0
+	await _wait(0.2)
+	await _shot("c11_libro_pag1")
+	game.machine.change("play")
+	for key in ["buscaminas_2", "buscaminas_4"]:
+		game.load_practice(key, 2)
+		await _wait(0.5)
+		await _shot("c12_%s_intro" % key)
+		game.dialog.close()
+		var mines := game.level as PracticeMinesLevel
+		var first: Array = mines.steps()[0].cell
+		game.player.global_position = mines.board.cell_center(Vector2i(int(first[0]), int(first[1])))
+		mines.handle_action(["interact"])
+		await _wait(0.6)
+		await _shot("c13_%s_paso2" % key)
+	game.load_chamber(3)
+	await _wait(0.4)
+	game.dialog.close()
+	game.machine.change("puzzle", {"table": (game.level as FigureLevel).table})
+	await _wait(0.4)
+	await _shot("c14_piezas")
+	game.machine.change("play")
+	game.machine.change("keys", {"keys": ["J", "D", "K", "S"], "seconds": 30.0, "ready": 0.0})
+	await _wait(0.3)
+	await _shot("c15_reto_teclas")
+	game.machine.change("quiz", {"quiz": {"title": "Sala 1", "question": "¿18 es par?", "options": ["Sí", "No"], "answer": 0}, "seconds": 15.0})
+	await _wait(0.3)
+	await _shot("c16_problema")
+	game.finish(true)
+	await _wait(2.0)
+	await _shot("c17_final")
+
+
+func _skip_dialog() -> void:
+	var t := 0
+	while game.dialog.is_open() and t < 40:
+		game.dialog.advance()
+		game.dialog.advance()
+		t += 1
+	await _wait(0.3)
+
+
+## Misiones: personajes, preguntas, pausa y engranajes.
+func _quests_tour() -> void:
+	game.machine.change("play", {"mode": "new"})
+	await _wait(0.5)
+	game.dialog.close()
+	var town := game.level as TownLevel
+	var mila: Npc = town.get_node("Actores/Mila")
+	var brasa: Npc = town.get_node("Actores/Brasa")
+	game.player.place(mila.global_position + Vector2(0, 24), Vector2.UP)
+	await _wait(0.8)
+	await _shot("m0_mila")
+	game.player.place(brasa.global_position + Vector2(0, 24), Vector2.UP)
+	await _wait(0.8)
+	await _shot("m1_brasa")
+	game.talk_to(mila)
+	await _wait(1.2)
+	await _shot("m2_mila_habla")
+	await _skip_dialog()
+	await _wait(0.4)
+	await _shot("m3_cuenta_mila")
+	for i in 3:
+		var quiz := game.machine.current as QuizState
+		quiz.choose(int(quiz.quiz.answer))
+		await _wait(0.6)
+		if i == 0:
+			await _shot("m4_cuenta_bien")
+		await _wait(QuizState.RESULT_TIME)
+	await _wait(0.6)
+	await _shot("m5_mision_cumplida")
+	await _skip_dialog()
+	game.talk_to(brasa)
+	await _skip_dialog()
+	game.machine.change("pause")
+	await _wait(0.6)
+	await _shot("m6_pausa_misiones")
+	game.machine.change("play")
+	for key in game.data.practices.keys():
+		game.practices_done[key] = true
+	game.load_chamber(0)
+	await _wait(0.6)
+	game.dialog.close()
+	var tuerca: Npc = game.level.get_node("Actores/Tuerca")
+	game.player.place(tuerca.global_position + Vector2(0, 24), Vector2.UP)
+	await _wait(0.8)
+	await _shot("m7_tuerca")
+	for i in 3:
+		game.load_chamber(i)
+		await _wait(0.6)
+		game.dialog.close()
+		var gear: GearPickup = game.level.nodes_of(GearPickup)[0]
+		game.player.place(gear.global_position + Vector2(0, 30), Vector2.UP)
+		await _wait(0.8)
+		await _shot("m8_engranaje_%d" % i)
+
+
+## Capítulo 2: llegada al Bosque, personajes, salas y jefe.
+func _forest_tour() -> void:
+	game.data.use_chapter(0)
+	game.machine.change("play", {"mode": "new"})
+	await _wait(0.5)
+	game.dialog.close()
+	game.load_chamber(4)
+	await _wait(0.3)
+	game.chapter_done()
+	await _wait(1.6)
+	await _shot("b0_llegada")
+	await _skip_dialog()
+	await _wait(0.6)
+	await _shot("b1_bosque_inicio")
+	var hub := game.level
+	for n in ["Sauce", "Letrero", "Ramas", "Lia", "Hongo"]:
+		var at: Vector2 = hub.get_node("Actores/" + n).global_position
+		game.player.place(at + Vector2(0, 24), Vector2.UP)
+		await _wait(0.7)
+		await _shot("b2_" + n.to_lower())
+	game.player.place(hub.get_node("Zonas/EntradaRuinas").global_position + Vector2(0, 70), Vector2.UP)
+	await _wait(0.7)
+	await _shot("b3_ruinas")
+	game.quests.talk("ramas")
+	await _skip_dialog()
+	await _wait(0.4)
+	await _shot("b4_pregunta_ramas")
+	var quiz := game.machine.current as QuizState
+	if quiz:
+		quiz.choose(int(quiz.quiz.answer))
+		await _wait(QuizState.RESULT_TIME + 0.4)
+	game.machine.change("play")
+	game.machine.change("pause")
+	await _wait(0.5)
+	await _shot("b5_pausa_bosque")
+	game.skills.grant(3)
+	game.skills.raise("vida")
+	game.apply_skills()
+	game.machine.change("skills")
+	game.machine.current.handle_input(["ui_down"])
+	await _shot("b5_habilidades")
+	game.machine.change("pause")
+	game.machine.change("play")
+	var rooms := [["b6_puente", "peso = carreta.peso()\nif peso > 10:\n    puente.reforzar()\n"], ["b7_jardin", "agua = maceta.medir()\nif agua < 5:\n    maceta.regar()\nelse:\n    maceta.asolear()\n"]]
+	for i in 2:
+		game.load_chamber(i)
+		await _wait(0.6)
+		var lvl := game.level as RoundsLevel
+		game.player.place(lvl.get_node("Zonas/EntradaSala").point(), Vector2.UP)
+		lvl._on_hall_entered()
+		await _wait(1.0)
+		await _shot(rooms[i][0] + "_intro")
+		game.dialog.close()
+		game.player.place(lvl.machine.global_position + Vector2(0, 40), Vector2.UP)
+		game.open_codex(lvl.machine.session)
+		while game.rig.is_gliding():
+			await _wait(0.1)
+		await _wait(0.4)
+		await _shot(rooms[i][0] + "_codice")
+		game.codex.write(rooms[i][1])
+		game.machine.current.run()
+		await _wait(1.0)
+		await _shot(rooms[i][0] + "_ronda")
+		await _wait(4.0)
+		await _shot(rooms[i][0] + "_fin")
+		game.dialog.close()
+	game.load_chamber(2)
+	await _wait(0.6)
+	var throne := game.level as ThroneLevel
+	await _wait(0.5)
+	await _shot("b8_jefe_intro")
+	game.dialog.close()
+	throne._ask_question()
+	await _wait(1.6)
+	await _shot("b9_jefe_pregunta")

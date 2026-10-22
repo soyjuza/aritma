@@ -51,6 +51,7 @@ func setup(kit: TileKit, bus: EventBus, data: Dictionary, text: Callable, open_c
 	session.file_name = String(data.get("file_name", "incognita.py"))
 	session.code = String(data.get("starter_code", ""))
 	session.help = data.get("help", [])
+	session.set_blocks(data.get("blocks", []))
 	session.max_steps = max_steps
 	session.machine = self
 	connect_console(open_codex)

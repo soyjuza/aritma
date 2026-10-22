@@ -1,0 +1,48 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://src/world/npc.gd" id="1_2mlym"]
+[ext_resource type="Texture2D" path="res://assets/pack/actors/Shadow.png" id="2_1vtna"]
+[ext_resource type="SpriteFrames" path="res://assets/personajes/ramas_animaciones.tres" id="3_ls8py"]
+[ext_resource type="Script" path="res://src/world/interactable.gd" id="4_p2qoc"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lj6et"]
+atlas = ExtResource("2_1vtna")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hfaey"]
+size = Vector2(10, 6)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_24mb2"]
+size = Vector2(24, 24)
+
+[node name="Ramas" type="Node2D"]
+script = ExtResource("1_2mlym")
+quest_id = "ramas"
+
+[node name="Sombra" type="Sprite2D" parent="."]
+modulate = Color(1, 1, 1, 0.7)
+position = Vector2(0, -1)
+texture = SubResource("AtlasTexture_lj6et")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -8)
+sprite_frames = ExtResource("3_ls8py")
+animation = &"idle_down"
+autoplay = "idle_down"
+
+[node name="Cuerpo" type="StaticBody2D" parent="."]
+
+[node name="Forma" type="CollisionShape2D" parent="Cuerpo"]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_hfaey")
+
+[node name="Charla" type="Area2D" parent="."]
+position = Vector2(0, -6)
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+script = ExtResource("4_p2qoc")
+prompt_key = "prompt_talk"
+
+[node name="Forma" type="CollisionShape2D" parent="Charla"]
+shape = SubResource("RectangleShape2D_24mb2")

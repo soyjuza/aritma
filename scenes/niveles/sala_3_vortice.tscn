@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=4]
+[gd_scene load_steps=29 format=4]
 
 [ext_resource type="Script" path="res://src/chambers/vortex_level.gd" id="1_ure31"]
 [ext_resource type="TileSet" path="res://assets/tiles/suelo.tres" id="2_8nyps"]
@@ -17,6 +17,7 @@
 [ext_resource type="Texture2D" path="res://assets/efectos/luz_suave.tres" id="18_eucke"]
 [ext_resource type="Script" path="res://src/chambers/mine_board.gd" id="30_board"]
 [ext_resource type="PackedScene" path="res://scenes/maquinas/faro.tscn" id="31_faro"]
+[ext_resource type="PackedScene" path="res://scenes/objetos/engranaje.tscn" id="31_gear"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xcbdf"]
 size = Vector2(80, 10)
@@ -81,6 +82,11 @@ script = ExtResource("30_board")
 
 [node name="Actores" type="Node2D" parent="."]
 y_sort_enabled = true
+
+[node name="Engranaje" parent="Actores" instance=ExtResource("31_gear")]
+position = Vector2(100, 112)
+item_id = "engranaje_2"
+
 
 [node name="Letrero" type="Node2D" parent="Actores" instance=ExtResource("4_eq173")]
 position = Vector2(216, 640)

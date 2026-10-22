@@ -9,7 +9,7 @@ func _init(text: Callable, settings: Dictionary = {}) -> void:
 	_text = text
 	for key in settings.keys():
 		if key in self:
-			set(key, int(settings[key]))
+			set(key, settings[key] if settings[key] is Array else int(settings[key]))
 
 
 func make(_rng: RandomNumberGenerator) -> Dictionary:

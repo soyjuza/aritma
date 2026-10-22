@@ -17,8 +17,8 @@
 			"text": "Tala, una rastreadora del pueblo, encontró entre las ruinas un brazalete aritmano que aún funciona: el Códice. Con él se puede escribir en el idioma de las máquinas."
 		},
 		{
-			"title": "Quince minutos",
-			"text": "Bajo la montaña duerme la Cámara de Pruebas, la última máquina con energía. Su núcleo, al despertar, solo resiste quince minutos. Quien llegue al Archivo antes de que se apague recuperará el saber de Aritma."
+			"title": "La Cámara dormida",
+			"text": "Bajo la montaña duerme la Cámara de Pruebas, la última máquina con energía. Quien llegue al Archivo recuperará el saber de Aritma."
 		}
 	],
 	"menu": [
@@ -30,6 +30,7 @@
 	],
 	"pause_options": [
 		"REANUDAR",
+		"HABILIDADES",
 		"LIBRO DE REGLAS",
 		"AJUSTES",
 		"GUARDAR",
@@ -37,6 +38,7 @@
 	],
 	"pause_help": [
 		"Vuelve a la expedición.",
+		"Gasta los puntos que dan las misiones y los jefes.",
 		"Todas las reglas que descubriste.",
 		"Efectos, sonido, texto y pantalla.",
 		"Guarda tu avance.",
@@ -96,10 +98,15 @@
 		}
 	],
 	"talk": {
+		"sauce": [
+			"SAUCE: Bienvenida al Bosque de Aritma. Yo cuido el sendero desde antes del Sol Negro.",
+			"SAUCE: En el templo las máquinas obedecían en orden. Aquí, además, deciden: si pasa una cosa hacen esto; si no, hacen lo otro.",
+			"SAUCE: Lee el letrero del camino antes de entrar a las ruinas. Y habla con Ramas y con Lía: necesitan ayuda."
+		],
 		"orun": [
 			"ORUN: Así que tú eres la que encontró el Códice. Lo veo brillar en tu brazo.",
 			"ORUN: Detrás de esa fachada está el templo de Aritma. Sus salas son máquinas que solo obedecen a programas.",
-			"ORUN: Cuando entres, el núcleo despertará y resistirá quince minutos. Ni la pausa lo detiene.",
+			"ORUN: Cuando entres, el núcleo despertará. No hay prisa: piensa cada sala con calma.",
 			"ORUN: La puerta no tiene cerradura. Obedece a quien le hable en su idioma: usa el atril que está a su derecha.",
 			"ORUN: Cada máquina prueba tu programa con casos que no ves. No sirve hacer la cuenta a mano: tiene que funcionar siempre.",
 			"ORUN: Y aprende a moverte: corre con SHIFT y salta con ESPACIO. Los aritmanos no construían pasillos para los lentos."
@@ -111,11 +118,10 @@
 		"intro_keys": "{accept}: continuar   {cancel}: saltar historia",
 		"menu_blurb": [
 			"Entra al templo de Aritma y supera",
-			"sus salas-máquina en 15 minutos."
+			"sus salas-máquina, sin prisa."
 		],
 		"saved_game": "PARTIDA GUARDADA",
 		"saved_place": "Lugar: {place}",
-		"saved_time": "Tiempo restante: {time}",
 		"objective_town": "Habla con Orun y abre la puerta del templo desde su atril",
 		"prompt_talk": "Hablar",
 		"prompt_read": "Leer la inscripción",
@@ -123,12 +129,48 @@
 		"hud_stamina": "ALIENTO",
 		"pause_title": "PAUSA",
 		"pause_kicker": "EXPEDICIÓN DETENIDA",
-		"pause_energy": "ENERGÍA DEL NÚCLEO",
-		"pause_time_note": "El tiempo no se detiene en la pausa.",
 		"pause_progress": "PROGRESO · CÁMARA {n} DE {total}",
 		"pause_town": "Pueblo de Raíz",
+		"pause_quests": "MISIONES",
+		"pause_quest_main": "Misión principal · {chapter}",
+		"pause_quests_empty": "En Raíz hay gente que necesita ayuda: busca el «!» sobre su cabeza.",
+		"quest_new": "Misión nueva: {title}",
+		"quest_done": "¡Misión cumplida! {title}",
+		"skills_new": "¡+{n} punto(s) de habilidad! Gástalos en la pausa → HABILIDADES",
+		"pause_skills_points": "HABILIDADES ({n})",
+		"skills_kicker": "PUNTOS DE HABILIDAD",
+		"skills_title": "HABILIDADES",
+		"skills_points": "Puntos para gastar: {n}",
+		"skills_row": "{name}  {n}/{max}",
+		"skills_back": "VOLVER",
+		"skills_back_help": "Vuelve al menú de pausa. Las misiones dan 1 punto y cada jefe da 2.",
+		"skills_can": "Enter o clic: subir un nivel (gasta 1 punto).",
+		"skills_full": "Nivel máximo.",
+		"skills_no_points": "No tienes puntos. Cumple misiones o vence jefes.",
+		"quest_item": "{item} ({n} de {of})",
+		"objective_forest": "Sigue el sendero hasta las ruinas del Bosque (al norte)",
+		"objective_rounds_tunnel": "Cruza el pasillo: los fosos solo se saltan corriendo (SHIFT + ESPACIO)",
+		"objective_bridge": "Programa el puente: si la carreta pesa más de 10, refuérzalo",
+		"objective_garden": "Programa el jardín: riega si hay menos de 5 de agua; si no, sol",
+		"objective_rounds_done": "La máquina aceptó tu programa: cruza el sello de la salida",
+		"rounds_already": "Esta máquina ya está en paz: el sello de la salida está abierto.",
+		"rounds_status": "La máquina prueba tu programa · ronda {round} de {of}",
+		"rounds_wrong": "Ronda {round}: el número era {n}. Tu programa hizo «{did}», pero debía hacer «{want}».",
+		"rounds_nothing": "nada",
+		"quiz_if_title": "if y else",
+		"quiz_if_question": "¿Qué imprime este programa?",
+		"quiz_if_nothing": "nada",
+		"ending_chapter2_title": "Capítulo 2 superado",
+		"ending_chapter2": [
+			"El Guardián del Bosque se hunde entre las raíces y el claro se llena de luciérnagas.",
+			"Más allá de los árboles, la montaña se abre en una cueva oscura: allí las máquinas repiten y repiten sin parar.",
+			"Siguiente: Capítulo 3, La Cueva (while). Próximamente."
+		],
+		"quest_quiz_header": "{title} · {n} de {of}",
+		"quest_quiz_right": "¡Correcto!",
+		"quest_quiz_wrong": "No era esa. Puedes volver a intentarlo.",
+		"quest_quiz_timeout": "Se acabó el tiempo. Puedes volver a intentarlo.",
 		"pause_keys": "{ui_up}/{ui_down} elegir   {accept} aceptar   {pause} volver",
-		"pause_dormant": "El núcleo duerme hasta que entres a la Cámara.",
 		"saved": "Partida guardada.",
 		"settings_title": "AJUSTES",
 		"settings_keys": "{ui_up}/{ui_down} elegir   {ui_left}/{ui_right} cambiar   {cancel} volver",
@@ -137,7 +179,7 @@
 			"Raíz, al atardecer. Al norte, la fachada del templo de Aritma, sellada desde el Sol Negro.",
 			"Orun te espera junto al camino. Párate frente a él y presiona E para hablar."
 		],
-		"codex_keys": "F5 o EJECUTAR: correr el programa   ·   ESC: cerrar el Códice (el tiempo sigue)   ·   Tu código se guarda al cerrar",
+		"codex_keys": "F5 o EJECUTAR: correr el programa   ·   ESC: cerrar el Códice   ·   Tu código se guarda al cerrar",
 		"codex_too_long": "El programa tiene {n} líneas y esta sala admite {max}. Usa un bucle.",
 		"prompt_codex": "Usar el Códice en la terminal",
 		"gate_sealed": "La puerta de la montaña está sellada. Junto a ella hay una terminal aritmana.",
@@ -153,17 +195,11 @@
 		"prompt_take_cube": "Tomar el cubo",
 		"prompt_drop_cube": "Soltar el cubo",
 		"objective_won": "El Archivo está abierto",
-		"ending_won_title": "El Archivo de Aritma",
+		"ending_won_title": "Capítulo 1 superado",
 		"ending_won": [
-			"Los estantes se iluminan uno por uno. Tablillas de bronce, planos de máquinas, programas enteros: todo lo que el Sol Negro hizo olvidar.",
-			"Tala sube con el núcleo apagándose en sus manos. Arriba, en Raíz, Orun ya está esperando.",
-			"—Lo sabía —dice—. No era magia. Era pensar despacio."
-		],
-		"ending_time": "Superaste la Cámara de Pruebas en {time}",
-		"ending_lost_title": "El núcleo se apagó",
-		"ending_lost": [
-			"Pasaron los 15 minutos. El zumbido del núcleo se apaga y la Cámara vuelve a sellarse.",
-			"Las reglas siguen ahí, escritas en las paredes. La próxima vez ya sabrás dónde mirar."
+			"El Guardián del Cero se deshace en chispas rojas y el templo queda en silencio. Detrás del trono, una puerta de bronce se abre hacia el otro lado de la montaña.",
+			"Tala sale con el núcleo en las manos. Abajo se extiende un bosque cerrado, y más allá cuevas, ruinas y una cima entre las nubes: el saber de Aritma está repartido por todo el valle.",
+			"Siguiente: Capítulo 2, El Bosque (if / else). Próximamente."
 		],
 		"ending_continue": "Pulsa Enter para volver al título",
 		"book_title": "LIBRO DE REGLAS DEL CÓDICE",
@@ -172,16 +208,22 @@
 			"Muévete con {move_up} {move_left} {move_down} {move_right}. Corre con {run} (gasta aliento) y salta con {jump}: corriendo, el salto llega más lejos.",
 			"{interact} usa lo que tienes delante: personas, inscripciones y los atriles de las máquinas.",
 			"En el atril de una máquina se abre el Códice: escribe el programa en Python y pulsa {run_code} para verla trabajar. {cancel} cierra el Códice.",
-			"{book} abre este libro y {pause} pausa el juego. La pausa detiene el reloj y a los guardianes; en el libro los guardianes se detienen, pero el reloj sigue.",
+			"{book} abre este libro y {pause} pausa el juego. La pausa detiene a los guardianes; en el libro los guardianes también se detienen.",
 			"Golpea con {attack} (el garrote). Cada vez que una máquina rechaza tu código, despiertan guardianes: te quitan medio corazón por golpe y no puedes usar la máquina hasta vencerlos.",
 			"Los guardianes se distinguen por el aro de color bajo sus pies: DORADO, el caballero (golpea de cerca); MORADO, el hechicero (lanza orbes de lejos: elimínalo primero, el garrote también deshace sus orbes); ROJO, el rúnico (explota).",
 			"El guardián rúnico (la calavera con aura roja) no golpea: se carga y explota. Aléjate del círculo rojo o véncelo antes (2 golpes). Si te alcanza, aparecen teclas al azar: pulsa solo esas, en orden, antes de que se vacíe la barra (de 5 a 8 segundos), o perderás 2 corazones.",
-			"El guardián rúnico (la calavera con aura roja) no golpea: se carga y explota. Aléjate del círculo rojo o véncelo antes (2 golpes). Si te alcanza, aparecen teclas al azar: pulsa solo esas, en orden, antes de que se vacíe la barra (de 5 a 8 segundos), o perderás 2 corazones.",
-			"Desde que entras al templo tienes 15 minutos.",
-			"Tienes 5 corazones y no se recuperan al resolver las salas (solo al enfrentar al jefe final). Si caes a un foso pierdes 7 segundos; si te quedas sin corazones pierdes 1 minuto (y si te quedaba menos, se acaba el juego)."
+			"Tienes 5 corazones y no se recuperan al resolver las salas (solo al enfrentar al jefe final). Si caes a un foso pierdes medio corazón y vuelves al borde; si te quedas sin corazones vuelves a la entrada de la sala con la vida llena."
 		],
 		"book_hint": "[{ui_left}] [{ui_right}] cambiar de página      [{book}] cerrar",
 		"prompt_machine": "Programar la máquina",
+		"objective_lock_tunnel": "Cruza el pasillo: los fosos solo se saltan corriendo (SHIFT + ESPACIO)",
+		"objective_lock_machine": "Programa la Compuerta: el número del sensor MÁS 3",
+		"objective_lock_done": "La Compuerta aceptó tu programa: cruza el sello de la salida",
+		"lock_already": "La Compuerta ya está abierta: el sello de la salida también.",
+		"lock_status": "La Compuerta prueba tu programa · ronda {round} de {of}",
+		"lock_still": "Ronda {round}: el sensor marcó {sensor}, pero la compuerta no se movió. ¿Te faltó compuerta.subir(nivel)?",
+		"lock_wrong": "Ronda {round}: el sensor marcó {sensor} y la compuerta subió a {raised}, pero debía subir a {want} ({sensor} + 3).",
+		"lock_solved": "¡La Compuerta sube a la altura justa en las tres rondas! El sello de la salida se abre.",
 		"objective_filter_tunnel": "Cruza el pasillo: los fosos solo se saltan corriendo (SHIFT + ESPACIO)",
 		"objective_filter_machine": "Programa la Criba: solo las esferas PARES al cáliz",
 		"objective_filter_done": "La Criba aceptó tu programa: cruza el sello de la salida",
@@ -201,7 +243,7 @@
 		],
 		"criba_round_error": "Ronda {round} (oculta, con otras esferas): {error}",
 		"temple_start": [
-			"El núcleo del templo despertó: ¡tienes 15 minutos!"
+			"El núcleo del templo despertó. Tómate el tiempo que necesites."
 		],
 		"player_fell": "¡Caíste al foso! El templo te devuelve al último punto seguro.",
 		"gate_title": "La Puerta del Templo",
@@ -223,12 +265,6 @@
 		"alarm_machine_locked": "La máquina está bloqueada: primero vence a los guardianes.",
 		"alarm_cleared": "Los guardianes cayeron. La máquina vuelve a aceptar código.",
 		"hud_alarm": "ALARMA {n}  ·  {k}",
-		"player_no_lives": "¡Te quedaste sin corazones! El núcleo se cobra {s} segundos y vuelves a la entrada de la sala.",
-		"ending_no_lives_title": "Tala cayó en la tumba",
-		"ending_no_lives": [
-			"Sin corazones y sin un minuto de energía, el núcleo ya no puede devolverte a la entrada.",
-			"Los guardianes vuelven a sus pedestales. La próxima vez, piensa el código antes de ejecutarlo."
-		],
 		"keys_title": "¡RUNA DE EXPLOSIÓN!",
 		"keys_hint": "Pulsa las teclas en orden antes de que se vacíe la barra (las demás teclas no cuentan)",
 		"keys_won": "¡La esquivaste!",
@@ -271,7 +307,7 @@
 		"figures_already": "Las figuras de la Mesa ya están completas.",
 		"prompt_figures": "Usar la Mesa de las Figuras",
 		"quiz_title": "EL GUARDIÁN DEL CERO TE PONE A PRUEBA",
-		"quiz_subtitle": "Recuerda lo que aprendiste en {sala}",
+		"quiz_subtitle": "Recuerda lo que aprendiste: {sala}",
 		"quiz_hint": "Responde con las teclas {keys} o con clic · quedan {s} s",
 		"quiz_right": "¡Correcto! El escudo se rompe.",
 		"quiz_wrong": "Respuesta equivocada: el Guardián llama a sus guardianes.",
@@ -280,6 +316,11 @@
 		"boss_quiz_right": "¡El escudo cayó sin pelear! Golpea al Guardián.",
 		"boss_quiz_wrong": "¡Llegan los guardianes! Vence a todos para romper el escudo.",
 		"boss_name": "EL GUARDIÁN DEL CERO",
+		"quiz_title_of": "{boss} TE PONE A PRUEBA",
+		"objective_forest_tunnel": "Sigue el sendero hasta el claro del Guardián",
+		"objective_forest_done": "El Guardián del Bosque cayó: el bosque es tuyo",
+		"objective_forest_boss": "Vence al Guardián del Bosque",
+		"boss_forest_beaten": "¡El Guardián del Bosque se deshace en hojas! El sendero hacia la Cueva queda libre.",
 		"codex_run_button": "EJECUTAR  (F5)",
 		"codex_title": "EL CÓDICE  ·  {title}  ·  {file}",
 		"codex_title_side": "{title}  ·  {file}",
@@ -289,14 +330,49 @@
 		"codex_lines_max": "LÍNEAS {used} / {max}",
 		"codex_lines": "LÍNEAS {used}",
 		"codex_run_log": "> ejecutar {file}",
-		"quiz_parity_title": "La Criba",
+		"quiz_parity_title": "variables y pares",
 		"quiz_parity_question": "¿El número {n} es PAR o IMPAR?",
 		"quiz_parity_even": "PAR",
 		"quiz_parity_odd": "IMPAR",
 		"quiz_multiple_title": "El Sendero",
 		"quiz_multiple_question": "¿Qué losa te sostiene? Solo los múltiplos de {m}.",
 		"quiz_solve_title": "El Mural",
-		"quiz_solve_question": "{equation}      x = ?"
+		"quiz_solve_question": "{equation}      x = ?",
+		"quiz_variable_title": "las variables",
+		"quiz_variable_question": "¿Cuánto vale {name} al final?",
+		"quiz_order_title": "el orden de las instrucciones",
+		"quiz_order_question": "¿En qué orden van las líneas para que funcione?",
+		"quiz_parity_code_question": "Al final, ¿{name} es PAR o IMPAR?",
+		"codex_welcome_blocks": "Arrastra las piezas al programa, ordénalas y presiona EJECUTAR.",
+		"blocks_program": "TU PROGRAMA",
+		"blocks_tray": "PIEZAS  (sobran algunas)",
+		"blocks_empty": "Arrastra aquí una pieza (o haz clic en ella)",
+		"blocks_tray_empty": "Usaste todas las piezas.",
+		"blocks_keys": "Suelta más a la derecha para meter la línea (sangría). Clic derecho la devuelve.",
+		"blocks_to_text": "ESCRIBIR A MANO",
+		"blocks_to_blocks": "USAR BLOQUES",
+		"objective_practice": "Sigue los pasos del cuadro de práctica",
+		"practice_step_done": "¡Bien hecho!",
+		"practice_done_banner": "¡Práctica completa! Sigue por la puerta",
+		"practice_go_on": "¡Listo! Cruza la puerta de arriba para seguir.",
+		"practice_fell": "Caíste. En la práctica no pierdes nada: inténtalo otra vez.",
+		"practice_kicker": "PRÁCTICA · {title}",
+		"practice_count": "PASO {n} DE {of}",
+		"practice_run_hint": "Ibas caminando: mantén {run} para correr.",
+		"practice_machine_done": "El atril ya cumplió su tarea.",
+		"practice_flag_wrong": "Esa no es: la bandera va en la baldosa verde.",
+		"practice_boom": "¡BOOM! En el Vórtice eso quita 2 corazones; aquí solo empiezas de nuevo.",
+		"pause_skip_practice": "SALTAR PRÁCTICA",
+		"pause_skip_help": "Pasa directo a la sala sin terminar las prácticas.",
+		"torch_done": "¡Hay {lit} braseros encendidos!",
+		"torch_missing": "Hay {lit} braseros encendidos y se necesitan {goal}.",
+		"torch_status": "Braseros: {lit} de {total}",
+		"function_missing": "No encontré la función {name}. Empieza con def {name}(...):",
+		"function_wrong": "{call} devolvió {got} y debía dar {want}.",
+		"function_error": "{call} falló: {error}",
+		"function_right": "¡La función {name} da los resultados correctos!",
+		"function_status": "El atril prueba {name}...",
+		"practice_flag_pick": "Esa no es la mina. Mira otra vez el número que brilla."
 	},
 	"credits": [
 		"Desarrollador:",
@@ -328,6 +404,7 @@
 		]
 	},
 	"script_errors": {
+		"compuerta_numero": "compuerta.subir() necesita un número, por ejemplo compuerta.subir(nivel)",
 		"no_tiene": "«%s» no tiene «%s».",
 		"no_puede_cambiar": "«%s» de %s no se puede cambiar.",
 		"no_puede_usar": "«%s» no se puede usar con [ ].",
@@ -401,5 +478,99 @@
 		"left": "Clic izq.",
 		"right": "Clic der.",
 		"other": "Clic"
+	},
+	"touch_names": {
+		"attack": "GOLPE",
+		"jump": "SALTO",
+		"interact": "USAR",
+		"flag": "BANDERA",
+		"book": "LIBRO",
+		"pause": "PAUSA",
+		"cancel": "VOLVER",
+		"close": "CERRAR",
+		"skip": "SALTAR",
+		"ui_left": "<",
+		"ui_right": ">",
+		"rotate": "GIRAR",
+		"run_code": "EJECUTAR",
+		"accept": "tocar",
+		"run": "CORRER"
+	},
+	"touch": {
+		"press_start": "Toca la pantalla para comenzar",
+		"intro_keys": "Toca la pantalla para seguir   ·   SALTAR: saltar la historia",
+		"hud_keys": "",
+		"pause_keys": "Toca una opción",
+		"settings_keys": "Toca el valor: a la izquierda baja, a la derecha sube",
+		"codex_keys": "EJECUTAR: correr el programa   ·   CERRAR: salir   ·   Tu código se guarda al cerrar",
+		"ending_continue": "Toca la pantalla para volver al título",
+		"book_hint": "< > cambiar de página      CERRAR: salir",
+		"book_town": [
+			"Muévete con la palanca de la izquierda. Toca CORRER para correr (gasta aliento) y otra vez para caminar. Salta con SALTO: corriendo, el salto llega más lejos.",
+			"{interact} usa lo que tienes delante: personas, inscripciones y los atriles de las máquinas.",
+			"En el atril de una máquina se abre el Códice: arma el programa con las piezas y toca EJECUTAR para verla trabajar. CERRAR cierra el Códice.",
+			"{book} abre este libro y {pause} pausa el juego. La pausa detiene a los guardianes; en el libro los guardianes también se detienen.",
+			"Golpea con {attack} (el garrote). Cada vez que una máquina rechaza tu código, despiertan guardianes: te quitan medio corazón por golpe y no puedes usar la máquina hasta vencerlos.",
+			"Los guardianes se distinguen por el aro de color bajo sus pies: DORADO, el caballero (golpea de cerca); MORADO, el hechicero (lanza orbes de lejos: elimínalo primero, el garrote también deshace sus orbes); ROJO, el rúnico (explota).",
+			"El guardián rúnico (la calavera con aura roja) no golpea: se carga y explota. Aléjate del círculo rojo o véncelo antes (2 golpes). Si te alcanza, aparecen teclas al azar: toca solo esas, en orden, antes de que se vacíe la barra (de 5 a 8 segundos), o perderás 2 corazones.",
+			"Tienes 5 corazones y no se recuperan al resolver las salas (solo al enfrentar al jefe final). Si caes a un foso pierdes medio corazón y vuelves al borde; si te quedas sin corazones vuelves a la entrada de la sala con la vida llena."
+		],
+		"keys_hint": "Toca las letras de abajo en orden antes de que se vacíe la barra",
+		"figures_hint": "Arrastra las piezas con el dedo  ·  todas deben caber",
+		"figures_rotate": "o toca la pieza:  la gira",
+		"quiz_hint": "Toca la respuesta · quedan {s} s",
+		"blocks_empty": "Arrastra aquí una pieza (o tócala)",
+		"blocks_keys": "Suelta más a la derecha para meter la línea. Sácala para devolverla.",
+		"practice_run_hint": "Ibas caminando: toca CORRER para correr.",
+		"objective_filter_tunnel": "Cruza el pasillo: los fosos solo se saltan corriendo (CORRER + SALTO)",
+		"objective_lock_tunnel": "Cruza el pasillo: los fosos solo se saltan corriendo (CORRER + SALTO)",
+		"codex_run_button": "EJECUTAR",
+		"prompt_board": "Destapar"
+	},
+	"touch_chambers": {
+		"bridge": {"intro": {"1": "Usa el atril (USAR). Aquí aparece el if: «if peso > 10:» pregunta algo, y las líneas de abajo, más a la derecha, solo se cumplen si la respuesta es sí.", "3": "INSCRIPCIÓN: Dos guardianes de piedra vigilan el puente. Cada código rechazado despierta a más. Golpéalos con el garrote (GOLPE)."}, "tunnel_intro": {"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."}},
+		"garden": {"intro": {"1": "Usa el atril (USAR). Ahora el if tiene compañero: else. Si la pregunta del if dice que no, se cumple lo que está debajo del else. Siempre pasa una de las dos."}, "tunnel_intro": {"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."}},
+		"throne_forest": {"intro": {"2": "Pelea igual que el anterior: golpéalo con GOLPE y esquiva su pisotón. Cuando se cubra con su escudo te preguntará qué imprime un if: toca la respuesta. Tienes 20 segundos."}},
+		"lock": {
+			"intro": {
+				"1": "Usa el atril (USAR). Un programa se lee de arriba abajo, una línea tras otra: primero guarda el número en una variable, después cámbiala y al final úsala.",
+				"3": "INSCRIPCIÓN: Dos guardianes de piedra vigilan la Compuerta. Cada vez que rechace tu código despertarán más. Golpéalos con el garrote (GOLPE)."
+			},
+			"tunnel_intro": {
+				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
+			}
+		},
+		"filter": {
+			"intro": {
+				"1": "Usa el atril (USAR) y programa la Criba. Ella pondrá a prueba tu programa con tres rondas de esferas: solo la primera se ve en el tubo.",
+				"3": "INSCRIPCIÓN: Dos guardianes de piedra vigilan la Criba. Cada vez que la Criba rechace tu código despertarán más. Golpéalos con el garrote (GOLPE)."
+			},
+			"tunnel_intro": {
+				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
+			}
+		},
+		"vortex": {
+			"intro": {
+				"1": "Primero enciende el Faro: usa su atril (USAR) y ordénale a las luces que se enciendan con luces.encender(), como abriste la puerta del pueblo.",
+				"2": "Encendido el tablero, párate sobre una baldosa: USAR la destapa y BANDERA le pone o quita una bandera. Cada número dice cuántas minas la rodean. Destapa todas las que no son mina."
+			}
+		},
+		"figures": {
+			"intro": {
+				"1": "Usa el atril de la Mesa (USAR): aparece una figura grande y varias piezas más pequeñas. Arrástralas con el dedo hasta llenar la figura: todas deben caber, sin sobrar ni faltar casillas.",
+				"2": "Toca una pieza sin moverla para girarla. Una pieza puesta se puede volver a levantar. Son dos figuras: la segunda llega con las piezas giradas."
+			}
+		},
+		"throne": {
+			"intro": {
+				"2": "Golpéalo con GOLPE. Cuando el círculo rojo marque su pisotón, sal corriendo o toca SALTO. Los orbes se esquivan o se deshacen con el garrote.",
+				"3": "Cada vez que pierda una cuarta parte de su vida se cubrirá con un escudo y te pondrá a prueba con un problema: tienes 20 segundos (toca la respuesta). Si aciertas, el escudo cae; si fallas, llamará a sus guardianes."
+			}
+		}
+	},
+	"touch_talk": {
+		"orun": {
+			"5": "ORUN: Y aprende a moverte: toca CORRER para correr y SALTO para saltar. Los aritmanos no construían pasillos para los lentos."
+		}
 	}
 }

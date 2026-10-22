@@ -33,6 +33,7 @@ func setup(bus: EventBus, data: Dictionary, text: Callable, open_codex: Callable
 	session.file_name = String(data.get("file_name", "faro.py"))
 	session.code = String(data.get("starter_code", ""))
 	session.help = data.get("help", [])
+	session.set_blocks(data.get("blocks", []))
 	session.machine = self
 	connect_console(open_codex)
 

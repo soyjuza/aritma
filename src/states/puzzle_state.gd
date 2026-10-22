@@ -1,4 +1,5 @@
 ## Patrón State: rompecabezas de la Mesa (Sala 4). Se arrastran piezas y R las gira.
+## En el celular, tocar una pieza sin moverla la gira.
 class_name PuzzleState
 extends GameState
 
@@ -6,6 +7,8 @@ const CELL := 48.0
 const SLOT := 3.4
 const COLORS := [Color("e2b44f"), Color("4fe3ff"), Color("6be38b"), Color("ff7a5c"), Color("b78bff"), Color("ff9fd0")]
 const SOLVED_PAUSE := 1.4
+const TAP_MS := 300
+const TAP_MOVE := 14.0
 
 var table: FigureTable
 
@@ -15,6 +18,10 @@ var _order: Array = []
 var _solved_at := -1.0
 var _mouse := Vector2.ZERO
 var _rotated := false
+var _last := -1    # última pieza tocada
+var _press_at := Vector2.ZERO
+var _press_ms := 0
+var _rotate_box := Rect2()
 
 
 func enter(params: Dictionary = {}) -> void:
@@ -28,10 +35,6 @@ func enter(params: Dictionary = {}) -> void:
 
 func exit() -> void:
 	_held = -1
-
-
-func timer_runs() -> bool:
-	return true
 
 
 func freezes_world() -> bool:
@@ -98,13 +101,25 @@ func handle_mouse(event: InputEventMouse) -> bool:
 	if _solved_at >= 0.0 or not event is InputEventMouseButton:
 		return true
 	var button := event as InputEventMouseButton
-	if button.button_index == MOUSE_BUTTON_LEFT and button.pressed:
+	if button.button_index == MOUSE_BUTTON_LEFT and button.pressed and game.data.touch and _rotate_box.has_point(_mouse):
+		_rotate(game.ui, _last)
+	elif button.button_index == MOUSE_BUTTON_LEFT and button.pressed:
+		_press_at = _mouse
+		_press_ms = Time.get_ticks_msec()
 		_pick(game.ui, _mouse)
 	elif button.button_index == MOUSE_BUTTON_LEFT and not button.pressed:
+		var i := _held
+		var tap := Time.get_ticks_msec() - _press_ms < TAP_MS and _mouse.distance_to(_press_at) < TAP_MOVE
 		_drop(game.ui)
+		if tap and game.data.touch:
+			_rotate(game.ui, i)
 	elif button.button_index == MOUSE_BUTTON_RIGHT and button.pressed:
 		_rotate(game.ui, _held if _held >= 0 else _piece_at(game.ui, _mouse))
 	return true
+
+
+func touch_buttons() -> Array:
+	return [] if _solved_at >= 0.0 else ["cancel:close"]
 
 
 func handle_input(actions: Array) -> void:
@@ -124,6 +139,7 @@ func _pick(ui: UIKit, mouse: Vector2) -> void:
 	_grab = mouse - _piece_origin(ui, i)
 	_puzzle().lift(i)
 	_held = i
+	_last = i
 	game.bus.publish(GameEvents.PIECE_PICKED)
 
 
@@ -176,7 +192,6 @@ func update(_delta: float) -> void:
 
 func draw(ui: UIKit) -> void:
 	ui.dim(0.55)
-	Hud.new().draw_timer(ui, game.timer)
 	var p := _panel(ui)
 	var puzzle := _puzzle()
 	ui.panel(p)
@@ -207,7 +222,7 @@ func draw(ui: UIKit) -> void:
 		var pulse := 0.5 + 0.5 * sin(ui.time * 8.0)
 		ui.frame(Rect2(origin, Vector2(puzzle.size) * CELL).grow(6), Color(UIKit.GOOD, 0.5 + 0.5 * pulse), 4.0)
 		ui.text_centered(game.data.message("figures_full"), p.end.y - 54, 26, UIKit.GOOD, "bold")
-	else:
+	elif not game.data.touch:
 		ui.key_hint("ESC", game.data.message("figures_close"), Vector2(p.position.x + 24, p.end.y - 40))
 
 
@@ -243,6 +258,7 @@ func _draw_rotate_hint(ui: UIKit, p: Rect2) -> void:
 	var pulse := 1.0 if _rotated else 0.6 + 0.4 * sin(ui.time * 6.0)
 	ui.rect(r, Color(0.08, 0.06, 0.02, 0.92))
 	ui.frame(r, Color(UIKit.GOLD, pulse), 2.0 if _rotated else 3.0)
+	_rotate_box = r
 	var kw := ui.measure(key, 24, "bold") + 18
 	ui.rect(Rect2(r.position + Vector2(10, 8), Vector2(kw, 28)), UIKit.GOLD)
 	ui.text(key, r.position + Vector2(19, 9), 24, Color("0b0f14"), "bold", false)

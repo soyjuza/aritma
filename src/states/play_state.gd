@@ -20,8 +20,18 @@ func exit() -> void:
 	game.player.controls_enabled = false
 
 
-func timer_runs() -> bool:
-	return true
+func touch_stick() -> bool:
+	return not game.dialog.is_open()
+
+
+func touch_tap() -> String:
+	return "accept" if game.dialog.is_open() else ""
+
+
+func touch_buttons() -> Array:
+	if game.dialog.is_open():
+		return []
+	return ["attack", "jump", "run", "interact", "book", "pause"] + game.level.touch_actions()
 
 
 func handle_input(actions: Array) -> void:
@@ -53,16 +63,13 @@ func draw(ui: UIKit) -> void:
 	var info := {
 		"title": game.place_title(),
 		"objective": game.data.message(game.level.objective_key) if game.level.objective_key != "" else "",
-		"timer_active": game.timer.active,
-		"timer": game.timer,
+		"in_chamber": game.level is ChamberLevel,
 		"stamina": game.player.stamina / game.player.stamina_max,
 		"stamina_label": game.data.message("hud_stamina"),
 		"keys": game.data.message("hud_keys", keys),
 		"fps": game.data.message("fps", {"fps": Engine.get_frames_per_second()}) if game.show_fps else "",
 		"health": game.health,
 		"hurt": game.player.invulnerable - (float(game.combat("invulnerable_sec", 1.0)) - 0.25),
-		"penalty": game.notices.penalty_text,
-		"penalty_left": game.notices.penalty_left,
 	}
 	var room := game.level as ChamberLevel
 	if room and room.alarm and room.alarm.fighting():
@@ -79,7 +86,8 @@ func draw(ui: UIKit) -> void:
 			info.prompt_key = own.key
 	info.extra = game.level.hud_line()
 	_hud.draw(ui, info)
-	_hud.draw_notice(ui, game.notices.text, game.notices.left, game.notices.good)
+	game.level.draw_hud(ui)
+	_hud.draw_notice(ui, game.notices.text, game.notices.left, game.notices.good, game.level.notice_top())
 	game.dialog.draw(ui)
 
 

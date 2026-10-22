@@ -13,6 +13,14 @@ func enter(_params: Dictionary = {}) -> void:
 	_t = 0.0
 
 
+func touch_tap() -> String:
+	return "accept"
+
+
+func touch_buttons() -> Array:
+	return ["cancel:skip"]
+
+
 func handle_input(actions: Array) -> void:
 	if "cancel" in actions:
 		_begin()
@@ -34,6 +42,7 @@ func _pages() -> Array:
 
 func _begin() -> void:
 	game.bus.publish(GameEvents.MENU_CONFIRM)
+	game.data.use_chapter(0)
 	game.machine.change("play", {"mode": "new"})
 
 

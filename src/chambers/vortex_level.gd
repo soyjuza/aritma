@@ -118,3 +118,8 @@ func _on_cleared() -> void:
 	_game.notify([_game.data.message("board_cleared_banner")], 7.0, true)
 	_game.dialog.say([_game.data.message("board_cleared")])
 	open_exit()
+
+
+## Sobre el tablero aparece el botón de bandera.
+func touch_actions() -> Array:
+	return ["flag"] if not action_prompt().is_empty() else []

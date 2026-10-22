@@ -1,4 +1,4 @@
-## Patrón Factory Method: crea la Sala 1.
+## Patrón Factory Method: crea la Criba (capítulo 3).
 class_name FilterBuilder
 extends ChamberBuilder
 

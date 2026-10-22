@@ -15,16 +15,47 @@ func enter(params: Dictionary = {}) -> void:
 		var lines: Array = chamber.get("intro", []).duplicate()
 		lines += chamber.get("tunnel_intro", [])
 		_pages.append({"title": game.data.message("chamber_banner", {"n": i + 1, "name": chamber.get("name", "")}), "lines": lines})
+	_pages = _split_long_pages(_pages, game.ui)
 	_page = _pages.size() - 1
 	game.bus.publish(GameEvents.MENU_CONFIRM)
 
 
-func timer_runs() -> bool:
-	return _return_to != "pause"
+## Parte en dos (o más) las páginas que no caben en el panel.
+func _split_long_pages(pages: Array, ui: UIKit) -> Array:
+	var r := _panel_rect(ui.size())
+	var room := r.end.y - 60 - (r.position.y + 124)
+	var out: Array = []
+	for page in pages:
+		var chunk: Array = []
+		var used := 0.0
+		for line in page.lines:
+			var h := _line_height(ui, String(line), r.size.x)
+			if not chunk.is_empty() and used + h > room:
+				out.append({"title": page.title, "lines": chunk})
+				chunk = []
+				used = 0.0
+			chunk.append(line)
+			used += h
+		out.append({"title": page.title, "lines": chunk})
+	return out
+
+
+func _line_height(ui: UIKit, line: String, w: float) -> float:
+	var rows := ui.wrap(line.format(game.key_names()), w - 90, 21).size()
+	return rows * (ui.line_height(21) + 1) + 12
+
+
+func _panel_rect(s: Vector2) -> Rect2:
+	var w := minf(980.0, s.x - 60.0)
+	return Rect2((s.x - w) / 2.0, 40, w, s.y - 80)
 
 
 func freezes_world() -> bool:
 	return true
+
+
+func touch_buttons() -> Array:
+	return ["ui_left", "ui_right", "cancel:close"]
 
 
 func handle_input(actions: Array) -> void:
@@ -42,8 +73,8 @@ func handle_input(actions: Array) -> void:
 func draw(ui: UIKit) -> void:
 	var s := ui.size()
 	ui.dim(0.7)
-	var w := minf(980.0, s.x - 60.0)
-	var r := Rect2((s.x - w) / 2.0, 40, w, s.y - 80)
+	var r := _panel_rect(s)
+	var w := r.size.x
 	ui.panel(r)
 	var page: Dictionary = _pages[_page]
 	ui.text(game.data.message("book_title"), r.position + Vector2(36, 24), 16, UIKit.CYAN)

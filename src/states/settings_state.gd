@@ -19,13 +19,38 @@ func enter(params: Dictionary = {}) -> void:
 	_row = 0
 
 
-## Desde la pausa todo sigue quieto.
-func timer_runs() -> bool:
-	return false
-
-
 func freezes_world() -> bool:
 	return _return_to == "pause"
+
+
+func touch_buttons() -> Array:
+	return ["cancel"]
+
+
+func handle_mouse(event: InputEventMouse) -> bool:
+	var button := event as InputEventMouseButton
+	if button == null or not button.pressed or button.button_index != MOUSE_BUTTON_LEFT:
+		return false
+	var point: Vector2 = game.overlay.make_input_local(event).position
+	var r := _panel(game.ui.size())
+	var i := int((point.y - (r.position.y + 78)) / ROW_H)
+	if point.x < r.position.x or point.x > r.end.x or i < 0 or i >= _rows.size():
+		return false
+	if i != _row:
+		_row = i
+		game.bus.publish(GameEvents.MENU_MOVE)
+	# El nombre solo elige la fila; en el valor, la mitad izquierda baja y la derecha sube
+	var vx := r.position.x + r.size.x * 0.56
+	if _rows[i].type == "back":
+		handle_input(["accept"])
+	elif point.x >= vx:
+		handle_input(["ui_left"] if point.x < vx + 170 else ["ui_right"])
+	return true
+
+
+func _panel(s: Vector2) -> Rect2:
+	var w := minf(980.0, s.x - 80.0)
+	return Rect2((s.x - w) / 2.0, 44, w, 120 + _rows.size() * ROW_H)
 
 
 func handle_input(actions: Array) -> void:
@@ -58,8 +83,8 @@ func handle_input(actions: Array) -> void:
 func draw(ui: UIKit) -> void:
 	var s := ui.size()
 	ui.rect(Rect2(Vector2.ZERO, s), Color(0.015, 0.025, 0.04, 0.7))
-	var w := minf(980.0, s.x - 80.0)
-	var r := Rect2((s.x - w) / 2.0, 44, w, 120 + _rows.size() * ROW_H)
+	var r := _panel(s)
+	var w := r.size.x
 	ui.panel(r)
 	ui.text(game.data.message("settings_title"), r.position + Vector2(36, 22), 34, UIKit.GOLD, "title")
 	var settings: SettingsRepository = game.settings

@@ -1,4 +1,4 @@
-## Sala 1: la Criba. Las pares van al cáliz.
+## La Criba (capítulo 3, while + if). Las pares van al cáliz.
 class_name FilterLevel
 extends ChamberLevel
 

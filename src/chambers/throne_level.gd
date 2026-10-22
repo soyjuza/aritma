@@ -17,8 +17,11 @@ var _quiz: BossQuiz
 
 func wire() -> void:
 	boss.setup(_game.bus, alarm, _game.data.setting("boss", {}))
-	boss.title = _game.data.message("boss_name")
+	boss.title = String(data.get("boss_name", _game.data.message("boss_name")))
+	if data.has("boss_tint"):
+		boss.modulate = Color(String(data.boss_tint))
 	_quiz = BossQuiz.new(_game.data.message, (data.get("quiz", {}) as Dictionary).get("problems", {}))
+	objective_key = String(data.get("tunnel_objective_key", objective_key))
 	boss.hold_while = _game.dialog.is_open
 	boss.arena = Rect2(to_global(arena.position), arena.size)
 	boss.defeated.connect(_on_boss_defeated)
@@ -33,7 +36,7 @@ func _on_hall_entered() -> void:
 	if _in_hall:
 		return
 	_in_hall = true
-	objective_key = "objective_throne_boss"
+	objective_key = String(data.get("boss_objective_key", "objective_throne_boss"))
 	boss.appear()
 	_game.health.heal(int(_game.combat("heal_on_boss", 4)))
 	# La cámara muestra al jefe mientras se lee
@@ -48,9 +51,11 @@ func _ask_question() -> void:
 	while not _game.machine.current is PlayState:
 		await get_tree().process_frame
 	var settings: Dictionary = data.get("quiz", {})
-	var kinds: Array = settings.get("kinds", ["paridad", "multiplo", "despejar"])
+	var kinds: Array = settings.get("kinds", ["variable", "orden", "paridad"])
 	var kind := String(kinds[clampi(boss.phase - 1, 0, kinds.size() - 1)])
-	_game.machine.change("quiz", {"quiz": _quiz.make(kind, _rng), "seconds": float(settings.get("seconds", 15)), "on_done": _on_answered})
+	var quiz: Dictionary = _quiz.make(kind, _rng)
+	quiz.header = _game.data.message("quiz_title_of", {"boss": boss.title})
+	_game.machine.change("quiz", {"quiz": quiz, "seconds": float(settings.get("seconds", 20)) + 5.0 * _game.skills.level("pensar"), "on_done": _on_answered})
 
 
 func _on_answered(right: bool) -> void:
@@ -104,9 +109,10 @@ func restart_after_death() -> void:
 
 func _on_boss_defeated() -> void:
 	open_exit()
-	objective_key = "objective_throne_done"
+	objective_key = String(data.get("done_objective_key", "objective_throne_done"))
 	_game.player.controls_enabled = false
 	_game.bus.publish(GameEvents.CORE_TAKEN)
-	_game.notify([_game.data.message("boss_beaten")], 4.0)
+	_game.notify([_game.data.message(String(data.get("beaten_key", "boss_beaten")))], 4.0)
+	_game.grant_points(int(data.get("skill_points", 2)))
 	await get_tree().create_timer(3.0).timeout
-	_game.finish(true)
+	_game.chapter_done()

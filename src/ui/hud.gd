@@ -24,17 +24,15 @@ func draw(ui: UIKit, info: Dictionary) -> void:
 		ui.text(extra, Vector2(44, 107), 16, UIKit.CYAN, "bold", false)
 	if info.get("alarm", 0) > 0:
 		draw_alarm(ui, int(info.alarm), int(info.get("guardians", 0)), String(info.get("alarm_label", "")))
-	if info.get("timer_active", false):
-		draw_timer(ui, info.timer)
-		if info.has("health"):
-			draw_hearts(ui, info.health, float(info.get("hurt", 0.0)))
-		draw_penalty(ui, String(info.get("penalty", "")), float(info.get("penalty_left", 0.0)))
+	if info.get("in_chamber", false) and info.has("health"):
+		draw_hearts(ui, info.health, float(info.get("hurt", 0.0)))
 	# Mira
 	var c := s / 2.0
 	ui.rect(Rect2(c - Vector2(3, 3), Vector2(6, 6)), Color(0, 0, 0, 0.5))
 	ui.rect(Rect2(c - Vector2(2, 2), Vector2(4, 4)), UIKit.TEXT)
 	# Ayuda
-	if info.get("prompt", "") != "":
+	# En el celular lo dice el botón USAR
+	if info.get("prompt", "") != "" and not InputSetup.touch:
 		var key := String(info.prompt_key)
 		var text := String(info.prompt)
 		var kw := ui.measure(key, 20, "bold") + 18
@@ -48,16 +46,18 @@ func draw(ui: UIKit, info: Dictionary) -> void:
 	# Aliento
 	var stamina: float = info.get("stamina", 1.0)
 	if stamina < 0.999:
-		ui.rect(Rect2(28, s.y - 78, 200, 8), Color("1f2730"))
-		ui.rect(Rect2(28, s.y - 78, 200 * stamina, 8), UIKit.GOOD if stamina > 0.25 else UIKit.ALERT)
-		ui.text(String(info.get("stamina_label", "")), Vector2(240, s.y - 86), 14, UIKit.MUTED)
+		# En el celular va al centro para no quedar bajo la palanca
+		var at := Vector2(s.x / 2.0 - 100, s.y - 40) if InputSetup.touch else Vector2(28, s.y - 78)
+		ui.rect(Rect2(at, Vector2(200, 8)), Color("1f2730"))
+		ui.rect(Rect2(at, Vector2(200 * stamina, 8)), UIKit.GOOD if stamina > 0.25 else UIKit.ALERT)
+		ui.text(String(info.get("stamina_label", "")), at + Vector2(212, -8), 14, UIKit.MUTED)
 	ui.text(String(info.get("keys", "")), Vector2(28, s.y - 52), 15, UIKit.MUTED)
 	if info.get("fps", "") != "":
 		ui.text_right(String(info.fps), s.x - 24, s.y - 40, 15, UIKit.MUTED)
 
 
 ## Aviso arriba. good: verde.
-func draw_notice(ui: UIKit, text: String, left: float, good := false) -> void:
+func draw_notice(ui: UIKit, text: String, left: float, good := false, top := 104.0) -> void:
 	if text == "" or left <= 0.0:
 		return
 	var s := ui.size()
@@ -66,7 +66,7 @@ func draw_notice(ui: UIKit, text: String, left: float, good := false) -> void:
 	var rows: Array = ui.wrap(text, minf(720.0, s.x - 520.0), size, "bold")
 	var h := rows.size() * (ui.line_height(size, "bold") + 2) + 26
 	var w := minf(780.0, s.x - 460.0)
-	var r := Rect2((s.x - w) / 2.0, 104, w, h)
+	var r := Rect2((s.x - w) / 2.0, top, w, h)
 	if good:
 		var pulse := 0.6 + 0.4 * sin(ui.time * 5.0)
 		ui.rect(r, Color(0.02, 0.09, 0.04, 0.9 * alpha))
@@ -99,16 +99,6 @@ func draw_hearts(ui: UIKit, health: PlayerHealth, hurt: float) -> void:
 		ui.texture_region(HEART, r, src)
 
 
-## "-7 s" bajo los corazones.
-func draw_penalty(ui: UIKit, text: String, left: float) -> void:
-	if text == "" or left <= 0.0:
-		return
-	var s := ui.size()
-	var a := clampf(left / 0.8, 0.0, 1.0)
-	var y := 140.0 - (2.2 - left) * 12.0
-	ui.text_right(text, s.x - 28, y, 30, Color(UIKit.ALERT, a), "title")
-
-
 ## Alarma de guardianes.
 func draw_alarm(ui: UIKit, level: int, guardians: int, label: String) -> void:
 	var s := ui.size()
@@ -119,16 +109,3 @@ func draw_alarm(ui: UIKit, level: int, guardians: int, label: String) -> void:
 	ui.rect(r, Color(0.12, 0.02, 0.02, 0.88))
 	ui.frame(r, Color(UIKit.ALERT, 0.6 + 0.4 * pulse), 2.0)
 	ui.text_centered(label, r.position.y + 7, 20, UIKit.TEXT, "bold")
-
-
-func draw_timer(ui: UIKit, timer: CountdownTimer) -> void:
-	var s := ui.size()
-	var r := Rect2(s.x - 210, 20, 182, 64)
-	ui.rect(r, Color(0.04, 0.055, 0.08, 0.85))
-	ui.frame(r, Color("3a2f17"), 1.5)
-	var frac := timer.remaining / maxf(1.0, timer.limit)
-	var center := r.position + Vector2(36, 32)
-	ui.arc(center, 20, 0, TAU, Color("1f2730"), 5)
-	ui.arc(center, 20, -PI / 2, -PI / 2 + TAU * frac, UIKit.CYAN if not timer.is_warning() else UIKit.ALERT, 5)
-	var color := UIKit.ALERT if timer.is_warning() and ui.blink(4.0) else UIKit.TEXT
-	ui.text_right(CountdownTimer.format(timer.remaining), r.end.x - 18, r.position.y + 12, 36, color, "title")

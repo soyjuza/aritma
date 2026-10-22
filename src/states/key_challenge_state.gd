@@ -47,8 +47,8 @@ func exit() -> void:
 	Engine.time_scale = 1.0
 
 
-func timer_runs() -> bool:
-	return true
+func touch_keys() -> Array:
+	return [] if finished else pool
 
 
 func handle_key(event: InputEventKey) -> bool:
@@ -101,7 +101,6 @@ func draw(ui: UIKit) -> void:
 	ui.dim(0.35)
 	ui.vignette(0.55, Color(0.75, 0.05, 0.02))
 	var hud := Hud.new()
-	hud.draw_timer(ui, game.timer)
 	hud.draw_hearts(ui, game.health, 0.0)
 	var box := 74.0
 	var gap := 14.0

@@ -63,6 +63,7 @@ func setup(kit: TileKit, bus: EventBus, data: Dictionary, text: Callable, open_c
 	session.file_name = String(data.get("file_name", "criba.py"))
 	session.code = String(data.get("starter_code", ""))
 	session.help = data.get("help", [])
+	session.set_blocks(data.get("blocks", []))
 	session.max_lines = int(data.get("max_lines", 0))
 	session.machine = self
 	$EtiquetaPar.text = String(data.get("chalice_label", "PAR"))

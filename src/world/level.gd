@@ -57,9 +57,24 @@ func action_prompt() -> Dictionary:
 	return {}
 
 
+## Botones táctiles extra del nivel (en el celular).
+func touch_actions() -> Array:
+	return []
+
+
 ## Texto extra para el HUD.
 func hud_line() -> String:
 	return ""
+
+
+## Algo propio del nivel encima del HUD.
+func draw_hud(_ui: UIKit) -> void:
+	pass
+
+
+## Altura del aviso grande.
+func notice_top() -> float:
+	return 104.0
 
 
 ## Sombras y partículas según la calidad.
@@ -86,7 +101,15 @@ func _wire_common() -> void:
 	for sign in nodes_of(SignPost):
 		sign.reading.used.connect(func(): _game.dialog.say(data.get(sign.lines_key, [])))
 	for npc in nodes_of(Npc):
-		npc.talk_area.used.connect(func(): _game.talk(npc.talk_key))
+		npc.talk_area.used.connect(func(): _game.talk_to(npc))
+		npc.quest_state = func(): return _game.quests.state(npc.quest_id)
+	for gear in nodes_of(GearPickup):
+		if _game.quests.found.has(gear.item_id):
+			gear.queue_free()
+		else:
+			gear.taken.connect(func():
+				_game.quests.pick(gear.item_id, gear.quest_id)
+				gear.queue_free())
 	for zone in nodes_of(CheckpointZone):
 		zone.crossed.connect(func(): set_checkpoint(zone.point()))
 	for pit in nodes_of(Pit):
@@ -100,10 +123,11 @@ func set_checkpoint(at: Vector2) -> void:
 
 func _on_player_fell() -> void:
 	_game.bus.publish(GameEvents.PLAYER_FELL)
-	_game.penalize(float(_game.combat("fall_penalty_sec", 7)))
+	_game.fall_damage()
 	_game.notify([_game.data.message("player_fell")], 2.5)
 	await get_tree().create_timer(0.7).timeout
-	respawn_player()
+	if not _game.health.is_dead():
+		respawn_player()
 
 
 func respawn_player() -> void:

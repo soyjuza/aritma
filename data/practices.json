@@ -1,0 +1,597 @@
+{
+	"pasos": {
+		"scene": "res://scenes/practicas/practica_1_pasos.tscn",
+		"title": "Moverse y saltar",
+		"intro": [
+			"INSCRIPCIÓN: Antes de la Compuerta, el templo deja practicar a quien entra.",
+			"Sigue el cuadro de arriba a la derecha y la flecha dorada."
+		],
+		"steps": [
+			{
+				"id": "caminar",
+				"text": "Camina con {move_up} {move_left} {move_down} {move_right} hasta la flecha dorada.",
+				"touch_text": "Mueve la palanca de la izquierda (pon el dedo en la mitad izquierda de la pantalla) hasta la flecha dorada."
+			},
+			{
+				"id": "correr",
+				"text": "Mantén {run} mientras caminas para correr hasta la siguiente flecha. Correr gasta la barra de aliento.",
+				"touch_text": "Toca CORRER (se queda prendido) y camina hasta la siguiente flecha. Correr gasta la barra de aliento."
+			},
+			{
+				"id": "saltar",
+				"text": "Un foso. Salta con {jump} justo antes del borde."
+			},
+			{
+				"id": "foso_largo",
+				"text": "Este foso es más ancho: corre con {run} y salta con {jump} antes del borde.",
+				"touch_text": "Este foso es más ancho: con CORRER prendido, toca SALTO antes del borde."
+			}
+		],
+		"done": [
+			"¡Bien! Así se cruzan los fosos de los pasillos del templo."
+		]
+	},
+	"pelea": {
+		"scene": "res://scenes/practicas/practica_2_pelea.tscn",
+		"title": "Pelear",
+		"dummy_hits": 3,
+		"intro": [
+			"INSCRIPCIÓN: Cada error en el código despierta a los guardianes del templo.",
+			"Aquí puedes practicar: no pierdes nada y, si te quedas sin corazones, solo repites el paso."
+		],
+		"steps": [
+			{
+				"id": "muneco",
+				"text": "Mira hacia el muñeco y golpéalo 3 veces con {attack}."
+			},
+			{
+				"id": "caballero",
+				"text": "Cayó un caballero. Golpéalo con {attack} hasta vencerlo y aléjate cuando levante el garrote."
+			},
+			{
+				"id": "hechicero",
+				"text": "Un hechicero lanza orbes: esquívalos o deshazlos con {attack}. Luego acércate y véncelo."
+			}
+		],
+		"done": [
+			"¡Bien! Si en una sala aparecen guardianes, el atril se bloquea hasta vencerlos a todos."
+		]
+	},
+	"bloques": {
+		"scene": "res://scenes/practicas/practica_3_bloques.tscn",
+		"title": "Armar programas",
+		"intro": [
+			"INSCRIPCIÓN: Los atriles se programan con el Códice. No hace falta escribir: se arma el programa con piezas.",
+			"Los errores aquí no despiertan a nadie. Prueba sin miedo."
+		],
+		"steps": [
+			{
+				"id": "atril",
+				"text": "Acércate al atril y presiona {interact}."
+			},
+			{
+				"id": "etapa1",
+				"text": "Arrastra la pieza antorchas.encender() a TU PROGRAMA y presiona EJECUTAR.",
+				"touch_text": "Arrastra la pieza antorchas.encender() a TU PROGRAMA y toca EJECUTAR."
+			},
+			{
+				"id": "etapa2",
+				"text": "Ahora enciende 3 braseros. Vuelve al atril y pon antorchas.encender() tres veces, una debajo de otra: el programa corre de arriba abajo."
+			}
+		],
+		"stages": [
+			{
+				"title": "Un brasero",
+				"goal": 1,
+				"starter_code": "# Enciende un brasero.\n",
+				"help": [
+					[
+						"antorchas.encender()",
+						"enciende un brasero"
+					],
+					[
+						"antorchas.apagar()",
+						"apaga un brasero"
+					],
+					[
+						"antorchas.quedan()",
+						"cuántos braseros faltan por encender"
+					]
+				],
+				"blocks": [
+					"antorchas.encender()",
+					"antorchas.apagar()"
+				]
+			},
+			{
+				"title": "Tres braseros",
+				"goal": 3,
+				"starter_code": "# Enciende 3 braseros.\n# Cada línea es una orden: se cumplen de arriba abajo.\n",
+				"help": [
+					[
+						"antorchas.encender()",
+						"enciende un brasero"
+					],
+					[
+						"antorchas.apagar()",
+						"apaga un brasero"
+					],
+					[
+						"antorchas.quedan()",
+						"cuántos braseros faltan por encender"
+					]
+				],
+				"blocks": [
+					"antorchas.encender()",
+					"antorchas.apagar()"
+				]
+			}
+		],
+		"done": [
+			"¡Bien! Así se programan los atriles del templo: una orden por línea, de arriba abajo."
+		]
+	},
+	"funciones": {
+		"scene": "res://scenes/practicas/practica_4_funciones.tscn",
+		"title": "Funciones con return",
+		"intro": [
+			"INSCRIPCIÓN: El Mural pide una función: un pedazo de programa que recibe números y DEVUELVE un resultado con return.",
+			"Practica aquí con funciones más fáciles."
+		],
+		"steps": [
+			{
+				"id": "atril",
+				"text": "Acércate al atril y presiona {interact}."
+			},
+			{
+				"id": "etapa1",
+				"text": "Arma doble(n): primero def, y el return DENTRO (más a la derecha). Debe devolver el doble de n."
+			},
+			{
+				"id": "etapa2",
+				"text": "Vuelve al atril. Ahora restar(a, b): debe devolver a menos b."
+			}
+		],
+		"stages": [
+			{
+				"title": "doble(n)",
+				"function": "doble",
+				"cases": [
+					[
+						[
+							3
+						],
+						6
+					],
+					[
+						[
+							5
+						],
+						10
+					],
+					[
+						[
+							12
+						],
+						24
+					]
+				],
+				"starter_code": "# El atril llama a doble(3), doble(5) y doble(12).\n# return devuelve el resultado.\n",
+				"help": [
+					[
+						"def doble(n):",
+						"crea la función; n es el número que le pasan"
+					],
+					[
+						"return n * 2",
+						"devuelve el doble de n"
+					],
+					[
+						"print(...)",
+						"solo escribe en la consola: no devuelve nada"
+					]
+				],
+				"blocks": [
+					"def doble(n):",
+					"return n * 2",
+					"return n + 2",
+					"print(n * 2)"
+				]
+			},
+			{
+				"title": "restar(a, b)",
+				"function": "restar",
+				"cases": [
+					[
+						[
+							9,
+							4
+						],
+						5
+					],
+					[
+						[
+							20,
+							8
+						],
+						12
+					],
+					[
+						[
+							7,
+							7
+						],
+						0
+					]
+				],
+				"starter_code": "# El atril llama a restar(9, 4), restar(20, 8) y restar(7, 7).\n",
+				"help": [
+					[
+						"def restar(a, b):",
+						"crea la función con dos números"
+					],
+					[
+						"return a - b",
+						"devuelve a menos b"
+					]
+				],
+				"blocks": [
+					"def restar(a, b):",
+					"return a - b",
+					"return b - a",
+					"return a + b"
+				]
+			}
+		],
+		"done": [
+			"¡Bien! El Mural llama a despejar(a, b, c) igual que este atril llamó a tus funciones."
+		]
+	},
+	"buscaminas": {
+		"scene": "res://scenes/practicas/practica_5_buscaminas.tscn",
+		"title": "El buscaminas (1 de 4)",
+		"board": [
+			5,
+			4
+		],
+		"mines": [
+			[
+				4,
+				1
+			]
+		],
+		"intro": [
+			"INSCRIPCIÓN: El Vórtice esconde minas bajo sus baldosas. Los números dicen dónde están.",
+			"En este tablero chico una mina no hace daño. Sigue los pasos."
+		],
+		"steps": [
+			{
+				"id": "destapar",
+				"cell": [
+					1,
+					2
+				],
+				"text": "Párate sobre la baldosa verde y presiona {interact} para destaparla.",
+				"do": "reveal"
+			},
+			{
+				"id": "bandera",
+				"cell": [
+					4,
+					1
+				],
+				"clue": [
+					4,
+					2
+				],
+				"text": "Cada número dice cuántas minas TOCAN su baldosa (también en diagonal). El 1 azul solo toca una baldosa tapada: la verde. Párate en ella y ponle bandera con {flag}.",
+				"do": "flag"
+			},
+			{
+				"id": "segura",
+				"cell": [
+					4,
+					0
+				],
+				"clue": [
+					3,
+					0
+				],
+				"text": "El 1 azul ya tiene su mina (la bandera). La otra baldosa tapada a su lado es segura: destápala con {interact}.",
+				"do": "reveal"
+			}
+		],
+		"done": [
+			"¡Bien! En el Vórtice haz lo mismo: busca un número que ya tenga todas sus minas y destapa las demás."
+		]
+	},
+	"buscaminas_2": {
+		"scene": "res://scenes/practicas/practica_5_buscaminas.tscn",
+		"title": "El buscaminas (2 de 4)",
+		"board": [
+			6,
+			4
+		],
+		"mines": [
+			[
+				5,
+				0
+			],
+			[
+				4,
+				3
+			]
+		],
+		"intro": [
+			"INSCRIPCIÓN: Ahora hay dos minas. Una bandera ayuda a encontrar baldosas seguras.",
+			"Sigue la baldosa verde y mira el número que brilla."
+		],
+		"steps": [
+			{
+				"id": "empezar",
+				"do": "reveal",
+				"cell": [
+					1,
+					1
+				],
+				"text": "Destapa la baldosa verde con {interact}."
+			},
+			{
+				"id": "mina_abajo",
+				"do": "flag",
+				"cell": [
+					4,
+					3
+				],
+				"clue": [
+					3,
+					3
+				],
+				"text": "El 1 que brilla solo toca UNA baldosa tapada: es la mina. Ponle bandera con {flag}."
+			},
+			{
+				"id": "segura_1",
+				"do": "reveal",
+				"cell": [
+					5,
+					2
+				],
+				"clue": [
+					4,
+					2
+				],
+				"text": "Este 1 ya tiene su mina (la bandera). Sus otras baldosas tapadas son seguras: destapa la verde."
+			},
+			{
+				"id": "segura_2",
+				"do": "reveal",
+				"cell": [
+					5,
+					1
+				],
+				"clue": [
+					4,
+					2
+				],
+				"text": "Por el mismo 1, esta también es segura. Destápala."
+			},
+			{
+				"id": "mina_arriba",
+				"do": "flag",
+				"cell": [
+					5,
+					0
+				],
+				"clue": [
+					4,
+					0
+				],
+				"text": "Mira el 1 que brilla: ya solo le queda una baldosa tapada. Ponle bandera."
+			},
+			{
+				"id": "terminar",
+				"do": "clear",
+				"text": "Queda una baldosa tapada sin bandera. ¿Es segura? Destápala para terminar."
+			}
+		],
+		"done": [
+			"¡Bien! Una bandera te dice qué baldosas de alrededor son seguras."
+		]
+	},
+	"buscaminas_3": {
+		"scene": "res://scenes/practicas/practica_5_buscaminas.tscn",
+		"title": "El buscaminas (3 de 4)",
+		"board": [
+			6,
+			5
+		],
+		"mines": [
+			[
+				0,
+				4
+			],
+			[
+				1,
+				4
+			],
+			[
+				4,
+				0
+			],
+			[
+				5,
+				2
+			]
+		],
+		"intro": [
+			"INSCRIPCIÓN: Cuatro minas. Aquí aparece el número 2.",
+			"Un 2 que toca justo dos baldosas tapadas tiene una mina en cada una."
+		],
+		"steps": [
+			{
+				"id": "empezar",
+				"do": "reveal",
+				"cell": [
+					1,
+					1
+				],
+				"text": "Destapa la baldosa verde con {interact}."
+			},
+			{
+				"id": "dos_a",
+				"do": "flag",
+				"cell": [
+					0,
+					4
+				],
+				"clue": [
+					0,
+					3
+				],
+				"text": "El 2 que brilla toca solo DOS baldosas tapadas: las dos son minas. Ponle bandera a la verde."
+			},
+			{
+				"id": "dos_b",
+				"do": "flag",
+				"cell": [
+					1,
+					4
+				],
+				"clue": [
+					0,
+					3
+				],
+				"text": "Y la otra baldosa tapada del 2 también es mina. Ponle bandera."
+			},
+			{
+				"id": "arriba",
+				"do": "flag",
+				"cell": [
+					4,
+					0
+				],
+				"clue": [
+					3,
+					0
+				],
+				"text": "Este 1 solo toca una baldosa tapada. Ponle bandera."
+			},
+			{
+				"id": "derecha",
+				"do": "flag",
+				"cell": [
+					5,
+					2
+				],
+				"clue": [
+					5,
+					3
+				],
+				"text": "Este 1 de abajo también toca una sola baldosa tapada. Ponle bandera."
+			},
+			{
+				"id": "terminar",
+				"do": "clear",
+				"text": "Ya están las 4 minas. Destapa todas las baldosas que quedan tapadas sin bandera."
+			}
+		],
+		"done": [
+			"¡Bien! Cuenta las baldosas tapadas: si son tantas como el número, todas son minas."
+		]
+	},
+	"buscaminas_4": {
+		"scene": "res://scenes/practicas/practica_5_buscaminas.tscn",
+		"title": "El buscaminas (4 de 4)",
+		"board": [
+			7,
+			5
+		],
+		"mines": [
+			[
+				3,
+				0
+			],
+			[
+				6,
+				0
+			],
+			[
+				0,
+				3
+			],
+			[
+				5,
+				3
+			],
+			[
+				2,
+				4
+			]
+		],
+		"intro": [
+			"INSCRIPCIÓN: El último ensayo, con cinco minas. Ya no se marca la baldosa: solo el número que hay que mirar.",
+			"Tú decides cuál baldosa es. Si explota una mina, el tablero vuelve a empezar."
+		],
+		"steps": [
+			{
+				"id": "empezar",
+				"do": "reveal",
+				"cell": [
+					1,
+					1
+				],
+				"text": "Destapa la baldosa verde con {interact}."
+			},
+			{
+				"id": "mina_1",
+				"do": "flag",
+				"cell": [
+					3,
+					0
+				],
+				"clue": [
+					2,
+					0
+				],
+				"pick": true,
+				"text": "Mira el número que brilla: ¿qué baldosa tapada que toca es la mina? Ponle bandera."
+			},
+			{
+				"id": "segura",
+				"do": "reveal",
+				"cell": [
+					5,
+					1
+				],
+				"clue": [
+					4,
+					1
+				],
+				"pick": true,
+				"text": "Este 1 ya tiene su bandera al lado. Destapa una baldosa tapada que toque: es segura."
+			},
+			{
+				"id": "mina_2",
+				"do": "flag",
+				"cell": [
+					0,
+					3
+				],
+				"clue": [
+					0,
+					2
+				],
+				"pick": true,
+				"text": "Busca la mina de este número y ponle bandera."
+			},
+			{
+				"id": "terminar",
+				"do": "clear",
+				"text": "Ahora tú solo: quedan 3 minas. Usa los números para destapar todo lo seguro."
+			}
+		],
+		"done": [
+			"¡Bien! Así se resuelve el Vórtice: un número a la vez, sin adivinar."
+		]
+	}
+}

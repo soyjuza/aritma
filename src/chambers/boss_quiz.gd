@@ -11,6 +11,10 @@ func _init(text: Callable = Callable(), settings: Dictionary = {}) -> void:
 		"paridad": ParityProblem.new(text, settings.get("paridad", {})),
 		"multiplo": MultipleProblem.new(text, settings.get("multiplo", {})),
 		"despejar": SolveProblem.new(text, settings.get("despejar", {})),
+		"variable": VariableProblem.new(text, settings.get("variable", {})),
+		"orden": OrderProblem.new(text, settings.get("orden", {})),
+		"si": IfProblem.new(text, settings.get("si", {"with_else": 0})),
+		"si_sino": IfProblem.new(text, settings.get("si_sino", {"with_else": 1})),
 	}
 
 

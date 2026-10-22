@@ -15,9 +15,91 @@
 				"puerta.abierta",
 				"True si está abierta"
 			]
+		],
+		"gate_blocks": [
+			"puerta.abrir()",
+			"puerta.cerrar()"
 		]
 	},
+	"chapters": [
+		{
+			"name": "Capítulo 1: El Templo de Aritma", "topic": "instrucciones en orden, métodos y variables",
+			"goal": "Supera las salas del templo y vence al Guardián del Cero",
+			"chambers": ["lock", "vortex", "figures", "core", "throne"],
+			"ending": "ending_won",
+			"outro": [
+				"El Guardián del Cero se deshace en chispas rojas. Detrás del trono, una puerta de bronce se abre al otro lado de la montaña.",
+				"Tala baja por un sendero entre árboles enormes: es el Bosque de Aritma. Al fondo, otras ruinas esperan.",
+				"CAPÍTULO 2: EL BOSQUE. Aquí las máquinas deciden solas: aprenderás if y else."
+			]
+		},
+		{
+			"name": "Capítulo 2: El Bosque", "topic": "if / else",
+			"goal": "Cruza las ruinas del Bosque y vence al Guardián del Bosque",
+			"chambers": ["bridge", "garden", "throne_forest"],
+			"ending": "ending_chapter2",
+			"hub": {
+				"scene": "res://scenes/niveles/bosque.tscn",
+				"name": "El Bosque de Aritma",
+				"objective_key": "objective_forest",
+				"sign": [
+					"LETRERO: Las máquinas del Bosque deciden solas. Para eso se usa if: «if agua < 5:» pregunta algo, y lo que va debajo, más a la derecha, solo pasa si la respuesta es sí.",
+					"LETRERO: Con else se dice qué hacer cuando la respuesta es no. Siempre pasa una de las dos: o lo del if, o lo del else."
+				]
+			}
+		},
+		{"name": "Capítulo 3: La Cueva", "topic": "while", "chambers": ["filter"]},
+		{"name": "Capítulo 4: Las Ruinas del Mural", "topic": "funciones con return", "chambers": ["roots"]},
+		{"name": "Capítulo 5: La Cima", "topic": "for y listas", "chambers": []}
+	],
 	"chambers": [
+		{
+			"name": "La Compuerta del Nivel",
+			"kind": "lock",
+			"file_name": "compuerta.py",
+			"rounds": 3,
+			"add": 3,
+			"practices": [
+				"pasos",
+				"pelea",
+				"bloques"
+			],
+			"starter_code": "# El sensor marca un número distinto en cada ronda.\n# La compuerta se abre con ese número MÁS 3.\n# Guárdalo en una variable, súmale 3 y sube la compuerta.\n\n",
+			"help": [
+				[
+					"nivel = sensor.leer()",
+					"guarda en la variable nivel el número del sensor"
+				],
+				[
+					"nivel = nivel + 3",
+					"le suma 3 a nivel y lo guarda otra vez en nivel"
+				],
+				[
+					"compuerta.subir(nivel)",
+					"sube la compuerta hasta ese nivel"
+				],
+				[
+					"print(nivel)",
+					"muestra el valor de nivel en la consola"
+				]
+			],
+			"blocks": [
+				"nivel = sensor.leer()",
+				"nivel = nivel + 3",
+				"nivel = nivel - 3",
+				"compuerta.subir(nivel)",
+				"print(nivel)"
+			],
+			"intro": [
+				"INSCRIPCIÓN: La Compuerta del Nivel solo se abre a la altura justa. El sensor de la izquierda marca un número; la compuerta debe subir a ese número MÁS 3, como dice el dintel.",
+				"Usa el atril (E). Un programa se lee de arriba abajo, una línea tras otra: primero guarda el número en una variable, después cámbiala y al final úsala.",
+				"La compuerta probará tu programa con tres números distintos, así que un número fijo no sirve: usa la variable.",
+				"INSCRIPCIÓN: Dos guardianes de piedra vigilan la Compuerta. Cada vez que rechace tu código —aunque sea por un error de escritura— despertarán más. Golpéalos con el garrote (J o clic)."
+			],
+			"tunnel_intro": [
+				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
+			]
+		},
 		{
 			"name": "El Filtro de la Dualidad",
 			"kind": "filter",
@@ -93,7 +175,16 @@
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
 			],
-			"max_lines": 0
+			"max_lines": 0,
+			"blocks": [
+				"while tolva.quedan() > 0:",
+				"n = tolva.soltar()",
+				"if n % 2 == 0:",
+				"caliz.recibir()",
+				"else:",
+				"crisol.desintegrar()",
+				"if n % 2 == 1:"
+			]
 		},
 		{
 			"name": "El Mural de la Incógnita",
@@ -144,6 +235,15 @@
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Las prensas del pasillo se cierran con su propio ritmo. La lámpara roja avisa justo antes de cerrar."
+			],
+			"blocks": [
+				"def despejar(a, b, c):",
+				"return (c - b) / a",
+				"return (c + b) / a",
+				"return (c - b) * a"
+			],
+			"practices": [
+				"funciones"
 			]
 		},
 		{
@@ -183,6 +283,16 @@
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Más allá, el Vórtice de Celdas. Aquí no hay trampas en el camino: el peligro está en el piso de la sala."
+			],
+			"blocks": [
+				"luces.encender()",
+				"luces.apagar()"
+			],
+			"practices": [
+				"buscaminas",
+				"buscaminas_2",
+				"buscaminas_3",
+				"buscaminas_4"
 			]
 		},
 		{
@@ -249,7 +359,7 @@
 				"INSCRIPCIÓN: Quien sepa leer los números encontrará la salida hacia la superficie.",
 				"El núcleo brilla al otro lado del abismo, sobre la losa dorada. Para llegar hay un sendero de losas flotantes, cada una con un número grabado.",
 				"INSCRIPCIÓN: Solo los {regla} te sostienen. Cualquier otra losa se desmorona bajo tus pies.",
-				"Piensa antes de pisar: busca un camino de losas buenas desde el borde hasta la losa dorada. Si caes pierdes 7 segundos, y la losa que pisaste queda rota."
+				"Piensa antes de pisar: busca un camino de losas buenas desde el borde hasta la losa dorada. Si caes pierdes medio corazón, y la losa que pisaste queda rota."
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Más allá, la Singularidad del Cero: el corazón del templo."
@@ -259,39 +369,167 @@
 			"name": "El Trono del Cero",
 			"kind": "throne",
 			"quiz": {
-				"seconds": 15,
-				"kinds": [
-					"paridad",
-					"multiplo",
-					"despejar"
-				],
+				"seconds": 20,
+				"kinds": ["variable", "orden", "paridad"],
 				"problems": {
-					"paridad": {
-						"min_number": 11,
-						"max_number": 99
+					"variable": {"min_lines": 2, "max_lines": 3, "max_start": 9, "options": 4},
+					"orden": {
+						"options": 4,
+						"programs": [
+							["n = 3", "doble = n * 2", "print(doble)"],
+							["lado = 4", "area = lado * lado", "print(area)"],
+							["precio = 5", "total = precio + 2", "print(total)"],
+							["a = 6", "b = a - 1", "print(b)"],
+							["x = 2", "x = x + 5", "print(x)"],
+							["llaves = 1", "llaves = llaves * 3", "print(llaves)"]
+						]
 					},
-					"multiplo": {
-						"min_divisor": 3,
-						"max_divisor": 6,
-						"min_factor": 3,
-						"max_factor": 12,
-						"options": 4
-					},
-					"despejar": {
-						"options": 4
-					}
+					"paridad": {"min_number": 11, "max_number": 99, "code_lines": 2},
+					"multiplo": {"min_divisor": 3, "max_divisor": 6, "min_factor": 3, "max_factor": 12, "options": 4},
+					"despejar": {"options": 4}
 				}
 			},
 			"intro": [
 				"Una sombra roja baja del techo y abre las alas sobre el trono: el Guardián del Cero.",
 				"EL GUARDIÁN DEL CERO: «Tomaste el núcleo, pero no saldrás con él mientras yo exista».",
 				"Golpéalo con J o clic. Cuando el círculo rojo marque su pisotón, sal corriendo o salta con ESPACIO. Los orbes se esquivan o se deshacen con el garrote.",
-				"Cada vez que pierda una cuarta parte de su vida se cubrirá con un escudo y te pondrá a prueba con un problema: tienes 15 segundos (1 a 4 o clic). Si aciertas, el escudo cae; si fallas, llamará a sus guardianes.",
+				"Cada vez que pierda una cuarta parte de su vida se cubrirá con un escudo y te pondrá a prueba con un problema: tienes 20 segundos (1 a 4 o clic). Si aciertas, el escudo cae; si fallas, llamará a sus guardianes.",
 				"Al entrar recuperas 2 corazones, y cada vez que caiga su escudo dejará una poción en el suelo."
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Aquí termina el templo. Quien llegue al trono deberá vencer a su último guardián."
 			]
+		},
+		{
+			"name": "El Puente Colgante",
+			"kind": "bridge",
+			"file_name": "puente.py",
+			"rounds": 3,
+			"limit": 10,
+			"objective_key": "objective_bridge",
+			"solved_text": "¡El puente aguanta las tres carretas! Solo lo reforzaste cuando hacía falta. El sello de la salida se abre.",
+			"starter_code": "# La carreta llega con un peso distinto cada vez.\n# Si pesa MÁS de 10, refuerza el puente. Si no, no hagas nada.\n\n",
+			"help": [
+				[
+					"peso = carreta.peso()",
+					"guarda en peso lo que pesa la carreta"
+				],
+				[
+					"if peso > 10:",
+					"lo de abajo (con sangría) solo pasa si peso es mayor que 10"
+				],
+				[
+					"    puente.reforzar()",
+					"refuerza el puente (va más a la derecha, dentro del if)"
+				],
+				[
+					"print(peso)",
+					"muestra el peso en la consola"
+				]
+			],
+			"blocks": [
+				"peso = carreta.peso()",
+				"if peso > 10:",
+				"if peso < 10:",
+				"puente.reforzar()",
+				"print(peso)"
+			],
+			"intro": [
+				"INSCRIPCIÓN: El Puente Colgante solo aguanta carretas livianas. Si una carreta pesa MÁS de 10, hay que reforzarlo antes; si pesa 10 o menos, reforzarlo lo traba.",
+				"Usa el atril (E). Aquí aparece el if: «if peso > 10:» pregunta algo, y las líneas de abajo, más a la derecha, solo se cumplen si la respuesta es sí.",
+				"Pasarán tres carretas con pesos distintos: tu programa tiene que decidir solo.",
+				"INSCRIPCIÓN: Dos guardianes de piedra vigilan el puente. Cada código rechazado despierta a más. Golpéalos con el garrote (J o clic)."
+			],
+			"tunnel_intro": [
+				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
+			]
+		},
+		{
+			"name": "El Jardín de las Macetas",
+			"kind": "garden",
+			"file_name": "maceta.py",
+			"rounds": 3,
+			"limit": 5,
+			"objective_key": "objective_garden",
+			"solved_text": "¡Las tres plantas quedaron sanas! Regaste las secas y asoleaste las mojadas. El sello de la salida se abre.",
+			"starter_code": "# Mide el agua de la maceta.\n# Si tiene MENOS de 5, riégala. Si no (else), asoléala.\n\n",
+			"help": [
+				[
+					"agua = maceta.medir()",
+					"guarda en agua cuánta agua tiene la tierra"
+				],
+				[
+					"if agua < 5:",
+					"pregunta si tiene menos de 5"
+				],
+				[
+					"    maceta.regar()",
+					"riega (dentro del if, más a la derecha)"
+				],
+				[
+					"else:",
+					"si la respuesta fue NO, pasa lo de abajo"
+				],
+				[
+					"    maceta.asolear()",
+					"le da sol (dentro del else)"
+				]
+			],
+			"blocks": [
+				"agua = maceta.medir()",
+				"if agua < 5:",
+				"if agua > 5:",
+				"maceta.regar()",
+				"else:",
+				"maceta.asolear()"
+			],
+			"intro": [
+				"INSCRIPCIÓN: Las macetas del jardín se marchitan si nadie las cuida. Tierra seca (menos de 5 de agua): hay que regarla. Tierra mojada (5 o más): hay que darle sol.",
+				"Usa el atril (E). Ahora el if tiene compañero: else. Si la pregunta del if dice que no, se cumple lo que está debajo del else. Siempre pasa una de las dos.",
+				"El jardín probará tu programa con tres macetas distintas.",
+				"INSCRIPCIÓN: También aquí vigilan guardianes de piedra. Cada código rechazado despierta a más."
+			],
+			"tunnel_intro": [
+				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
+			]
+		},
+		{
+			"name": "El Claro del Guardián",
+			"kind": "throne",
+			"quiz": {
+				"seconds": 20,
+				"kinds": [
+					"si",
+					"si_sino",
+					"si_sino"
+				],
+				"problems": {
+					"si": {
+						"with_else": 0,
+						"options": 4
+					},
+					"si_sino": {
+						"with_else": 1,
+						"options": 4
+					}
+				}
+			},
+			"intro": [
+				"Entre las raíces del claro despierta el Guardián del Bosque, primo verde del Guardián del Cero.",
+				"EL GUARDIÁN DEL BOSQUE: «Aquí todo decide por sí mismo. Veamos si tú sabes decidir».",
+				"Pelea igual que el anterior: golpéalo con J o clic y esquiva su pisotón. Cuando se cubra con su escudo te preguntará qué imprime un if. Tienes 20 segundos.",
+				"Al entrar recuperas 2 corazones, y cada escudo que cae deja una poción."
+			],
+			"tunnel_intro": [
+				"INSCRIPCIÓN: Al final del sendero está el claro del Guardián del Bosque."
+			],
+			"id": "throne_forest",
+			"boss_name": "EL GUARDIÁN DEL BOSQUE",
+			"boss_tint": "#9dffb0",
+			"boss_objective_key": "objective_forest_boss",
+			"beaten_key": "boss_forest_beaten",
+			"tunnel_objective_key": "objective_forest_tunnel",
+			"done_objective_key": "objective_forest_done"
 		}
 	]
 }

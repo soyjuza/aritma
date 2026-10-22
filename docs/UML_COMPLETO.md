@@ -1,6 +1,6 @@
 # UML completo (generado)
 
-Generado por `tools/generar_uml.py` a partir del código: **148 clases**, un diagrama
+Generado por `tools/generar_uml.py` a partir del código: **178 clases**, un diagrama
 por carpeta de `src/`. Las flechas `<|--` son herencia. Las relaciones entre paquetes
 (composición, uso, eventos) están en el diagrama principal de `docs/ARQUITECTURA.md`.
 Para actualizarlo: `python3 tools/generar_uml.py`.
@@ -14,6 +14,10 @@ classDiagram
         +load_level(new_level)
         +enter_chamber(index)
         +enter_temple()
+        +next_practice(index) String
+        +load_practice(key, index)
+        +leave_practice()
+        +skip_practice()
         +load_chamber(index)
         +show_title_shot()
         +follow_player()
@@ -24,14 +28,19 @@ classDiagram
         +fade_in()
         +fade_out()
         +talk(key)
+        +talk_to(npc)
+        +apply_skills()
+        +grant_points(points)
         +notify(lines, seconds, good)
         +start_new_game()
         +open_codex(session)
         +save_game()
         +load_game()
+        +load_hub(i)
+        +chapter_done()
         +finish(won, ending)
         +combat(key, fallback)
-        +penalize(seconds)
+        +fall_damage()
     }
 ```
 
@@ -49,21 +58,18 @@ classDiagram
         +play_music(track)
         +set_volume(bus_name, level)
     }
-    class CountdownTimer {
-        <<RefCounted>>
-        +reset()
-        +start()
-        +stop()
-        +elapsed() float
-        +is_warning() bool
-        +tick(delta)
-        +format(seconds) String$
-    }
     class DataRepository {
         <<RefCounted>>
+        +use_touch()
         +setting(key, fallback)
+        +use_chapter(i)
+        +use_order(ids)
+        +room_id(room) String$
+        +chapter_data(i) Dictionary
+        +chapter_name(i) String
         +chamber_count() int
         +chamber_data(index) Dictionary
+        +practice(key) Dictionary
         +talk(key) Array
         +message(key, params) String
         +messages(key) Array
@@ -81,10 +87,11 @@ classDiagram
         <<RefCounted>>
         +register(controls)$
         +key_name(action) String$
+        +drop_mouse_bindings()$
     }
     class LifeRules {
         <<RefCounted>>
-        +penalize(seconds)
+        +fall_damage()
     }
     class PlayerHealth {
         <<RefCounted>>
@@ -93,6 +100,18 @@ classDiagram
         +damage(amount) bool
         +heal(amount)
         +refill()
+    }
+    class QuestLog {
+        <<RefCounted>>
+        +quest(id) Dictionary
+        +state(id) String
+        +reset()
+        +found_count(id) int
+        +done_count() int
+        +talk(id)
+        +pick(item, id)
+        +save_state() Dictionary
+        +restore(data)
     }
     class SaveRepository {
         <<RefCounted>>
@@ -113,21 +132,35 @@ classDiagram
         +save()
         +apply()
     }
+    class SkillTree {
+        <<RefCounted>>
+        +skill(id) Dictionary
+        +level(id) int
+        +max_level(id) int
+        +free_points() int
+        +can_raise(id) bool
+        +raise(id) bool
+        +grant(points)
+        +reset()
+        +save_state() Dictionary
+        +restore(data)
+    }
 ```
 
 | Clase | Hereda de | Archivo |
 |---|---|---|
 | `AudioService` | `RefCounted` | `src/core/audio_service.gd` |
-| `CountdownTimer` | `RefCounted` | `src/core/countdown_timer.gd` |
 | `DataRepository` | `RefCounted` | `src/core/data_repository.gd` |
 | `EventBus` | `RefCounted` | `src/core/event_bus.gd` |
 | `GameEvents` | `RefCounted` | `src/core/game_events.gd` |
 | `InputSetup` | `RefCounted` | `src/core/input_setup.gd` |
 | `LifeRules` | `RefCounted` | `src/core/life_rules.gd` |
 | `PlayerHealth` | `RefCounted` | `src/core/player_health.gd` |
+| `QuestLog` | `RefCounted` | `src/core/quest_log.gd` |
 | `SaveRepository` | `RefCounted` | `src/core/save_repository.gd` |
 | `SecretCodeDetector` | `RefCounted` | `src/core/secret_code_detector.gd` |
 | `SettingsRepository` | `RefCounted` | `src/core/settings_repository.gd` |
+| `SkillTree` | `RefCounted` | `src/core/skill_tree.gd` |
 
 ## `src/player/` — Tala y sus estados (patrón State)
 
@@ -520,6 +553,12 @@ classDiagram
         +kinds() Array
         +make(kind, rng) Dictionary
     }
+    class BridgeMachine {
+        +setup(bus, data, text, open_codex)
+        +make_values() Array
+        +api_for(weight, record) Dictionary
+        +wanted(weight) String
+    }
     class ChamberBuilder {
         <<Factory Method>>
         +build(data) ChamberLevel
@@ -623,8 +662,28 @@ classDiagram
     class FilterLevel {
         +wire()
     }
+    class GardenMachine {
+        +setup(bus, data, text, open_codex)
+        +make_values() Array
+        +api_for(water, record) Dictionary
+        +wanted(water) String
+    }
     class GateMachine {
         +setup(data, text, open_fn, close_fn, open_codex)
+        +evaluate(source, sandbox) CodeMachine
+        +perform(report)
+    }
+    class LockBuilder {
+        <<Factory Method>>
+        +create_level() ChamberLevel
+    }
+    class LockLevel {
+        +wire()
+    }
+    class LockMachine {
+        +setup(bus, data, text, open_codex)
+        +status_text() String
+        +mark_solved()
         +evaluate(source, sandbox) CodeMachine
         +perform(report)
     }
@@ -683,7 +742,15 @@ classDiagram
         +send(to_chalice) String
         +end_round()
     }
+    class IfProblem {
+        <<Strategy>>
+        +make(rng) Dictionary
+    }
     class MultipleProblem {
+        <<Strategy>>
+        +make(rng) Dictionary
+    }
+    class OrderProblem {
         <<Strategy>>
         +make(rng) Dictionary
     }
@@ -699,6 +766,11 @@ classDiagram
     class SolveProblem {
         <<Strategy>>
         +make(rng) Dictionary
+    }
+    class VariableProblem {
+        <<Strategy>>
+        +make(rng) Dictionary
+        +program(rng, lines, start_max) Dictionary$
     }
     class RootsBuilder {
         <<Factory Method>>
@@ -717,6 +789,24 @@ classDiagram
         +equation(a, b, c) String$
         +answer(value) String$
         +judge(case, value) Verdict$
+    }
+    class RoundsLevel {
+        +wire()
+    }
+    class RoundsMachine {
+        <<Template Method>>
+        +setup(bus, data, text, open_codex)
+        +status_text() String
+        +make_values() Array
+        +api_for(_value, _record) Dictionary
+        +wanted(_value) String
+        +evaluate(source, sandbox) CodeMachine
+        +perform(report)
+        +mark_solved()
+    }
+    class SceneBuilder {
+        <<Factory Method>>
+        +create_level() ChamberLevel
     }
     class ThroneBuilder {
         <<Factory Method>>
@@ -737,8 +827,10 @@ classDiagram
         +hud_line() String
         +restore_solved()
         +restart_after_death()
+        +touch_actions() Array
     }
     CodeMachine <|-- BeaconMachine
+    RoundsMachine <|-- BridgeMachine
     Level <|-- ChamberLevel
     ChamberBuilder <|-- CoreBuilder
     ChamberLevel <|-- CoreLevel
@@ -748,13 +840,23 @@ classDiagram
     ChamberLevel <|-- FigureLevel
     ChamberBuilder <|-- FilterBuilder
     ChamberLevel <|-- FilterLevel
+    RoundsMachine <|-- GardenMachine
     CodeMachine <|-- GateMachine
+    ChamberBuilder <|-- LockBuilder
+    ChamberLevel <|-- LockLevel
+    CodeMachine <|-- LockMachine
     CodeMachine <|-- MuralMachine
+    QuizProblem <|-- IfProblem
     QuizProblem <|-- MultipleProblem
+    QuizProblem <|-- OrderProblem
     QuizProblem <|-- ParityProblem
     QuizProblem <|-- SolveProblem
+    QuizProblem <|-- VariableProblem
     ChamberBuilder <|-- RootsBuilder
     ChamberLevel <|-- RootsLevel
+    ChamberLevel <|-- RoundsLevel
+    CodeMachine <|-- RoundsMachine
+    ChamberBuilder <|-- SceneBuilder
     ChamberBuilder <|-- ThroneBuilder
     ChamberLevel <|-- ThroneLevel
     ChamberBuilder <|-- VortexBuilder
@@ -766,6 +868,7 @@ classDiagram
 | `AlarmDirector` | `Node` | `src/chambers/alarm_director.gd` |
 | `BeaconMachine` | `CodeMachine` | `src/chambers/beacon_machine.gd` |
 | `BossQuiz` | `RefCounted` | `src/chambers/boss_quiz.gd` |
+| `BridgeMachine` | `RoundsMachine` | `src/chambers/bridge_machine.gd` |
 | `ChamberBuilder` | `RefCounted` | `src/chambers/chamber_builder.gd` |
 | `ChamberLevel` | `Level` | `src/chambers/chamber_level.gd` |
 | `ChamberRegistry` | `RefCounted` | `src/chambers/chamber_registry.gd` |
@@ -783,20 +886,30 @@ classDiagram
 | `FilterBuilder` | `ChamberBuilder` | `src/chambers/filter_builder.gd` |
 | `FilterCommand` | `RefCounted` | `src/chambers/filter_command.gd` |
 | `FilterLevel` | `ChamberLevel` | `src/chambers/filter_level.gd` |
+| `GardenMachine` | `RoundsMachine` | `src/chambers/garden_machine.gd` |
 | `GateMachine` | `CodeMachine` | `src/chambers/gate_machine.gd` |
+| `LockBuilder` | `ChamberBuilder` | `src/chambers/lock_builder.gd` |
+| `LockLevel` | `ChamberLevel` | `src/chambers/lock_level.gd` |
+| `LockMachine` | `CodeMachine` | `src/chambers/lock_machine.gd` |
 | `MineBoard` | `Node2D` | `src/chambers/mine_board.gd` |
 | `MinefieldGenerator` | `RefCounted` | `src/chambers/minefield_generator.gd` |
 | `MuralMachine` | `CodeMachine` | `src/chambers/mural_machine.gd` |
 | `NumberPath` | `Node2D` | `src/chambers/number_path.gd` |
 | `ParityFilter` | `RefCounted` | `src/chambers/parity_filter.gd` |
+| `IfProblem` | `QuizProblem` | `src/chambers/quiz/if_problem.gd` |
 | `MultipleProblem` | `QuizProblem` | `src/chambers/quiz/multiple_problem.gd` |
+| `OrderProblem` | `QuizProblem` | `src/chambers/quiz/order_problem.gd` |
 | `ParityProblem` | `QuizProblem` | `src/chambers/quiz/parity_problem.gd` |
 | `QuizProblem` | `RefCounted` | `src/chambers/quiz/quiz_problem.gd` |
 | `SolveProblem` | `QuizProblem` | `src/chambers/quiz/solve_problem.gd` |
+| `VariableProblem` | `QuizProblem` | `src/chambers/quiz/variable_problem.gd` |
 | `RootsBuilder` | `ChamberBuilder` | `src/chambers/roots_builder.gd` |
 | `RootsCommand` | `RefCounted` | `src/chambers/roots_command.gd` |
 | `RootsLevel` | `ChamberLevel` | `src/chambers/roots_level.gd` |
 | `RootsTrial` | `RefCounted` | `src/chambers/roots_trial.gd` |
+| `RoundsLevel` | `ChamberLevel` | `src/chambers/rounds_level.gd` |
+| `RoundsMachine` | `CodeMachine` | `src/chambers/rounds_machine.gd` |
+| `SceneBuilder` | `ChamberBuilder` | `src/chambers/scene_builder.gd` |
 | `ThroneBuilder` | `ChamberBuilder` | `src/chambers/throne_builder.gd` |
 | `ThroneLevel` | `ChamberLevel` | `src/chambers/throne_level.gd` |
 | `VortexBuilder` | `ChamberBuilder` | `src/chambers/vortex_builder.gd` |
@@ -806,6 +919,11 @@ classDiagram
 
 ```mermaid
 classDiagram
+    class CallsAdapter {
+        <<Adapter>>
+        +type_name() String
+        +get_method(attr) ScriptCallable
+    }
     class DoorAdapter {
         <<Adapter>>
         +type_name() String
@@ -821,6 +939,21 @@ classDiagram
         +type_name() String
         +get_method(attr) ScriptCallable
         +get_attribute(ctx, attr, line)
+    }
+    class LockAdapter {
+        <<Adapter>>
+        +type_name() String
+        +get_method(attr) ScriptCallable
+    }
+    class SensorAdapter {
+        <<Adapter>>
+        +type_name() String
+        +get_method(attr) ScriptCallable
+    }
+    class TorchAdapter {
+        <<Adapter>>
+        +type_name() String
+        +get_method(attr) ScriptCallable
     }
     class HostFunction {
         +invoke(ctx, args, line)
@@ -886,16 +1019,24 @@ classDiagram
         +run(source, api, max_steps) Result
         +call_function(result, function_name, args) Array
     }
+    ScriptObject <|-- CallsAdapter
     ScriptObject <|-- DoorAdapter
     ScriptObject <|-- LightsAdapter
+    ScriptObject <|-- LockAdapter
+    ScriptObject <|-- SensorAdapter
+    ScriptObject <|-- TorchAdapter
     ScriptCallable <|-- HostFunction
 ```
 
 | Clase | Hereda de | Archivo |
 |---|---|---|
+| `CallsAdapter` | `ScriptObject` | `src/script_lang/adapters/calls_adapter.gd` |
 | `DoorAdapter` | `ScriptObject` | `src/script_lang/adapters/door_adapter.gd` |
 | `FilterAdapter` | `RefCounted` | `src/script_lang/adapters/filter_adapter.gd` |
 | `LightsAdapter` | `ScriptObject` | `src/script_lang/adapters/lights_adapter.gd` |
+| `LockAdapter` | `ScriptObject` | `src/script_lang/adapters/lock_adapter.gd` |
+| `SensorAdapter` | `ScriptObject` | `src/script_lang/adapters/sensor_adapter.gd` |
+| `TorchAdapter` | `ScriptObject` | `src/script_lang/adapters/torch_adapter.gd` |
 | `HostFunction` | `ScriptCallable` | `src/script_lang/host_function.gd` |
 | `Lexer` | `RefCounted` | `src/script_lang/lexer.gd` |
 | `Parser` | `RefCounted` | `src/script_lang/parser.gd` |
@@ -914,8 +1055,8 @@ classDiagram
     class BookState {
         <<State>>
         +enter(params)
-        +timer_runs() bool
         +freezes_world() bool
+        +touch_buttons() Array
         +handle_input(actions)
         +draw(ui)
     }
@@ -923,19 +1064,21 @@ classDiagram
         <<State>>
         +enter(params)
         +exit()
-        +timer_runs() bool
+        +touch_buttons() Array
         +handle_input(actions)
         +run()
         +draw(ui)
     }
     class CreditsState {
         <<State>>
+        +touch_tap() String
         +handle_input(actions)
         +draw(ui)
     }
     class EndState {
         <<State>>
         +enter(params)
+        +touch_tap() String
         +handle_input(actions)
         +update(delta)
         +draw(ui)
@@ -950,11 +1093,16 @@ classDiagram
         +update(_delta)
         +draw(_ui)
         +freezes_world() bool
-        +timer_runs() bool
+        +touch_buttons() Array
+        +touch_tap() String
+        +touch_stick() bool
+        +touch_keys() Array
     }
     class IntroState {
         <<State>>
         +enter(_params)
+        +touch_tap() String
+        +touch_buttons() Array
         +handle_input(actions)
         +update(delta)
         +draw(ui)
@@ -964,7 +1112,7 @@ classDiagram
         +random_keys(pool, count) Array$
         +enter(params)
         +exit()
-        +timer_runs() bool
+        +touch_keys() Array
         +handle_key(event) bool
         +is_getting_ready() bool
         +time_left() float
@@ -974,14 +1122,15 @@ classDiagram
     class MenuState {
         <<State>>
         +enter(_params)
+        +handle_mouse(event) bool
         +handle_input(actions)
         +draw(ui)
     }
     class PauseState {
         <<State>>
         +enter(params)
-        +timer_runs() bool
         +freezes_world() bool
+        +handle_mouse(event) bool
         +handle_input(actions)
         +update(delta)
         +draw(ui)
@@ -990,7 +1139,9 @@ classDiagram
         <<State>>
         +enter(params)
         +exit()
-        +timer_runs() bool
+        +touch_stick() bool
+        +touch_tap() String
+        +touch_buttons() Array
         +handle_input(actions)
         +update(delta)
         +draw(ui)
@@ -999,9 +1150,9 @@ classDiagram
         <<State>>
         +enter(params)
         +exit()
-        +timer_runs() bool
         +freezes_world() bool
         +handle_mouse(event) bool
+        +touch_buttons() Array
         +handle_input(actions)
         +check_solved(ui)
         +update(_delta)
@@ -1010,7 +1161,6 @@ classDiagram
     class QuizState {
         <<State>>
         +enter(params)
-        +timer_runs() bool
         +freezes_world() bool
         +handle_key(event) bool
         +handle_mouse(event) bool
@@ -1022,8 +1172,18 @@ classDiagram
     class SettingsState {
         <<State>>
         +enter(params)
-        +timer_runs() bool
         +freezes_world() bool
+        +touch_buttons() Array
+        +handle_mouse(event) bool
+        +handle_input(actions)
+        +draw(ui)
+    }
+    class SkillsState {
+        <<State>>
+        +enter(_params)
+        +freezes_world() bool
+        +touch_buttons() Array
+        +handle_mouse(event) bool
         +handle_input(actions)
         +draw(ui)
     }
@@ -1036,6 +1196,7 @@ classDiagram
     class TitleState {
         <<State>>
         +enter(_params)
+        +touch_tap() String
         +handle_input(actions)
         +draw(ui)
     }
@@ -1051,6 +1212,7 @@ classDiagram
     GameState <|-- PuzzleState
     GameState <|-- QuizState
     GameState <|-- SettingsState
+    GameState <|-- SkillsState
     GameState <|-- TitleState
 ```
 
@@ -1069,6 +1231,7 @@ classDiagram
 | `PuzzleState` | `GameState` | `src/states/puzzle_state.gd` |
 | `QuizState` | `GameState` | `src/states/quiz_state.gd` |
 | `SettingsState` | `GameState` | `src/states/settings_state.gd` |
+| `SkillsState` | `GameState` | `src/states/skills_state.gd` |
 | `StateMachine` | `RefCounted` | `src/states/state_machine.gd` |
 | `TitleState` | `GameState` | `src/states/title_state.gd` |
 
@@ -1076,16 +1239,44 @@ classDiagram
 
 ```mermaid
 classDiagram
+    class BlockBoard {
+        <<Control>>
+        +font_size() int
+        +program_rect() Rect2
+        +tray_rect() Rect2
+        +row_height() float
+        +piece_size(piece) Vector2
+        +row_rect(row) Rect2
+        +tray_layout() Dictionary
+        +row_at(point) int
+        +tray_piece_at(point) int
+        +drop_target() Vector2i
+        +max_indent(row) int
+        +place(piece, row, indent)
+        +take_back(row)
+        +shift(row, delta)
+        +move(row, delta)
+        +suggested_indent(row) int
+    }
     class CodexPanel {
         <<Control>>
         +fold(folded)
         +open(session, keys_text, side)
         +close() String
+        +source() String
+        +write(code)
+        +toggle_mode()
+        +show_mode()
         +log_line(text, color)
     }
     class CodexSession {
         <<RefCounted>>
         +count_lines(source) int$
+        +set_blocks(lines)
+        +free_pieces() Array
+        +blocks_source() String
+        +blocks_state() Dictionary
+        +restore_blocks(state)
     }
     class DialogBox {
         <<RefCounted>>
@@ -1099,11 +1290,9 @@ classDiagram
     class Hud {
         <<RefCounted>>
         +draw(ui, info)
-        +draw_notice(ui, text, left, good)
+        +draw_notice(ui, text, left, good, top)
         +draw_hearts(ui, health, hurt)
-        +draw_penalty(ui, text, left)
         +draw_alarm(ui, level, guardians, label)
-        +draw_timer(ui, timer)
     }
     class MenuList {
         <<RefCounted>>
@@ -1112,12 +1301,13 @@ classDiagram
         +first_enabled()
         +selected() String
         +height() float
+        +index_at(point) int
+        +clicked(event, point) bool
         +draw(ui, at, width)
     }
     class NoticeBoard {
         <<RefCounted>>
         +notify(lines, seconds, is_good)
-        +penalty(seconds)
         +tick(delta)
     }
     class OverlayCanvas {
@@ -1128,6 +1318,10 @@ classDiagram
         +fade_in()
         +fade_out()
         +tick(delta)
+    }
+    class TouchControls {
+        <<Control>>
+        +setup(p_game, p_names, mouse_as_finger)
     }
     class UIKit {
         <<RefCounted>>
@@ -1159,6 +1353,7 @@ classDiagram
 
 | Clase | Hereda de | Archivo |
 |---|---|---|
+| `BlockBoard` | `Control` | `src/ui/block_board.gd` |
 | `CodexPanel` | `Control` | `src/ui/codex_panel.gd` |
 | `CodexSession` | `RefCounted` | `src/ui/codex_session.gd` |
 | `DialogBox` | `RefCounted` | `src/ui/dialog_box.gd` |
@@ -1167,6 +1362,7 @@ classDiagram
 | `NoticeBoard` | `RefCounted` | `src/ui/notice_board.gd` |
 | `OverlayCanvas` | `Control` | `src/ui/overlay_canvas.gd` |
 | `ScreenFade` | `RefCounted` | `src/ui/screen_fade.gd` |
+| `TouchControls` | `Control` | `src/ui/touch_controls.gd` |
 | `UIKit` | `RefCounted` | `src/ui/ui_kit.gd` |
 
 ## `src/world/` — Piezas de los mapas
@@ -1184,6 +1380,9 @@ classDiagram
     class FlickerLight {
         <<PointLight2D>>
     }
+    class GearPickup {
+        <<Area2D>>
+    }
     class Grate {
         <<Node2D>>
         +open()
@@ -1191,6 +1390,9 @@ classDiagram
     }
     class HeartPotion {
         <<Area2D>>
+    }
+    class HubLevel {
+        +wire()
     }
     class Interactable {
         <<Area2D>>
@@ -1204,7 +1406,10 @@ classDiagram
         +title_point() Vector2
         +handle_action(_actions) bool
         +action_prompt() Dictionary
+        +touch_actions() Array
         +hud_line() String
+        +draw_hud(_ui)
+        +notice_top() float
         +apply_quality(profile)
         +cell_center(cell) Vector2$
         +nodes_of(kind) Array
@@ -1242,6 +1447,7 @@ classDiagram
         +mark_fired()
     }
     TriggerZone <|-- CheckpointZone
+    Level <|-- HubLevel
     Level <|-- TownLevel
 ```
 
@@ -1250,8 +1456,10 @@ classDiagram
 | `CheckpointZone` | `TriggerZone` | `src/world/checkpoint_zone.gd` |
 | `Crusher` | `Node2D` | `src/world/crusher.gd` |
 | `FlickerLight` | `PointLight2D` | `src/world/flicker_light.gd` |
+| `GearPickup` | `Area2D` | `src/world/gear_pickup.gd` |
 | `Grate` | `Node2D` | `src/world/grate.gd` |
 | `HeartPotion` | `Area2D` | `src/world/heart_potion.gd` |
+| `HubLevel` | `Level` | `src/world/hub_level.gd` |
 | `Interactable` | `Area2D` | `src/world/interactable.gd` |
 | `Level` | `Node2D` | `src/world/level.gd` |
 | `Npc` | `Node2D` | `src/world/npc.gd` |

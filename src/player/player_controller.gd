@@ -27,6 +27,7 @@ var health: PlayerHealth
 var combat: Dictionary = {}
 var attack_time := 0.28
 var attack_cooldown := 0.12
+var attack_damage := 1    # 2 con la mejora de Tuerca
 var attack_reach := 20.0
 var attack_arc := deg_to_rad(75.0)
 var invulnerable := 0.0
@@ -227,7 +228,7 @@ func strike() -> void:
 			continue
 		var to: Vector2 = guardian.global_position - global_position
 		if to.length() <= attack_reach + guardian.radius and absf(facing.angle_to(to)) <= attack_arc:
-			guardian.take_hit(1, to.normalized() if to.length() > 0.1 else facing)
+			guardian.take_hit(attack_damage, to.normalized() if to.length() > 0.1 else facing)
 
 
 ## Recibe un golpe. force: aunque esté parpadeando.

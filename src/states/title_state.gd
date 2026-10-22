@@ -8,6 +8,10 @@ func enter(_params: Dictionary = {}) -> void:
 	game.show_title_shot()
 
 
+func touch_tap() -> String:
+	return "accept"
+
+
 func handle_input(actions: Array) -> void:
 	if "accept" in actions or "jump" in actions:
 		game.bus.publish(GameEvents.MENU_CONFIRM)
