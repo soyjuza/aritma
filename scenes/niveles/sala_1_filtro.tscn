@@ -17,6 +17,7 @@
 [ext_resource type="Texture2D" uid="uid://ds4i5gcvgogx5" path="res://assets/pack/fx/Smoke/Smoke/SpriteSheet.png" id="17_g1tjx"]
 [ext_resource type="Texture2D" uid="uid://b3k42g1ao17ty" path="res://assets/efectos/luz_suave.tres" id="18_eucke"]
 [ext_resource type="PackedScene" path="res://scenes/objetos/estatua_guardian.tscn" id="19_estatua"]
+[ext_resource type="PackedScene" path="res://scenes/objetos/engranaje.tscn" id="31_gear"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_iwjhg"]
 size = Vector2(80, 12)
@@ -79,6 +80,12 @@ tile_set = ExtResource("3_t3h0o")
 
 [node name="Actores" type="Node2D" parent="."]
 y_sort_enabled = true
+
+[node name="Objeto" parent="Actores" instance=ExtResource("31_gear")]
+position = Vector2(430, 300)
+item_id = "cristal_3"
+quest_id = "cristales"
+look = "crystal"
 
 [node name="Letrero" parent="Actores" instance=ExtResource("4_eq173")]
 position = Vector2(216, 640)

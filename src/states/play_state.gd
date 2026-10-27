@@ -87,7 +87,7 @@ func draw(ui: UIKit) -> void:
 	info.extra = game.level.hud_line()
 	_hud.draw(ui, info)
 	game.level.draw_hud(ui)
-	_hud.draw_notice(ui, game.notices.text, game.notices.left, game.notices.good, game.level.notice_top())
+	_hud.draw_notice(ui, game.notices.text, game.notices.left, game.notices.good, game.level.notice_top(), game.notices.place)
 	game.dialog.draw(ui)
 
 

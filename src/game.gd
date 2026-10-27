@@ -28,6 +28,8 @@ var quests: QuestLog
 var skills: SkillTree
 var machine_zoom := 1.0    # en el celular la cámara se acerca más a la máquina
 var practices_done := {}
+var reached := 0          # capítulo más alto abierto (sube al vencer cada jefe)
+var map_id := "pueblo"    # mapa del mundo donde está Tala (o del que salió)
 
 var _observers: Array = []
 var _tool: RefCounted
@@ -207,14 +209,19 @@ func enter_chamber(index: int) -> void:
 	_changing = false
 	bus.publish(GameEvents.CHAMBER_ENTERED, {"index": index, "name": place_title()})
 	fade_in()
-	if index == 0:
+	if index == 0 and data.chapter == 0:
 		notify(data.messages("temple_start"), 6.0)
 
 
-## Tala entra al templo y va a la Sala 1.
+## Tala entra a las salas del mapa (templo, ruinas...). Si ya venció a su jefe, no.
 func enter_temple() -> void:
 	if chamber_index >= 0:
 		return
+	var chapter := int(data.map_data(map_id).get("chapter", 0))
+	if reached > chapter:
+		dialog.say([data.message("dungeon_done")])
+		return
+	data.use_chapter(chapter)
 	bus.publish(GameEvents.TEMPLE_ENTERED)
 	await enter_chamber(0)
 
@@ -352,9 +359,10 @@ func start_new_game() -> void:
 	Engine.time_scale = 1.0
 	dialog.close()
 	chamber_index = -1
+	reached = 0
 	practices_done.clear()
-	load_level(town_scene.instantiate())
-	play_music(level.music_key)
+	data.use_chapter(0)
+	load_map("pueblo")
 	fade_in()
 
 
@@ -365,51 +373,100 @@ func open_codex(session: CodexSession) -> void:
 
 func save_game() -> void:
 	var room := level.save_state()
-	saves.save({"chamber": chamber_index, "hearts": health.halves, "room": room, "quests": quests.save_state(), "skills": skills.save_state(), "chapter": data.chapter})
+	saves.save({"chamber": chamber_index, "hearts": health.halves, "room": room, "quests": quests.save_state(), "skills": skills.save_state(), "chapter": data.chapter, "map": map_id, "reached": reached, "order": data.chambers.map(func(c): return DataRepository.room_id(c))})
 
 
 func load_game() -> void:
 	var snap := saves.load_snapshot()
 	start_new_game()
-	var chapter := int(snap.get("chapter", -1))
+	var chapter := int(snap.get("chapter", 0))
+	reached = int(snap.get("reached", maxi(chapter, 0)))
+	map_id = String(snap.get("map", data.map_of_chapter(maxi(chapter, 0))))
 	if chapter >= 0:
 		data.use_chapter(chapter)
+	else:
+		data.use_order(snap.get("order", []))    # orden suelto (pruebas)
 	var index := int(snap.get("chamber", -1))
 	if index >= 0 and index < data.chamber_count():
 		load_chamber(index)
 		level.resume_from_save(snap.get("room", {}))
-	elif chapter > 0:
-		load_hub(chapter)
+	else:
+		load_map(map_id, "Puerta" if chapter > 0 else "")
 	quests.restore(snap.get("quests", {}))
 	skills.restore(snap.get("skills", {"earned": quests.done_count()}))
 	apply_skills()
 	health.halves = clampi(int(snap.get("hearts", health.max_halves)), 1, health.max_halves)
 
 
-## Mapa del capítulo i (el Bosque...). El capítulo 1 usa el pueblo.
-func load_hub(i: int) -> void:
-	data.use_chapter(i)
+## Carga un mapa del mundo sin fundido. entry: marcador de Entradas/ donde aparece Tala.
+func load_map(id: String, entry := "") -> void:
+	var info := data.map_data(id)
+	var map: Level
+	if info.has("scene"):
+		map = (load(String(info.scene)) as PackedScene).instantiate()
+		map.data = info
+	else:
+		map = town_scene.instantiate()
+		map.data = data.town.merged(info)
+	map_id = id
 	chamber_index = -1
-	var hub: Dictionary = data.chapter_data(i).get("hub", {})
-	var map: Level = (load(String(hub.get("scene", ""))) as PackedScene).instantiate()
-	map.data = hub
+	data.use_chapter(int(info.get("chapter", 0)))
 	load_level(map)
+	var mark := map.get_node_or_null("Entradas/" + entry) as Marker2D
+	if mark:
+		player.place(mark.global_position, Vector2(mark.get_meta("facing", Vector2.DOWN)))
+		map.checkpoint = mark.global_position
 	play_music(map.music_key)
 
 
-## Vencido el jefe: sigue al mapa del capítulo siguiente o termina.
+## Cruza al mapa vecino por un borde.
+func go_to_map(id: String, entry: String) -> void:
+	if _changing or data.map_data(id).is_empty() and id != "pueblo":
+		return
+	_changing = true
+	player.controls_enabled = false
+	await fade_out()
+	load_map(id, entry)
+	_changing = false
+	fade_in()
+	notices.notify([place_title()], 3.0, false, true)
+	bus.publish(GameEvents.CHAMBER_ENTERED, {"index": -1, "name": place_title()})
+
+
+## Vencido el jefe: Tala sale frente a la puerta y se abre el camino al mapa siguiente.
 func chapter_done() -> void:
 	var info := data.chapter_data(data.chapter)
-	var next := data.chapter_data(data.chapter + 1)
-	if data.chapter < 0 or not next.has("hub"):
+	reached = maxi(reached, data.chapter + 1)
+	if data.chapter < 0 or data.chapter + 1 >= data.chapters.size():
 		finish(true, String(info.get("ending", "")))
 		return
 	player.controls_enabled = false
 	await fade_out()
-	load_hub(data.chapter + 1)
+	load_map(data.map_of_chapter(data.chapter), "Puerta")
+	var opened: Barrier = null
+	for barrier in level.nodes_of(Barrier):
+		if barrier.need == reached:
+			opened = barrier
+			barrier.set_open(false)
 	fade_in()
 	dialog.say(info.get("outro", []))
 	bus.publish(GameEvents.CHAMBER_ENTERED, {"index": -1, "name": place_title()})
+	if opened:
+		_reveal(opened)
+
+
+## La cámara muestra cómo se abre el camino nuevo mientras se lee.
+func _reveal(barrier: Barrier) -> void:
+	rig.frame(barrier.global_position + Vector2(-150, 0), 1.0, 0.8)
+	await get_tree().create_timer(1.0).timeout
+	if not is_instance_valid(barrier):
+		return
+	rig.shake(3.0)
+	barrier.crumble()
+	await get_tree().create_timer(1.0).timeout
+	while dialog.is_open():
+		await get_tree().process_frame
+	follow_player()
 
 
 ## Fin de la partida. ending es la clave del texto final.

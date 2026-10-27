@@ -12,6 +12,10 @@ func default_data() -> Dictionary:
 
 func wire() -> void:
 	gate.setup(data, func(key, args): return _game.data.message(key, args), open_gate, close_gate, func(): _game.open_codex(gate.session))
+	if _game.reached > 0:
+		# El templo ya se superó: la puerta queda abierta
+		seal.open()
+		gate.mark_solved()
 	gate.solved.connect(func(): objective_key = "objective_town_open")
 	$Zonas/EntradaTemplo.crossed.connect(func(): _game.enter_temple())
 

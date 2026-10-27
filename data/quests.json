@@ -163,6 +163,141 @@
 			"thanks": [
 				"LÍA: ¡Con esa medicina aguantarás lo que venga!"
 			]
+		},
+		{
+			"id": "mientras",
+			"title": "Las vueltas de Grava",
+			"goal": "Responde 3 preguntas de while que confunden a Grava",
+			"kind": "quiz",
+			"problem": "mientras",
+			"count": 3,
+			"seconds": 60,
+			"settings": {
+				"options": 4
+			},
+			"points": 1,
+			"offer": [
+				"GRAVA: Pico y pico toda la vida, y los letreros de esta cueva me tienen mareado.",
+				"GRAVA: Dicen «while» y repiten cosas... ¿hasta cuándo? ¿Me dices qué imprimen tres de ellos?"
+			],
+			"again": [
+				"GRAVA: Otra vez. Ve vuelta por vuelta: cambia el número y vuelve a preguntar."
+			],
+			"fail": [
+				"GRAVA: Mmm, ese no era. El while para justo cuando la pregunta da que no; mira el número en ese momento.",
+				"GRAVA: Háblame cuando quieras."
+			],
+			"done": [
+				"GRAVA: ¡Por fin lo veo! Toma mi casco de minero: vale un punto de habilidad."
+			],
+			"thanks": [
+				"GRAVA: Mientras haya roca, se pica. ¡Igual que el while!"
+			]
+		},
+		{
+			"id": "cristales",
+			"title": "Los cristales de Perla",
+			"goal": "Encuentra 3 cristales violetas en la Cueva",
+			"kind": "collect",
+			"count": 3,
+			"item": "Cristal violeta",
+			"points": 1,
+			"offer": [
+				"PERLA: Estos cristales guardan la luz del sol de antes. Los violetas son los más fuertes.",
+				"PERLA: Uno está en la cueva y dos en las ruinas. Si me los traes, te hago un amuleto."
+			],
+			"progress": [
+				"PERLA: Llevas {n} de {of} cristales. Uno está en la cueva y dos en las ruinas."
+			],
+			"done": [
+				"Los tres cristales se juntan y brillan como un amuleto. Tala gana un punto de habilidad."
+			],
+			"thanks": [
+				"PERLA: Con esa luz no te perderás en la oscuridad."
+			]
+		},
+		{
+			"id": "funciones",
+			"title": "Las recetas de Pluma",
+			"goal": "Dile a Pluma qué devuelven 3 funciones",
+			"kind": "quiz",
+			"problem": "funcion",
+			"count": 3,
+			"seconds": 60,
+			"settings": {
+				"options": 4
+			},
+			"points": 1,
+			"offer": [
+				"PLUMA: Copio las recetas de las ruinas, pero no entiendo qué devuelven.",
+				"PLUMA: «def», «return»... Dime qué imprime cada una de estas tres, ¿sí?"
+			],
+			"again": [
+				"PLUMA: Otra vez: pon el número en lugar de n y haz la cuenta del return."
+			],
+			"fail": [
+				"PLUMA: Esa no era. La función recibe el número, hace la cuenta y devuelve el resultado con return.",
+				"PLUMA: Vuelve cuando quieras."
+			],
+			"done": [
+				"PLUMA: ¡Ahora mis copias tienen sentido! Toma esta pluma de cóndor: vale un punto de habilidad."
+			],
+			"thanks": [
+				"PLUMA: Recibe, calcula, devuelve. ¡Qué elegante!"
+			]
+		},
+		{
+			"id": "pergaminos",
+			"title": "Los pergaminos del Vigía",
+			"goal": "Encuentra 3 pergaminos perdidos en el Mirador",
+			"kind": "collect",
+			"count": 3,
+			"item": "Pergamino",
+			"points": 1,
+			"offer": [
+				"VIGÍA: El viento se llevó mis pergaminos con el mapa de Aritma.",
+				"VIGÍA: Uno cayó cerca de las rocas del este y dos volaron a las ruinas. ¿Me los traes?"
+			],
+			"progress": [
+				"VIGÍA: Llevas {n} de {of} pergaminos. Uno cerca de las rocas del este, dos en las ruinas."
+			],
+			"done": [
+				"Los pergaminos encajan como un mapa completo. Tala gana un punto de habilidad."
+			],
+			"thanks": [
+				"VIGÍA: Con el mapa completo, ya sé por dónde se sube a la Cima."
+			]
+		},
+		{
+			"id": "listas",
+			"title": "Las cuentas de Eco",
+			"goal": "Responde 3 preguntas de listas y for que Eco no recuerda",
+			"kind": "quiz",
+			"problem": "para_lista",
+			"count": 3,
+			"seconds": 60,
+			"settings": {
+				"over_list": 1,
+				"options": 4
+			},
+			"points": 1,
+			"offer": [
+				"ECO: ...ECO... ECO. SOY ECO, EL ÚLTIMO AUTÓMATA DE LA CIMA.",
+				"ECO: EL FRÍO BORRÓ MI MEMORIA DE LISTAS. ¿ME DICES QUÉ IMPRIMEN TRES PROGRAMAS?"
+			],
+			"again": [
+				"ECO: REPITE CONMIGO: UNA VUELTA POR CADA NÚMERO DE LA LISTA."
+			],
+			"fail": [
+				"ECO: ERROR. SUMA LOS NÚMEROS UNO POR UNO, EN CADA VUELTA DEL FOR.",
+				"ECO: HÁBLAME OTRA VEZ."
+			],
+			"done": [
+				"ECO: MEMORIA RESTAURADA. TE DOY MI ÚLTIMA CHISPA: UN PUNTO DE HABILIDAD."
+			],
+			"thanks": [
+				"ECO: ...LISTA... FOR... LISTA... FOR. GRACIAS, TALA."
+			]
 		}
 	]
 }

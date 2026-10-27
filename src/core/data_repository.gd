@@ -6,6 +6,7 @@ var config: Dictionary
 var chambers: Array        # salas del capítulo actual, en orden
 var chapters: Array
 var chapter := 0
+var maps: Dictionary       # mapas del mundo (Raíz, Bosque...)
 var town: Dictionary
 var texts: Dictionary
 var practices: Dictionary
@@ -19,6 +20,7 @@ func _init(base_path: String = "res://data") -> void:
 	var chamber_file := _read(base_path.path_join("chambers.json"))
 	_all_chambers = chamber_file.get("chambers", [])
 	chapters = chamber_file.get("chapters", [])
+	maps = chamber_file.get("maps", {})
 	use_chapter(0)
 	town = chamber_file.get("town", {})
 	texts = _read(base_path.path_join("texts.json"))
@@ -78,6 +80,16 @@ static func room_id(room: Dictionary) -> String:
 ## Datos del capítulo i ({} si no existe).
 func chapter_data(i: int) -> Dictionary:
 	return chapters[i] if i >= 0 and i < chapters.size() else {}
+
+
+## Datos de un mapa del mundo ({} si no existe).
+func map_data(id: String) -> Dictionary:
+	return maps.get(id, {})
+
+
+## Mapa donde está la entrada a las salas del capítulo i.
+func map_of_chapter(i: int) -> String:
+	return String(chapter_data(i).get("map", "pueblo"))
 
 
 func chapter_name(i: int) -> String:

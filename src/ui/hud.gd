@@ -56,12 +56,19 @@ func draw(ui: UIKit, info: Dictionary) -> void:
 		ui.text_right(String(info.fps), s.x - 24, s.y - 40, 15, UIKit.MUTED)
 
 
-## Aviso arriba. good: verde.
-func draw_notice(ui: UIKit, text: String, left: float, good := false, top := 104.0) -> void:
+## Aviso arriba. good: verde. place: nombre del lugar, dorado.
+func draw_notice(ui: UIKit, text: String, left: float, good := false, top := 104.0, place := false) -> void:
 	if text == "" or left <= 0.0:
 		return
 	var s := ui.size()
 	var alpha := clampf(left, 0.0, 1.0)
+	if place:
+		var pw := ui.measure(text, 34, "title") + 80
+		var pr := Rect2((s.x - pw) / 2.0, top, pw, 64)
+		ui.rect(pr, Color(0.03, 0.04, 0.06, 0.88 * alpha))
+		ui.frame(pr, Color(UIKit.GOLD, alpha), 2.0)
+		ui.text_centered(text, pr.position.y + 12, 34, Color(UIKit.GOLD, alpha), "title")
+		return
 	var size := 30 if good else 22
 	var rows: Array = ui.wrap(text, minf(720.0, s.x - 520.0), size, "bold")
 	var h := rows.size() * (ui.line_height(size, "bold") + 2) + 26

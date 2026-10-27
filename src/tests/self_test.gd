@@ -19,6 +19,12 @@ func _init(context: Game) -> void:
 
 
 func run() -> void:
+	# SOLO=_test_algo corre una sola prueba
+	if OS.has_environment("SOLO"):
+		await call(OS.get_environment("SOLO"))
+		print("SELFTEST ", "OK" if _failures == 0 else "FALLO (%d)" % _failures)
+		game.get_tree().quit()
+		return
 	ScriptLangTests.new().run_all(_check)
 	_test_quality()
 	_test_health_and_alarm_rules()
@@ -41,6 +47,9 @@ func run() -> void:
 	await _test_mine_practices()
 	await _test_quests()
 	await _test_forest()
+	_test_new_quizzes()
+	await _test_world()
+	await _test_late_chapters()
 	print("SELFTEST ", "OK" if _failures == 0 else "FALLO (%d)" % _failures)
 	game.get_tree().quit(0 if _failures == 0 else 1)
 
@@ -83,6 +92,16 @@ func _walk_up_until(done: Callable, limit: float, run := false) -> void:
 		await _wait(0.1)
 		t += 0.1
 		game.dialog.close()
+	_release_all()
+
+
+## Camina en una dirección hasta que pase algo (sin cerrar diálogos).
+func _walk_until(action: String, done: Callable, limit: float) -> void:
+	_key(action, true)
+	var t := 0.0
+	while not done.call() and t < limit:
+		await _wait(0.1)
+		t += 0.1
 	_release_all()
 
 
@@ -1373,8 +1392,14 @@ func _test_forest() -> void:
 	await _wait(0.3)
 	await game.chapter_done()
 	await _wait(0.6)
-	_check(game.level is HubLevel and game.data.chapter == 1 and game.dialog.is_open(), "Capítulos: vencer al Guardián del Cero lleva al Bosque")
+	_check(game.level is TownLevel and game.reached == 1 and game.dialog.is_open(), "Capítulos: vencer al Guardián del Cero devuelve a Raíz con el camino del este abierto")
 	await _finish_dialog()
+	await _wait(1.5)
+	var rocks := game.level.get_node("Actores/Rocas1") as Barrier
+	_check(rocks.is_open, "Raíz: las rocas del este se deshacen al volver del templo")
+	game.player.place(game.level.get_node("Entradas/Este").global_position, Vector2.RIGHT)
+	await _walk_until("move_right", func(): return game.level is HubLevel, 5.0)
+	_check(game.map_id == "bosque" and game.data.chapter == 1, "Mundo: caminando al este de Raíz se llega al Bosque")
 	var hub := game.level as HubLevel
 	for n in ["Sauce", "Ramas", "Lia", "Letrero", "Hongo"]:
 		_check(hub.has_node("Actores/" + n), "Bosque: en el mapa está " + n)
@@ -1419,6 +1444,144 @@ func _test_forest() -> void:
 	# Fin del capítulo 2
 	await game.chapter_done()
 	await _wait(0.3)
-	_check(game.machine.current is EndState and game.machine.current._key == "ending_chapter2", "Capítulos: vencer al Guardián del Bosque cierra el capítulo 2")
+	_check(game.map_id == "bosque" and game.reached == 2 and game.level.get_node("Actores/Rocas2") != null, "Capítulos: vencer al Guardián del Bosque devuelve al Bosque y abre el camino a la Cueva")
+	await _finish_dialog()
+	game.quests.reset()
+	game.data.use_chapter(0)
+
+## Preguntas de while, funciones, listas y for: la buena es lo que imprime el programa.
+func _test_new_quizzes() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 33
+	var quiz := BossQuiz.new(game.data.message)
+	var sandbox := ScriptSandbox.new()
+	for kind in ["mientras", "mientras_veces", "funcion", "funcion_doble", "lista", "para", "para_lista"]:
+		var ok := true
+		for i in 150:
+			var q := quiz.make(kind, rng)
+			var code: Array = q.code.duplicate()
+			if kind == "mientras_veces":
+				# Cuenta las vueltas en vez de imprimir la variable
+				code = ["vueltas = 0"] + code.slice(0, 3) + ["    vueltas = vueltas + 1", "print(vueltas)"]
+			var result := sandbox.run("\n".join(code) + "\n", {})
+			ok = ok and result.ok and q.options.size() == 4 and String(q.options[q.answer]) == " ".join(result.output)
+			ok = ok and q.options.size() == q.options.filter(func(o): return q.options.count(o) == 1).size()
+		_check(ok, "Preguntas «%s»: 150 al azar, la respuesta buena es lo que imprime" % kind)
+
+
+## El mundo: mapas unidos por los bordes, rocas que se abren y salidas que llegan a algún lado.
+func _test_world() -> void:
+	var links_ok := true
+	for id in game.data.maps:
+		var info: Dictionary = game.data.maps[id]
+		var scene: Node = (load(String(info.get("scene", "res://scenes/niveles/pueblo.tscn"))) as PackedScene).instantiate()
+		for exit in scene.find_children("*", "Area2D", true, false):
+			if exit is MapExit:
+				var target: Dictionary = game.data.map_data(exit.target)
+				var other: Node = (load(String(target.get("scene", "res://scenes/niveles/pueblo.tscn"))) as PackedScene).instantiate()
+				links_ok = links_ok and not target.is_empty() and other.has_node("Entradas/" + exit.entry)
+				other.free()
+		links_ok = links_ok and scene.has_node("Entradas/Puerta")
+		scene.free()
+	_check(links_ok, "Mundo: cada salida lleva a un mapa que existe y a un punto de llegada")
+	game.machine.change("play", {"mode": "new"})
+	await _wait(0.4)
+	game.dialog.close()
+	_check(game.reached == 0 and not (game.level.get_node("Actores/Rocas1") as Barrier).is_open, "Mundo: al empezar, las rocas del este de Raíz están cerradas")
+	game.player.place(game.level.get_node("Entradas/Este").global_position - Vector2(40, 0), Vector2.RIGHT)
+	await _walk_until("move_right", func(): return game.level is HubLevel, 2.0)
+	_check(game.level is TownLevel, "Mundo: con las rocas cerradas no se sale de Raíz")
+	# Con todo abierto se cruza de mapa en mapa hasta la Cima y se vuelve
+	game.reached = 4
+	var route := [["pueblo", "bosque"], ["bosque", "cueva"], ["cueva", "mirador"], ["mirador", "cima"]]
+	var walked := true
+	for step in route:
+		game.load_map(step[0], "Este" if step[0] != "pueblo" else "Este")
+		await _wait(0.3)
+		game.player.place(game.level.get_node("Entradas/Este").global_position, Vector2.RIGHT)
+		await _walk_until("move_right", func(): return game.map_id == step[1], 5.0)
+		walked = walked and game.map_id == step[1]
+	_check(walked, "Mundo: caminando al este se va de Raíz al Bosque, la Cueva, el Mirador y la Cima")
+	game.player.place(game.level.get_node("Entradas/Oeste").global_position, Vector2.LEFT)
+	await _walk_until("move_left", func(): return game.map_id == "mirador", 5.0)
+	_check(game.map_id == "mirador" and game.player.global_position.x > 400.0, "Mundo: al volver por el oeste se aparece en el borde este del mapa anterior")
+	# El balcón del Mirador muestra el valle
+	game.player.place(game.level.get_node("Zonas/Balcon").global_position + Vector2(0, -40), Vector2.DOWN)
+	await _walk_until("move_down", func(): return game.dialog.is_open(), 3.0)
+	_check(game.dialog.is_open(), "Mirador: asomarse al balcón muestra el valle")
+	await _finish_dialog()
+	# Guardar en la Cueva y volver
+	game.reached = 2
+	game.load_map("cueva", "Puerta")
+	game.saves.path = "user://save_prueba.cfg"
+	game.save_game()
+	game.load_map("pueblo")
+	game.load_game()
+	await _wait(0.3)
+	_check(game.map_id == "cueva" and game.reached == 2 and game.level.dark, "Mundo: guardar en la Cueva y cargar vuelve a la Cueva, a oscuras")
+	_check(not (game.level.get_node("Actores/Rocas3") as Barrier).is_open, "Cueva: la salida al Mirador sigue cerrada hasta vencer a su Guardián")
+	game.player.place(game.level.get_node("Zonas/EntradaRuinas").global_position + Vector2(0, 60), Vector2.UP)
+	await _walk_up_until(func(): return game.level is RoundsLevel, 6.0)
+	_release_all()
+	_check(game.data.chapter == 2 and game.chamber_index == 0 and game.level is RoundsLevel, "Cueva: las ruinas del norte llevan a la Bomba")
+	game.load_map("pueblo", "Puerta")
+	game.enter_temple()
+	await _wait(0.2)
+	_check(game.level is TownLevel and game.dialog.is_open(), "Mundo: un templo ya superado no se vuelve a entrar")
+	game.dialog.close()
+
+
+## Capítulos 3, 4 y 5: salas, jefes y final.
+func _test_late_chapters() -> void:
+	var sandbox := ScriptSandbox.new()
+	var plan := [
+		[2, ["pump", "filter", "throne_cave"], "EL GUARDIÁN DE LA CUEVA"],
+		[3, ["mill", "roots", "throne_ruins"], "EL GUARDIÁN DE LAS RUINAS"],
+		[4, ["bells", "scale", "twins", "throne_peak"], "LA SOMBRA DEL SOL NEGRO"],
+	]
+	for p in plan:
+		game.data.use_chapter(p[0])
+		_check(game.data.chambers.map(func(c): return DataRepository.room_id(c)) == p[1], "Capítulo %d: salas %s" % [p[0] + 1, ", ".join(p[1])])
+		game.load_chamber(p[1].size() - 1)
+		await _wait(0.3)
+		game.dialog.close()
+		_check((game.level as ThroneLevel).boss.title == p[2], "Capítulo %d: el jefe es %s" % [p[0] + 1, p[2]])
+	var cases := [
+		[2, 0, "while tanque.nivel() < 10:\n    bomba.bombear()\n", ["bomba.bombear()\n", "while tanque.nivel() <= 10:\n    bomba.bombear()\n"], "Bomba"],
+		[3, 0, "def moler(sacos):\n    return sacos * 3\n", ["def moler(sacos):\n    print(sacos * 3)\n", "def moler(sacos):\n    return sacos + 3\n"], "Molino"],
+		[4, 0, "notas = partitura.leer()\nfor n in notas:\n    campana.tocar(n)\n", ["campana.tocar(partitura.leer())\n", "notas = partitura.leer()\ncampana.tocar(notas[0])\n"], "Campanas"],
+		[4, 1, "total = 0\nfor p in pesas.lista():\n    total = total + p\nbalanza.poner(total)\n", ["total = 0\nfor p in pesas.lista():\n    total = total + p\n    balanza.poner(total)\n"], "Balanza"],
+		[4, 2, "def factorizar(b, c):\n    for p in range(-10, 11):\n        q = b - p\n        if p * q == c:\n            return [p, q]\n", ["def factorizar(b, c):\n    return [b, c]\n"], "Raíces Gemelas"],
+	]
+	var on_floor := true
+	for c in cases:
+		game.data.use_chapter(c[0])
+		game.load_chamber(c[1])
+		await _wait(0.3)
+		game.dialog.close()
+		var room := game.level as RoundsLevel
+		var good: CodeMachine.Report = room.machine.evaluate(c[2], sandbox)
+		_check(good.success, "%s: la solución pasa las 3 rondas" % c[4])
+		for bad in c[3]:
+			var r: CodeMachine.Report = room.machine.evaluate(bad, sandbox)
+			_check(not r.success and (r.message != "" or r.error != ""), "%s: «%s» no sirve y dice por qué" % [c[4], bad.strip_edges().replace("\n", " / ")])
+		await room.machine.perform(good)
+		_check(room.solved, "%s: al acertar se abre la salida" % c[4])
+		for item in room.nodes_of(GearPickup):
+			var cell: Vector2i = room.ground.local_to_map(room.ground.to_local(item.global_position))
+			on_floor = on_floor and room.ground.get_cell_source_id(cell) != -1 and room.walls.get_cell_source_id(cell) == -1
+	_check(on_floor, "Capítulos 3-5: los cristales y pergaminos de las salas están sobre piso")
+	# Los gemelos aceptan los dos números en cualquier orden
+	game.data.use_chapter(4)
+	game.load_chamber(2)
+	await _wait(0.2)
+	var twins := (game.level as RoundsLevel).machine
+	var flipped := "def factorizar(b, c):\n    for p in range(10, -11, -1):\n        q = b - p\n        if p * q == c:\n            return [p, q]\n"
+	_check(twins.evaluate(flipped, sandbox).success, "Raíces Gemelas: da igual el orden de [p, q]")
+	# Vencer a la Sombra del Sol Negro termina el juego
+	game.reached = 4
+	await game.chapter_done()
+	await _wait(0.3)
+	_check(game.machine.current is EndState and game.machine.current._key == "ending_final" and game.reached == 5, "Final: vencer a la Sombra del Sol Negro termina el juego")
 	game.quests.reset()
 	game.data.use_chapter(0)

@@ -3,6 +3,7 @@ class_name ThroneLevel
 extends ChamberLevel
 
 const POTION := preload("res://scenes/objetos/pocion.tscn")
+const TINT := preload("res://assets/efectos/tinte.gdshader")
 
 ## Donde puede caer el pisotón.
 @export var arena := Rect2(48, 56, 400, 250)
@@ -19,7 +20,10 @@ func wire() -> void:
 	boss.setup(_game.bus, alarm, _game.data.setting("boss", {}))
 	boss.title = String(data.get("boss_name", _game.data.message("boss_name")))
 	if data.has("boss_tint"):
-		boss.modulate = Color(String(data.boss_tint))
+		var paint := ShaderMaterial.new()
+		paint.shader = TINT
+		paint.set_shader_parameter("tint", Color(String(data.boss_tint)))
+		boss.sprite.material = paint
 	_quiz = BossQuiz.new(_game.data.message, (data.get("quiz", {}) as Dictionary).get("problems", {}))
 	objective_key = String(data.get("tunnel_objective_key", objective_key))
 	boss.hold_while = _game.dialog.is_open

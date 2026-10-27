@@ -15,7 +15,8 @@
 		"quality": 1,
 		"full": false,
 		"text": 1,
-		"shake": true
+		"shake": true,
+		"pad": 1
 	},
 	"movement": {
 		"walk_speed": 72.0,
@@ -208,10 +209,30 @@
 	"touch_codex_zoom": 1.45,
 	"touch_machine_zoom": 1.3,
 	"skills": [
-		{"id": "vida", "name": "VIDA", "max": 3, "desc": "+1 corazón por nivel."},
-		{"id": "fuerza", "name": "FUERZA", "max": 2, "desc": "El garrote golpea más fuerte: +1 de daño por nivel."},
-		{"id": "aliento", "name": "ALIENTO", "max": 2, "desc": "+50 % de energía para correr y saltar por nivel."},
-		{"id": "pensar", "name": "TIEMPO DE PENSAR", "max": 3, "desc": "+5 segundos por nivel en las preguntas de los jefes."}
+		{
+			"id": "vida",
+			"name": "VIDA",
+			"max": 3,
+			"desc": "+1 corazón por nivel."
+		},
+		{
+			"id": "fuerza",
+			"name": "FUERZA",
+			"max": 2,
+			"desc": "El garrote golpea más fuerte: +1 de daño por nivel."
+		},
+		{
+			"id": "aliento",
+			"name": "ALIENTO",
+			"max": 2,
+			"desc": "+50 % de energía para correr y saltar por nivel."
+		},
+		{
+			"id": "pensar",
+			"name": "TIEMPO DE PENSAR",
+			"max": 3,
+			"desc": "+5 segundos por nivel en las preguntas de los jefes."
+		}
 	],
 	"combat": {
 		"hearts": 5,

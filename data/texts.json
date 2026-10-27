@@ -91,6 +91,17 @@
 			"help": "También con F11."
 		},
 		{
+			"key": "pad",
+			"label": "MOVERSE (CELULAR)",
+			"type": "choice",
+			"options": [
+				"PALANCA",
+				"CRUCETA"
+			],
+			"touch_only": true,
+			"help": "Palanca: aparece donde pones el dedo y mueve en todas las direcciones. Cruceta: fija abajo a la izquierda, cuatro direcciones."
+		},
+		{
 			"key": "",
 			"label": "VOLVER",
 			"type": "back",
@@ -372,7 +383,67 @@
 		"function_error": "{call} falló: {error}",
 		"function_right": "¡La función {name} da los resultados correctos!",
 		"function_status": "El atril prueba {name}...",
-		"practice_flag_pick": "Esa no es la mina. Mira otra vez el número que brilla."
+		"practice_flag_pick": "Esa no es la mina. Mira otra vez el número que brilla.",
+		"prompt_look": "Mirar",
+		"dungeon_done": "Ya venciste al guardián de estas ruinas. El camino sigue por otro lado.",
+		"barrier_forest": [
+			"Rocas enormes tapan el camino del este. Dicen que se abrirán cuando el templo despierte del todo."
+		],
+		"barrier_cave": [
+			"Rocas enormes tapan el camino del este. Se abrirán cuando venzas al Guardián del Bosque."
+		],
+		"barrier_lookout": [
+			"Rocas enormes tapan la salida del este. Se abrirán cuando venzas al Guardián de la Cueva."
+		],
+		"barrier_peak": [
+			"Rocas cubiertas de escarcha tapan el sendero del este. Se abrirán cuando venzas al Guardián de las Ruinas."
+		],
+		"objective_go_forest": "Sigue el camino del este hacia el Bosque",
+		"objective_go_cave": "Sigue el camino del este: lleva a la Cueva",
+		"objective_cave": "Entra a las ruinas de la Cueva (al norte)",
+		"objective_go_lookout": "Cruza la cueva hacia el este: sale al otro lado de la montaña",
+		"objective_lookout": "Entra a las Ruinas del Mural (al norte) o asómate al balcón",
+		"objective_go_peak": "Sube por el camino del este hacia la Cima",
+		"objective_peak": "Entra al templo de la Cima (al norte)",
+		"objective_pump": "Programa la Bomba: mientras el tanque tenga menos de 10, bombea",
+		"objective_mill": "Programa el Molino: moler(sacos) devuelve sacos × 3",
+		"objective_bells": "Programa las Campanas: toca cada nota de la partitura con un for",
+		"objective_scale": "Programa la Balanza: suma todas las pesas con un for",
+		"objective_twins": "Programa las Raíces: factorizar(b, c) devuelve [p, q]",
+		"objective_cave_tunnel": "Sigue hasta el claro del Guardián de la Cueva",
+		"objective_cave_boss": "Vence al Guardián de la Cueva",
+		"objective_cave_done": "El Guardián de la Cueva cayó",
+		"boss_cave_beaten": "¡El Guardián de la Cueva se apaga! La salida del este queda libre.",
+		"objective_ruins_tunnel": "Sigue hasta el salón del Guardián de las Ruinas",
+		"objective_ruins_boss": "Vence al Guardián de las Ruinas",
+		"objective_ruins_done": "El Guardián de las Ruinas cayó",
+		"boss_ruins_beaten": "¡El Guardián de las Ruinas se deshace en letras! El sendero a la Cima queda libre.",
+		"objective_peak_tunnel": "Sube al trono de la Cima",
+		"objective_peak_boss": "Vence a la Sombra del Sol Negro",
+		"objective_peak_done": "La Sombra del Sol Negro desapareció",
+		"boss_peak_beaten": "¡La Sombra del Sol Negro se deshace en luz! Aritma despierta.",
+		"pump_times": "bombear {n} veces",
+		"pump_wrong": "Ronda {round}: el tanque empezó en {n}. Tu programa hizo «{did}», pero debía «{want}».",
+		"mill_wrong": "Ronda {round}: el Molino llamó moler({n}). Tu función devolvió «{did}», pero debía devolver {want}.",
+		"bells_wrong": "Ronda {round}: la partitura era {n}. Tus campanas sonaron «{did}», pero debían sonar «{want}».",
+		"scale_wrong": "Ronda {round}: las pesas eran {n}. Tu programa puso «{did}», pero el total era {want}.",
+		"twins_wrong": "Ronda {round}: el polinomio era {n}. Tu función devolvió «{did}», pero los números eran {want}.",
+		"quiz_while_title": "while",
+		"quiz_while_value": "¿Qué imprime este programa?",
+		"quiz_while_times": "¿Cuántas veces se repite lo de adentro del while?",
+		"quiz_func_title": "Funciones con return",
+		"quiz_func_question": "¿Qué imprime este programa?",
+		"quiz_list_title": "Listas",
+		"quiz_list_question": "¿Qué imprime? (la primera posición de una lista es la 0)",
+		"quiz_for_title": "for",
+		"quiz_for_question": "¿Qué imprime este programa?",
+		"ending_final_title": "¡Aritma despierta!",
+		"ending_final": [
+			"La Sombra del Sol Negro se deshace en luz y, por primera vez en siglos, las máquinas de Aritma vuelven a zumbar.",
+			"Desde la Cima, Tala ve encenderse una por una las ruinas del valle: la Cueva, el Mirador, el Bosque y el templo de Raíz.",
+			"El Códice brilla en su brazo. Ya no es solo un objeto: es todo lo que aprendió en el camino.",
+			"FIN. Gracias por jugar Paredes Vivas."
+		]
 	},
 	"credits": [
 		"Desarrollador:",
@@ -525,12 +596,32 @@
 		"objective_filter_tunnel": "Cruza el pasillo: los fosos solo se saltan corriendo (CORRER + SALTO)",
 		"objective_lock_tunnel": "Cruza el pasillo: los fosos solo se saltan corriendo (CORRER + SALTO)",
 		"codex_run_button": "EJECUTAR",
-		"prompt_board": "Destapar"
+		"prompt_board": "Destapar",
+		"objective_rounds_tunnel": "Cruza el pasillo: los fosos solo se saltan con CORRER + SALTO"
 	},
 	"touch_chambers": {
-		"bridge": {"intro": {"1": "Usa el atril (USAR). Aquí aparece el if: «if peso > 10:» pregunta algo, y las líneas de abajo, más a la derecha, solo se cumplen si la respuesta es sí.", "3": "INSCRIPCIÓN: Dos guardianes de piedra vigilan el puente. Cada código rechazado despierta a más. Golpéalos con el garrote (GOLPE)."}, "tunnel_intro": {"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."}},
-		"garden": {"intro": {"1": "Usa el atril (USAR). Ahora el if tiene compañero: else. Si la pregunta del if dice que no, se cumple lo que está debajo del else. Siempre pasa una de las dos."}, "tunnel_intro": {"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."}},
-		"throne_forest": {"intro": {"2": "Pelea igual que el anterior: golpéalo con GOLPE y esquiva su pisotón. Cuando se cubra con su escudo te preguntará qué imprime un if: toca la respuesta. Tienes 20 segundos."}},
+		"bridge": {
+			"intro": {
+				"1": "Usa el atril (USAR). Aquí aparece el if: «if peso > 10:» pregunta algo, y las líneas de abajo, más a la derecha, solo se cumplen si la respuesta es sí.",
+				"3": "INSCRIPCIÓN: Dos guardianes de piedra vigilan el puente. Cada código rechazado despierta a más. Golpéalos con el garrote (GOLPE)."
+			},
+			"tunnel_intro": {
+				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
+			}
+		},
+		"garden": {
+			"intro": {
+				"1": "Usa el atril (USAR). Ahora el if tiene compañero: else. Si la pregunta del if dice que no, se cumple lo que está debajo del else. Siempre pasa una de las dos."
+			},
+			"tunnel_intro": {
+				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
+			}
+		},
+		"throne_forest": {
+			"intro": {
+				"2": "Pelea igual que el anterior: golpéalo con GOLPE y esquiva su pisotón. Cuando se cubra con su escudo te preguntará qué imprime un if: toca la respuesta. Tienes 20 segundos."
+			}
+		},
 		"lock": {
 			"intro": {
 				"1": "Usa el atril (USAR). Un programa se lee de arriba abajo, una línea tras otra: primero guarda el número en una variable, después cámbiala y al final úsala.",
@@ -565,6 +656,66 @@
 			"intro": {
 				"2": "Golpéalo con GOLPE. Cuando el círculo rojo marque su pisotón, sal corriendo o toca SALTO. Los orbes se esquivan o se deshacen con el garrote.",
 				"3": "Cada vez que pierda una cuarta parte de su vida se cubrirá con un escudo y te pondrá a prueba con un problema: tienes 20 segundos (toca la respuesta). Si aciertas, el escudo cae; si fallas, llamará a sus guardianes."
+			}
+		},
+		"pump": {
+			"intro": {
+				"1": "Usa el atril (USAR). Aquí aparece while: «while tanque.nivel() < 10:» repite lo de abajo, una y otra vez, MIENTRAS la respuesta sea sí. Cuando el tanque llega a 10, para solo.",
+				"3": "INSCRIPCIÓN: Guardianes de piedra vigilan la Bomba. Cada código rechazado despierta a más. Golpéalos con el garrote (GOLPE)."
+			},
+			"tunnel_intro": {
+				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
+			}
+		},
+		"mill": {
+			"intro": {
+				"1": "Usa el atril (USAR). El Molino no lee órdenes sueltas: llama a tu función moler(sacos) y espera que le DEVUELVAS el número de bolsas con return.",
+				"3": "INSCRIPCIÓN: Guardianes de piedra vigilan el Molino. Cada código rechazado despierta a más. Golpéalos con el garrote (GOLPE)."
+			},
+			"tunnel_intro": {
+				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
+			}
+		},
+		"bells": {
+			"intro": {
+				"1": "Usa el atril (USAR). partitura.leer() te da una LISTA, como [3, 1, 4]. Con «for n in notas:» lo de abajo se repite una vez por cada nota, y n vale esa nota.",
+				"3": "INSCRIPCIÓN: Guardianes de piedra vigilan las Campanas. Cada código rechazado despierta a más. Golpéalos con el garrote (GOLPE)."
+			},
+			"tunnel_intro": {
+				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
+			}
+		},
+		"scale": {
+			"intro": {
+				"1": "Usa el atril (USAR). Empieza con total = 0 y, con un for, súmale cada pesa. Al final, fuera del for, pon el total en la balanza.",
+				"3": "INSCRIPCIÓN: Guardianes de piedra vigilan la Balanza. Cada código rechazado despierta a más. Golpéalos con el garrote (GOLPE)."
+			},
+			"tunnel_intro": {
+				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
+			}
+		},
+		"twins": {
+			"intro": {
+				"1": "Ejemplo: x² + 5x + 6 → 2 + 3 = 5 y 2 · 3 = 6, así que factorizar(5, 6) devuelve [2, 3].",
+				"3": "INSCRIPCIÓN: Guardianes de piedra vigilan los árboles. Cada código rechazado despierta a más. Golpéalos con el garrote (GOLPE)."
+			},
+			"tunnel_intro": {
+				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
+			}
+		},
+		"throne_cave": {
+			"intro": {
+				"2": "Pelea igual que antes: golpéalo con GOLPE y esquiva su pisotón. Cuando se cubra con su escudo te preguntará por un while. Toca la respuesta. Tienes 20 segundos."
+			}
+		},
+		"throne_ruins": {
+			"intro": {
+				"2": "Golpéalo con GOLPE y esquiva su pisotón. Cuando se cubra con su escudo te preguntará qué imprime una función. Toca la respuesta. Tienes 20 segundos."
+			}
+		},
+		"throne_peak": {
+			"intro": {
+				"2": "Golpéala con GOLPE y esquiva su pisotón. Cuando se cubra con su escudo te preguntará por listas y por for. Toca la respuesta. Tienes 20 segundos."
 			}
 		}
 	},

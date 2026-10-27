@@ -1,4 +1,4 @@
-## Controles del celular: palanca a la izquierda y botones a la derecha.
+## Controles del celular: palanca o cruceta a la izquierda y botones a la derecha.
 ## Cada estado dice qué necesita (touch_buttons, touch_stick, touch_tap, touch_keys).
 ## Un botón puede traer otra etiqueta: "cancel:skip" usa el texto "skip" de touch_names.
 ## Los botones mandan las mismas acciones que el teclado: el resto del juego no cambia.
@@ -6,6 +6,7 @@ class_name TouchControls
 extends Control
 
 const STICK_RADIUS := 120.0
+const PAD_ARM := 78.0    # tamaño de cada brazo de la cruceta
 const DEAD := 0.2
 const KEY_SIZE := 112.0
 const KEY_GAP := 14.0
@@ -105,7 +106,24 @@ func _key_at(point: Vector2) -> String:
 
 
 func _stick_zone(point: Vector2) -> bool:
-	return _state != null and _state.touch_stick() and point.x < size.x * 0.45 and point.y > size.y * 0.3
+	if _state == null or not _state.touch_stick():
+		return false
+	if _pad():
+		return point.distance_to(_stick_rest()) < PAD_ARM * 2.6
+	return point.x < size.x * 0.45 and point.y > size.y * 0.3
+
+
+## Ajustes → MOVERSE: 1 = cruceta fija.
+func _pad() -> bool:
+	return game.settings.get_int("pad") == 1
+
+
+## Dirección de la cruceta según dónde está el dedo (cuatro direcciones).
+func _pad_dir(point: Vector2) -> Vector2:
+	var d := point - _stick_rest()
+	if d.length() < 16.0:
+		return Vector2.ZERO
+	return Vector2(signf(d.x), 0) if absf(d.x) > absf(d.y) else Vector2(0, signf(d.y))
 
 
 func _stick_rest() -> Vector2:
@@ -165,6 +183,8 @@ func _finger_down(finger: int, point: Vector2) -> bool:
 		_stick_finger = finger
 		_stick_base = point
 		_stick = Vector2.ZERO
+		if _pad():
+			_move(_pad_dir(point))
 		return true
 	var tap: String = _state.touch_tap()
 	if tap != "":
@@ -190,6 +210,9 @@ func _finger_up(finger: int) -> bool:
 func _finger_move(finger: int, point: Vector2) -> bool:
 	if finger != _stick_finger:
 		return false
+	if _pad():
+		_move(_pad_dir(point))
+		return true
 	var offset := (point - _stick_base).limit_length(STICK_RADIUS * 1.6)
 	# Si el dedo se pasa del borde, la palanca lo sigue
 	if offset.length() > STICK_RADIUS:
@@ -244,7 +267,7 @@ func _draw() -> void:
 	if game == null or _state == null:
 		return
 	if _state.touch_stick():
-		_draw_stick()
+		_draw_pad() if _pad() else _draw_stick()
 	for entry in _buttons():
 		_draw_button(entry)
 	var keys: Array = _state.touch_keys()
@@ -262,6 +285,22 @@ func _draw_stick() -> void:
 	_ui.arc(base, STICK_RADIUS, 0, TAU, Color(UIKit.CYAN, 0.55 if active else 0.25), 3.0)
 	var knob := base + _stick * STICK_RADIUS
 	draw_circle(knob, 52, Color(UIKit.GOLD if _running else UIKit.CYAN, 0.55 if active else 0.25))
+
+
+func _draw_pad() -> void:
+	var c := _stick_rest()
+	var a := PAD_ARM
+	for dir in [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]:
+		var held: bool = _stick_finger >= 0 and _stick.normalized().is_equal_approx(dir)
+		var r := Rect2(c + dir * a - Vector2(a, a) / 2.0, Vector2(a, a))
+		_ui.rect(r, Color(UIKit.GOLD if _running else UIKit.CYAN, 0.45) if held else Color(0.04, 0.055, 0.08, 0.4))
+		_ui.frame(r, Color(UIKit.CYAN, 0.6 if held else 0.35), 2.5)
+		# Flecha
+		var tip: Vector2 = r.get_center() + dir * a * 0.22
+		var side := Vector2(-dir.y, dir.x) * a * 0.2
+		draw_colored_polygon(PackedVector2Array([tip, tip - dir * a * 0.3 + side, tip - dir * a * 0.3 - side]), Color(UIKit.TEXT, 0.85 if held else 0.55))
+	var mid := Rect2(c - Vector2(a, a) / 2.0, Vector2(a, a))
+	_ui.rect(mid, Color(0.04, 0.055, 0.08, 0.4))
 
 
 func _draw_button(entry: String) -> void:

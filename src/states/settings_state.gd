@@ -11,7 +11,8 @@ var _return_to := "menu"
 
 func _init(context) -> void:
 	super(context)
-	_rows = game.data.texts.get("settings_rows", [])
+	# Las filas del celular solo se ven en el celular
+	_rows = game.data.texts.get("settings_rows", []).filter(func(r): return game.data.touch or not r.get("touch_only", false))
 
 
 func enter(params: Dictionary = {}) -> void:

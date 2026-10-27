@@ -44,16 +44,26 @@ puntos seguros, fosos, máquinas).
 
 ## Capítulos
 El mundo se divide en 5 capítulos (`data/chambers.json`, "chapters"). Cada uno enseña un tema y
-termina con su jefe. Por ahora se juegan el 1 y el 2; la Criba y el Mural esperan en el 3 y el 4. Al vencer al jefe de un
-capítulo, Tala llega al mapa del siguiente (`hub` en el JSON).
+termina con su jefe.
 
-| Capítulo | Tema | Salas |
-|---|---|---|
-| 1. El Templo de Aritma | instrucciones en orden, métodos y variables (sin bucles) | Compuerta, Faro, Figuras, Sendero, Trono (jefe) |
-| 2. El Bosque | if / else | Puente, Jardín, Claro del Guardián (jefe) |
-| 3. La Cueva | while | Criba (y sale al mirador) |
-| 4. Las Ruinas del Mural | funciones con return | Mural |
-| 5. La Cima | for y listas | (por hacer, jefe final) |
+| Capítulo | Mapa | Tema | Salas |
+|---|---|---|---|
+| 1. El Templo de Aritma | Raíz (`pueblo.tscn`) | instrucciones en orden, métodos y variables (sin bucles) | Compuerta, Faro, Figuras, Sendero, Trono (jefe) |
+| 2. El Bosque | `bosque.tscn` | if / else | Puente, Jardín, Claro del Guardián (jefe) |
+| 3. La Cueva | `cueva.tscn` | while | Bomba, Criba, Claro de Cristal (jefe) |
+| 4. El Mirador | `mirador.tscn` | funciones con return | Molino, Mural, Salón del Mural (jefe) |
+| 5. La Cima | `cima.tscn` | for y listas | Campanas, Balanza, Raíces Gemelas, Trono de la Cima (jefe final) |
+
+## El mundo
+Los mapas están unidos por sus bordes, como en Pokémon o Survival RPG: Raíz → Bosque → Cueva →
+Mirador → Cima, siempre hacia el este (`data/chambers.json`, "maps"). El paso a cada zona nueva
+está tapado por **rocas** que se derrumban al vencer al jefe del capítulo anterior; se puede volver
+atrás cuando se quiera. Cada mapa tiene su templo (la entrada a sus salas); un templo ya vencido
+no se vuelve a abrir. En el Mirador, el **balcón** del sur muestra todo el valle.
+
+- `src/world/map_exit.gd`: zona del borde que lleva al mapa vecino (`target`, `entry`).
+- `src/world/barrier.gd` + `scenes/objetos/rocas.tscn`: rocas con `need` (capítulo que las abre).
+- `tools/crear_mundo.gd`: genera los 5 mapas (`godot --headless -s tools/crear_mundo.gd`).
 
 ## Las salas del capítulo 1
 | Sala | Máquina | Qué hay que hacer | Después |
@@ -64,9 +74,6 @@ capítulo, Tala llega al mapa del siguiente (`hub` en el JSON).
 | 4. La Singularidad del Cero | — | Sin código: cruzar el abismo por losas numeradas pisando solo las que cumplen la regla (múltiplos de 3 o de 4, al azar) | Una losa mala se rompe y Tala cae (−½ corazón); la losa queda rota. Tomar el núcleo lleva al Trono. |
 | 5. El Trono del Cero | — | Nada: es el **jefe del capítulo 1**, el Guardián del Cero (tengu rojo) | 16 de vida en 4 fases. Ráfaga de orbes, pisotón con círculo rojo (salir o saltar con ESPACIO; −1 corazón). Al perder cada cuarta parte se cubre con un escudo y pone un **problema** sin bucles (cuánto vale una variable, en qué orden van las líneas, par/impar después de calcular; 20 s): si aciertas cae el escudo; si fallas llama 4, 5 o 6 guardianes. Al caer el escudo deja una **poción**. Si Tala cae, el jefe vuelve a vida llena. Vencerlo cierra el capítulo 1. |
 
-Salas guardadas para otros capítulos: **la Criba** (separar pares e impares con while + if, capítulo 3)
-y **el Mural de la Incógnita** (`despejar(a, b, c)` con return, capítulo 4).
-
 ## Las salas del capítulo 2
 Se entra por las ruinas al norte de `bosque.tscn`. Cada sala prueba el programa en 3 rondas con números distintos.
 
@@ -75,6 +82,28 @@ Se entra por las ruinas al norte de `bosque.tscn`. Cada sala prueba el programa 
 | 1. El Puente Colgante | Puente | `peso = carreta.peso()`, `if peso > 10:` → `puente.reforzar()` |
 | 2. El Jardín de las Macetas | Maceta | `agua = maceta.medir()`, `if agua < 5:` → `maceta.regar()`, `else:` → `maceta.asolear()` |
 | 3. El Claro del Guardián | — | Jefe del capítulo 2: el Guardián del Bosque. Sus problemas son de if y de if/else (qué imprime). |
+
+## Las salas del capítulo 3
+| Sala | Máquina | Qué hay que hacer |
+|---|---|---|
+| 1. La Bomba de la Cueva | Bomba | `while tanque.nivel() < 10:` → `bomba.bombear()` (el tanque empieza distinto cada ronda y debe quedar justo en 10) |
+| 2. El Filtro de la Dualidad | Criba | `while tolva.quedan() > 0:` soltar cada esfera; si es par al Cáliz, si no al Crisol |
+| 3. El Claro de Cristal | — | Jefe: el Guardián de la Cueva (morado). Pregunta cuántas veces se repite un while y qué imprime. |
+
+## Las salas del capítulo 4
+| Sala | Máquina | Qué hay que hacer |
+|---|---|---|
+| 1. El Molino de la Montaña | Molino | `def moler(sacos):` → `return sacos * 3` |
+| 2. El Mural de la Incógnita | Mural | `def despejar(a, b, c):` → `return (c - b) / a` |
+| 3. El Salón del Mural | — | Jefe: el Guardián de las Ruinas (dorado). Pregunta qué devuelve una función (también una dentro de otra). |
+
+## Las salas del capítulo 5
+| Sala | Máquina | Qué hay que hacer |
+|---|---|---|
+| 1. Las Campanas de la Cima | Campanas | `notas = partitura.leer()`, `for n in notas:` → `campana.tocar(n)` |
+| 2. La Balanza de las Pesas | Balanza | `total = 0`, `for p in pesas.lista():` → `total = total + p`, y fuera del for `balanza.poner(total)` |
+| 3. Las Raíces Gemelas | Gemelas | `def factorizar(b, c):` prueba `p` de −10 a 10 con `q = b - p` y devuelve `[p, q]` cuando `p * q == c` |
+| 4. El Trono de la Cima | — | Jefe final: la Sombra del Sol Negro. Pregunta por listas, for y for sobre listas. Vencerla termina el juego. |
 
 ## Misiones secundarias
 Están en `data/quests.json`. Los personajes con misión tienen un **«!»** sobre la cabeza (y **«?»** si
@@ -89,6 +118,11 @@ Cada misión cumplida da **1 punto de habilidad**.
 | Brasa | Raíz | encontrar 3 engranajes de bronce escondidos en las salas 1, 2 y 3 | 1 punto |
 | Ramas | Bosque | 3 preguntas de if / else | 1 punto |
 | Lía | Bosque | encontrar 3 hongos azules (uno en el bosque, uno en cada sala) | 1 punto |
+| Grava | Cueva | 3 preguntas de while | 1 punto |
+| Perla | Cueva | encontrar 3 cristales violetas (uno en la cueva, uno en la Bomba y uno en la Criba) | 1 punto |
+| Pluma | Mirador | 3 preguntas de qué devuelve una función | 1 punto |
+| Vigía | Mirador | encontrar 3 pergaminos (uno en el mirador, uno en el Molino y uno en el Mural) | 1 punto |
+| Eco | Cima | 3 preguntas de listas y for | 1 punto |
 
 Las preguntas de las misiones usan el mismo cuadro que el jefe, pero sin castigo: si fallas,
 vuelves a hablar con el personaje. Los engranajes cuentan aunque no hayas hablado con Brasa.
@@ -106,6 +140,9 @@ Las misiones dan 1 punto y cada jefe da 2. Se gastan en **pausa → HABILIDADES*
 ## En el celular
 El Códice se abre a pantalla completa y más grande (`touch_codex_zoom`), y la cámara se acerca a la
 máquina mientras prueba el programa (`touch_machine_zoom`). En el PC se prueba con `-- --tactil`.
+
+Para moverse hay dos controles, a elegir en **Ajustes → MOVERSE (CELULAR)**: la **palanca** que
+aparece donde se toca la mitad izquierda de la pantalla, o la **cruceta** fija de 4 direcciones.
 
 ## Guardianes y corazones
 - Cada vez que una máquina rechaza el código (también por un error de escritura) sube la
@@ -130,5 +167,5 @@ máquina mientras prueba el programa (`touch_machine_zoom`). En el PC se prueba 
 ## Pruebas automáticas
 ```
 godot --path . -- --selftest                       # pruebas de reglas y del recorrido completo
-godot --path . -- --recorrido=/carpeta[:sala2|:sala3|:sala4|:sala5|:jefe|:compuerta|:misiones|:bosque]  # capturas del camino del jugador
+godot --path . -- --recorrido=/carpeta[:sala2|:sala3|:sala4|:sala5|:jefe|:compuerta|:misiones|:bosque|:mundo|:celular]  # capturas del camino del jugador
 ```

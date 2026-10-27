@@ -135,7 +135,7 @@
 		"scene": "res://scenes/practicas/practica_4_funciones.tscn",
 		"title": "Funciones con return",
 		"intro": [
-			"INSCRIPCIÓN: El Mural pide una función: un pedazo de programa que recibe números y DEVUELVE un resultado con return.",
+			"INSCRIPCIÓN: Las máquinas de las ruinas piden funciones: un pedazo de programa que recibe números y DEVUELVE un resultado con return.",
 			"Practica aquí con funciones más fáciles."
 		],
 		"steps": [
@@ -244,7 +244,7 @@
 			}
 		],
 		"done": [
-			"¡Bien! El Mural llama a despejar(a, b, c) igual que este atril llamó a tus funciones."
+			"¡Bien! El Molino llama a moler(sacos) igual que este atril llamó a tus funciones."
 		]
 	},
 	"buscaminas": {

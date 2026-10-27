@@ -23,35 +23,143 @@
 	},
 	"chapters": [
 		{
-			"name": "Capítulo 1: El Templo de Aritma", "topic": "instrucciones en orden, métodos y variables",
+			"name": "Capítulo 1: El Templo de Aritma",
+			"topic": "instrucciones en orden, métodos y variables",
 			"goal": "Supera las salas del templo y vence al Guardián del Cero",
-			"chambers": ["lock", "vortex", "figures", "core", "throne"],
-			"ending": "ending_won",
+			"chambers": [
+				"lock",
+				"vortex",
+				"figures",
+				"core",
+				"throne"
+			],
 			"outro": [
-				"El Guardián del Cero se deshace en chispas rojas. Detrás del trono, una puerta de bronce se abre al otro lado de la montaña.",
-				"Tala baja por un sendero entre árboles enormes: es el Bosque de Aritma. Al fondo, otras ruinas esperan.",
-				"CAPÍTULO 2: EL BOSQUE. Aquí las máquinas deciden solas: aprenderás if y else."
+				"El Guardián del Cero se deshace en chispas rojas y Tala sale del templo con el núcleo en las manos.",
+				"Un temblor recorre el pueblo: al este, las rocas que cerraban el camino se desmoronan. Detrás empieza el Bosque de Aritma.",
+				"CAPÍTULO 2: EL BOSQUE. Allí las máquinas deciden solas: aprenderás if y else. Sigue el camino del este."
+			],
+			"map": "pueblo"
+		},
+		{
+			"name": "Capítulo 2: El Bosque",
+			"topic": "if / else",
+			"goal": "Cruza las ruinas del Bosque y vence al Guardián del Bosque",
+			"chambers": [
+				"bridge",
+				"garden",
+				"throne_forest"
+			],
+			"map": "bosque",
+			"outro": [
+				"El Guardián del Bosque se hunde entre las raíces y el claro se llena de luciérnagas.",
+				"Al este del bosque caen las rocas que tapaban el sendero: lleva a una cueva que atraviesa la montaña.",
+				"CAPÍTULO 3: LA CUEVA. Allí las máquinas repiten y repiten: aprenderás while."
 			]
 		},
 		{
-			"name": "Capítulo 2: El Bosque", "topic": "if / else",
-			"goal": "Cruza las ruinas del Bosque y vence al Guardián del Bosque",
-			"chambers": ["bridge", "garden", "throne_forest"],
-			"ending": "ending_chapter2",
-			"hub": {
-				"scene": "res://scenes/niveles/bosque.tscn",
-				"name": "El Bosque de Aritma",
-				"objective_key": "objective_forest",
-				"sign": [
-					"LETRERO: Las máquinas del Bosque deciden solas. Para eso se usa if: «if agua < 5:» pregunta algo, y lo que va debajo, más a la derecha, solo pasa si la respuesta es sí.",
-					"LETRERO: Con else se dice qué hacer cuando la respuesta es no. Siempre pasa una de las dos: o lo del if, o lo del else."
-				]
-			}
+			"name": "Capítulo 3: La Cueva",
+			"topic": "while",
+			"goal": "Cruza la Cueva de Cristal y vence a su Guardián",
+			"map": "cueva",
+			"chambers": [
+				"pump",
+				"filter",
+				"throne_cave"
+			],
+			"outro": [
+				"El Guardián de la Cueva se apaga como un cristal sin luz.",
+				"Por el este entra aire frío: las rocas cayeron y la cueva sale al otro lado de la montaña.",
+				"CAPÍTULO 4: EL MIRADOR. Las máquinas de las ruinas piden funciones con return."
+			]
 		},
-		{"name": "Capítulo 3: La Cueva", "topic": "while", "chambers": ["filter"]},
-		{"name": "Capítulo 4: Las Ruinas del Mural", "topic": "funciones con return", "chambers": ["roots"]},
-		{"name": "Capítulo 5: La Cima", "topic": "for y listas", "chambers": []}
+		{
+			"name": "Capítulo 4: El Mirador",
+			"topic": "funciones con return",
+			"goal": "Supera las Ruinas del Mural y vence a su Guardián",
+			"map": "mirador",
+			"chambers": [
+				"mill",
+				"roots",
+				"throne_ruins"
+			],
+			"outro": [
+				"El Guardián de las Ruinas se rompe en letras doradas que el viento se lleva.",
+				"Al este, las rocas se deshacen y aparece un sendero blanco que sube a la Cima.",
+				"CAPÍTULO 5: LA CIMA. La última ruina: allí se trabaja con for y con listas."
+			]
+		},
+		{
+			"name": "Capítulo 5: La Cima",
+			"topic": "for y listas",
+			"goal": "Llega al templo de la Cima y vence a la Sombra del Sol Negro",
+			"map": "cima",
+			"chambers": [
+				"bells",
+				"scale",
+				"twins",
+				"throne_peak"
+			],
+			"ending": "ending_final"
+		}
 	],
+	"maps": {
+		"pueblo": {
+			"name": "Pueblo de Raíz",
+			"chapter": 0,
+			"done_objective_key": "objective_go_forest"
+		},
+		"bosque": {
+			"scene": "res://scenes/niveles/bosque.tscn",
+			"name": "El Bosque de Aritma",
+			"chapter": 1,
+			"objective_key": "objective_forest",
+			"done_objective_key": "objective_go_cave",
+			"sign": [
+				"LETRERO: Las máquinas del Bosque deciden solas. Para eso se usa if: «if agua < 5:» pregunta algo, y lo que va debajo, más a la derecha, solo pasa si la respuesta es sí.",
+				"LETRERO: Con else se dice qué hacer cuando la respuesta es no. Siempre pasa una de las dos: o lo del if, o lo del else."
+			]
+		},
+		"cueva": {
+			"scene": "res://scenes/niveles/cueva.tscn",
+			"name": "La Cueva de Cristal",
+			"chapter": 2,
+			"objective_key": "objective_cave",
+			"done_objective_key": "objective_go_lookout",
+			"sign": [
+				"LETRERO: Las máquinas de la Cueva repiten. Para eso se usa while: «while tanque.nivel() < 10:» repite lo de abajo, una y otra vez, MIENTRAS la pregunta diga que sí.",
+				"LETRERO: Ojo: si lo de adentro nunca cambia la respuesta, el while no termina nunca. El Códice lo detiene y te avisa."
+			]
+		},
+		"mirador": {
+			"scene": "res://scenes/niveles/mirador.tscn",
+			"name": "El Mirador",
+			"chapter": 3,
+			"objective_key": "objective_lookout",
+			"done_objective_key": "objective_go_peak",
+			"sign": [
+				"LETRERO: Las Ruinas del Mural guardan máquinas que piden funciones. «def moler(sacos):» crea una función, y «return» le devuelve el resultado a quien la llamó.",
+				"LETRERO: print solo escribe en la consola. return entrega el número: eso es lo que recibe la máquina."
+			],
+			"view_sign": [
+				"LETRERO: «Desde aquí se ve todo Aritma». Asómate al borde del balcón."
+			],
+			"view": [
+				"Desde el balcón se ve todo el valle: el bosque, el río y, muy lejos, los techos del pueblo de Raíz.",
+				"Al este, una montaña blanca sube entre las nubes. En su cima brilla una luz cian: la última ruina de Aritma.",
+				"Allá arriba espera lo que queda del Sol Negro. Pero antes están las Ruinas del Mural, al norte: sus máquinas piden funciones."
+			]
+		},
+		"cima": {
+			"scene": "res://scenes/niveles/cima.tscn",
+			"name": "La Cima de Aritma",
+			"chapter": 4,
+			"objective_key": "objective_peak",
+			"sign": [
+				"LETRERO: En la Cima las máquinas trabajan con LISTAS: [3, 1, 4] son varios números guardados juntos, en orden.",
+				"LETRERO: «for n in notas:» repite lo de abajo una vez por cada número de la lista. En cada vuelta, n vale el número que sigue."
+			]
+		}
+	},
 	"chambers": [
 		{
 			"name": "La Compuerta del Nivel",
@@ -241,9 +349,6 @@
 				"return (c - b) / a",
 				"return (c + b) / a",
 				"return (c - b) * a"
-			],
-			"practices": [
-				"funciones"
 			]
 		},
 		{
@@ -370,23 +475,68 @@
 			"kind": "throne",
 			"quiz": {
 				"seconds": 20,
-				"kinds": ["variable", "orden", "paridad"],
+				"kinds": [
+					"variable",
+					"orden",
+					"paridad"
+				],
 				"problems": {
-					"variable": {"min_lines": 2, "max_lines": 3, "max_start": 9, "options": 4},
+					"variable": {
+						"min_lines": 2,
+						"max_lines": 3,
+						"max_start": 9,
+						"options": 4
+					},
 					"orden": {
 						"options": 4,
 						"programs": [
-							["n = 3", "doble = n * 2", "print(doble)"],
-							["lado = 4", "area = lado * lado", "print(area)"],
-							["precio = 5", "total = precio + 2", "print(total)"],
-							["a = 6", "b = a - 1", "print(b)"],
-							["x = 2", "x = x + 5", "print(x)"],
-							["llaves = 1", "llaves = llaves * 3", "print(llaves)"]
+							[
+								"n = 3",
+								"doble = n * 2",
+								"print(doble)"
+							],
+							[
+								"lado = 4",
+								"area = lado * lado",
+								"print(area)"
+							],
+							[
+								"precio = 5",
+								"total = precio + 2",
+								"print(total)"
+							],
+							[
+								"a = 6",
+								"b = a - 1",
+								"print(b)"
+							],
+							[
+								"x = 2",
+								"x = x + 5",
+								"print(x)"
+							],
+							[
+								"llaves = 1",
+								"llaves = llaves * 3",
+								"print(llaves)"
+							]
 						]
 					},
-					"paridad": {"min_number": 11, "max_number": 99, "code_lines": 2},
-					"multiplo": {"min_divisor": 3, "max_divisor": 6, "min_factor": 3, "max_factor": 12, "options": 4},
-					"despejar": {"options": 4}
+					"paridad": {
+						"min_number": 11,
+						"max_number": 99,
+						"code_lines": 2
+					},
+					"multiplo": {
+						"min_divisor": 3,
+						"max_divisor": 6,
+						"min_factor": 3,
+						"max_factor": 12,
+						"options": 4
+					},
+					"despejar": {
+						"options": 4
+					}
 				}
 			},
 			"intro": [
@@ -530,6 +680,348 @@
 			"beaten_key": "boss_forest_beaten",
 			"tunnel_objective_key": "objective_forest_tunnel",
 			"done_objective_key": "objective_forest_done"
+		},
+		{
+			"name": "La Bomba de la Cueva",
+			"kind": "pump",
+			"file_name": "bomba.py",
+			"rounds": 3,
+			"limit": 10,
+			"objective_key": "objective_pump",
+			"wrong_key": "pump_wrong",
+			"solved_text": "¡El tanque quedó justo en 10 las tres veces! El while bombeó lo necesario y paró solo. El sello de la salida se abre.",
+			"starter_code": "# El tanque empieza con un nivel distinto en cada ronda.\n# MIENTRAS tenga menos de 10, bombea.\n# while repite lo de adentro hasta que la pregunta diga que no.\n\n",
+			"help": [
+				[
+					"while tanque.nivel() < 10:",
+					"repite lo de abajo mientras el tanque tenga menos de 10"
+				],
+				[
+					"    bomba.bombear()",
+					"sube el agua 1 (dentro del while, más a la derecha)"
+				],
+				[
+					"tanque.nivel()",
+					"cuánta agua tiene ahora el tanque"
+				],
+				[
+					"print(tanque.nivel())",
+					"muestra el nivel en la consola"
+				]
+			],
+			"blocks": [
+				"while tanque.nivel() < 10:",
+				"while tanque.nivel() > 10:",
+				"bomba.bombear()",
+				"print(tanque.nivel())"
+			],
+			"intro": [
+				"INSCRIPCIÓN: La Bomba llena el tanque de la cueva. Debe quedar justo en 10: ni una gota menos, ni una más.",
+				"Usa el atril (E). Aquí aparece while: «while tanque.nivel() < 10:» repite lo de abajo, una y otra vez, MIENTRAS la respuesta sea sí. Cuando el tanque llega a 10, para solo.",
+				"El tanque empieza en un nivel distinto en cada ronda: no sirve contar a mano cuántas veces bombear.",
+				"INSCRIPCIÓN: Guardianes de piedra vigilan la Bomba. Cada código rechazado despierta a más. Golpéalos con el garrote (J o clic)."
+			],
+			"tunnel_intro": [
+				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
+			]
+		},
+		{
+			"name": "El Claro de Cristal",
+			"kind": "throne",
+			"id": "throne_cave",
+			"quiz": {
+				"seconds": 20,
+				"kinds": [
+					"mientras_veces",
+					"mientras",
+					"mientras"
+				],
+				"problems": {
+					"mientras": {
+						"options": 4
+					},
+					"mientras_veces": {
+						"times": 1,
+						"options": 4
+					}
+				}
+			},
+			"intro": [
+				"Los cristales del techo se encienden de golpe y del más grande sale el Guardián de la Cueva.",
+				"EL GUARDIÁN DE LA CUEVA: «Aquí abajo todo se repite. ¿Sabrás cuándo parar?».",
+				"Pelea igual que antes: golpéalo con J o clic y esquiva su pisotón. Cuando se cubra con su escudo te preguntará por un while. Tienes 20 segundos.",
+				"Al entrar recuperas 2 corazones, y cada escudo que cae deja una poción."
+			],
+			"tunnel_intro": [
+				"INSCRIPCIÓN: Al fondo de la cueva, el claro del Guardián."
+			],
+			"boss_name": "EL GUARDIÁN DE LA CUEVA",
+			"boss_tint": "#c9a0ff",
+			"boss_objective_key": "objective_cave_boss",
+			"beaten_key": "boss_cave_beaten",
+			"tunnel_objective_key": "objective_cave_tunnel",
+			"done_objective_key": "objective_cave_done"
+		},
+		{
+			"name": "El Molino de la Montaña",
+			"kind": "mill",
+			"file_name": "molino.py",
+			"function": "moler",
+			"factor": 3,
+			"rounds": 3,
+			"objective_key": "objective_mill",
+			"wrong_key": "mill_wrong",
+			"practices": [
+				"funciones"
+			],
+			"solved_text": "¡El Molino recibió la harina justa las tres veces! Tu función devolvió el resultado con return. El sello de la salida se abre.",
+			"starter_code": "# El Molino llama a moler(sacos) con un número distinto en cada ronda.\n# Cada saco de trigo da 3 bolsas de harina.\n# Devuelve con return cuántas bolsas salen.\n\ndef moler(sacos):\n    \n",
+			"help": [
+				[
+					"def moler(sacos):",
+					"el Molino la llama; sacos es el número de sacos"
+				],
+				[
+					"    return sacos * 3",
+					"devuelve 3 bolsas por cada saco (dentro de la función)"
+				],
+				[
+					"print(sacos * 3)",
+					"solo escribe en la consola: el Molino no recibe nada"
+				]
+			],
+			"blocks": [
+				"def moler(sacos):",
+				"return sacos * 3",
+				"return sacos + 3",
+				"print(sacos * 3)"
+			],
+			"intro": [
+				"INSCRIPCIÓN: El Molino de la Montaña muele trigo. Cada saco da 3 bolsas de harina.",
+				"Usa el atril (E). El Molino no lee órdenes sueltas: llama a tu función moler(sacos) y espera que le DEVUELVAS el número de bolsas con return.",
+				"Te llamará con tres números distintos. print no sirve: solo escribe en la consola, no le entrega nada al Molino.",
+				"INSCRIPCIÓN: Guardianes de piedra vigilan el Molino. Cada código rechazado despierta a más. Golpéalos con el garrote (J o clic)."
+			],
+			"tunnel_intro": [
+				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
+			]
+		},
+		{
+			"name": "El Salón del Mural",
+			"kind": "throne",
+			"id": "throne_ruins",
+			"quiz": {
+				"seconds": 20,
+				"kinds": [
+					"funcion",
+					"funcion",
+					"funcion_doble"
+				],
+				"problems": {
+					"funcion": {
+						"options": 4
+					},
+					"funcion_doble": {
+						"nested": 1,
+						"options": 4
+					}
+				}
+			},
+			"intro": [
+				"Las letras del Mural se despegan de la pared y forman un cuerpo dorado: el Guardián de las Ruinas.",
+				"EL GUARDIÁN DE LAS RUINAS: «Una función recibe y devuelve. Veamos si sabes qué devuelve la mía».",
+				"Golpéalo con J o clic y esquiva su pisotón. Cuando se cubra con su escudo te preguntará qué imprime una función. Tienes 20 segundos.",
+				"Al entrar recuperas 2 corazones, y cada escudo que cae deja una poción."
+			],
+			"tunnel_intro": [
+				"INSCRIPCIÓN: Más allá del Mural, el salón de su Guardián."
+			],
+			"boss_name": "EL GUARDIÁN DE LAS RUINAS",
+			"boss_tint": "#ffd27a",
+			"boss_objective_key": "objective_ruins_boss",
+			"beaten_key": "boss_ruins_beaten",
+			"tunnel_objective_key": "objective_ruins_tunnel",
+			"done_objective_key": "objective_ruins_done"
+		},
+		{
+			"name": "Las Campanas de la Cima",
+			"kind": "bells",
+			"file_name": "campanas.py",
+			"rounds": 3,
+			"bells": 5,
+			"objective_key": "objective_bells",
+			"wrong_key": "bells_wrong",
+			"solved_text": "¡Las campanas tocaron las tres partituras sin un error! El for recorrió cada lista. El sello de la salida se abre.",
+			"starter_code": "# La partitura cambia en cada ronda: es una LISTA de números.\n# Toca cada nota, en orden, con un for.\n\n",
+			"help": [
+				[
+					"notas = partitura.leer()",
+					"guarda la lista de notas, por ejemplo [3, 1, 4]"
+				],
+				[
+					"for n in notas:",
+					"repite lo de abajo una vez por cada nota; n vale cada nota"
+				],
+				[
+					"    campana.tocar(n)",
+					"toca la campana n (dentro del for)"
+				],
+				[
+					"print(notas)",
+					"muestra la lista en la consola"
+				]
+			],
+			"blocks": [
+				"notas = partitura.leer()",
+				"for n in notas:",
+				"campana.tocar(n)",
+				"campana.tocar(notas)",
+				"print(notas)"
+			],
+			"intro": [
+				"INSCRIPCIÓN: Cinco campanas, numeradas del 1 al 5. La partitura dice cuáles tocar y en qué orden.",
+				"Usa el atril (E). partitura.leer() te da una LISTA, como [3, 1, 4]. Con «for n in notas:» lo de abajo se repite una vez por cada nota, y n vale esa nota.",
+				"Cada ronda trae una partitura distinta, más larga o más corta: el for se adapta solo.",
+				"INSCRIPCIÓN: Guardianes de piedra vigilan las Campanas. Cada código rechazado despierta a más. Golpéalos con el garrote (J o clic)."
+			],
+			"tunnel_intro": [
+				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
+			]
+		},
+		{
+			"name": "La Balanza de las Pesas",
+			"kind": "scale",
+			"file_name": "balanza.py",
+			"rounds": 3,
+			"objective_key": "objective_scale",
+			"wrong_key": "scale_wrong",
+			"solved_text": "¡La balanza quedó en equilibrio las tres veces! Sumaste la lista con un for. El sello de la salida se abre.",
+			"starter_code": "# pesas.lista() da la lista de pesas (cambia en cada ronda).\n# Súmalas todas con un for y pon el total en la balanza.\n\n",
+			"help": [
+				[
+					"total = 0",
+					"empieza la suma en cero"
+				],
+				[
+					"for p in pesas.lista():",
+					"repite una vez por cada pesa; p vale esa pesa"
+				],
+				[
+					"    total = total + p",
+					"suma la pesa al total (dentro del for)"
+				],
+				[
+					"balanza.poner(total)",
+					"pone el total (fuera del for, sin sangría)"
+				]
+			],
+			"blocks": [
+				"total = 0",
+				"for p in pesas.lista():",
+				"total = total + p",
+				"total = p",
+				"balanza.poner(total)"
+			],
+			"intro": [
+				"INSCRIPCIÓN: La Balanza solo se equilibra con el peso exacto: la suma de todas las pesas.",
+				"Usa el atril (E). Empieza con total = 0 y, con un for, súmale cada pesa. Al final, fuera del for, pon el total en la balanza.",
+				"Si pones el total dentro del for, la balanza recibe un número en cada vuelta y se traba.",
+				"INSCRIPCIÓN: Guardianes de piedra vigilan la Balanza. Cada código rechazado despierta a más. Golpéalos con el garrote (J o clic)."
+			],
+			"tunnel_intro": [
+				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
+			]
+		},
+		{
+			"name": "Las Raíces Gemelas",
+			"kind": "twins",
+			"file_name": "gemelas.py",
+			"function": "factorizar",
+			"rounds": 3,
+			"objective_key": "objective_twins",
+			"wrong_key": "twins_wrong",
+			"solved_text": "¡Los árboles gemelos florecen! Tu función encontró los dos números cada vez. El sello de la salida se abre.",
+			"starter_code": "# Las Raíces Gemelas piden factorizar x² + bx + c.\n# Busca dos números p y q con p + q = b y p * q = c.\n# Prueba todos los p de -10 a 10 con un for; q sale de b - p.\n\ndef factorizar(b, c):\n    \n",
+			"help": [
+				[
+					"def factorizar(b, c):",
+					"los árboles la llaman con b y c"
+				],
+				[
+					"for p in range(-10, 11):",
+					"prueba p = -10, -9, ... hasta 10"
+				],
+				[
+					"    q = b - p",
+					"si p + q = b, entonces q = b - p"
+				],
+				[
+					"    if p * q == c:",
+					"¿se cumple también p · q = c?"
+				],
+				[
+					"        return [p, q]",
+					"devuelve la lista con los dos números"
+				]
+			],
+			"blocks": [
+				"def factorizar(b, c):",
+				"for p in range(-10, 11):",
+				"q = b - p",
+				"q = b + p",
+				"if p * q == c:",
+				"return [p, q]",
+				"return p * q"
+			],
+			"intro": [
+				"INSCRIPCIÓN: Dos árboles gemelos guardan un polinomio: x² + bx + c. Sus raíces son dos números p y q que suman b y multiplicados dan c.",
+				"Ejemplo: x² + 5x + 6 → 2 + 3 = 5 y 2 · 3 = 6, así que factorizar(5, 6) devuelve [2, 3].",
+				"Usa el atril (E). Esta sala junta todo: una función, un for que prueba números, un if que revisa y un return que devuelve una lista.",
+				"INSCRIPCIÓN: Guardianes de piedra vigilan los árboles. Cada código rechazado despierta a más. Golpéalos con el garrote (J o clic)."
+			],
+			"tunnel_intro": [
+				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
+			]
+		},
+		{
+			"name": "El Trono de la Cima",
+			"kind": "throne",
+			"id": "throne_peak",
+			"quiz": {
+				"seconds": 20,
+				"kinds": [
+					"lista",
+					"para",
+					"para_lista"
+				],
+				"problems": {
+					"lista": {
+						"options": 4
+					},
+					"para": {
+						"options": 4
+					},
+					"para_lista": {
+						"over_list": 1,
+						"options": 4
+					}
+				}
+			},
+			"intro": [
+				"En lo alto del templo, una sombra sin forma se enrosca sobre el trono: lo que queda del Sol Negro.",
+				"LA SOMBRA DEL SOL NEGRO: «Yo quemé las máquinas de Aritma. Tu Códice es lo último que me falta».",
+				"Golpéala con J o clic y esquiva su pisotón. Cuando se cubra con su escudo te preguntará por listas y por for. Tienes 20 segundos.",
+				"Al entrar recuperas 2 corazones, y cada escudo que cae deja una poción. Es la última pelea: ¡tú puedes!"
+			],
+			"tunnel_intro": [
+				"INSCRIPCIÓN: Arriba, el trono de la Cima. Lo que quemó Aritma espera allí."
+			],
+			"boss_name": "LA SOMBRA DEL SOL NEGRO",
+			"boss_tint": "#8f86c8",
+			"boss_objective_key": "objective_peak_boss",
+			"beaten_key": "boss_peak_beaten",
+			"tunnel_objective_key": "objective_peak_tunnel",
+			"done_objective_key": "objective_peak_done"
 		}
 	]
 }

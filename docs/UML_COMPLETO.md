@@ -1,6 +1,6 @@
 # UML completo (generado)
 
-Generado por `tools/generar_uml.py` a partir del código: **178 clases**, un diagrama
+Generado por `tools/generar_uml.py` a partir del código: **190 clases**, un diagrama
 por carpeta de `src/`. Las flechas `<|--` son herencia. Las relaciones entre paquetes
 (composición, uso, eventos) están en el diagrama principal de `docs/ARQUITECTURA.md`.
 Para actualizarlo: `python3 tools/generar_uml.py`.
@@ -36,7 +36,8 @@ classDiagram
         +open_codex(session)
         +save_game()
         +load_game()
-        +load_hub(i)
+        +load_map(id, entry)
+        +go_to_map(id, entry)
         +chapter_done()
         +finish(won, ending)
         +combat(key, fallback)
@@ -66,6 +67,8 @@ classDiagram
         +use_order(ids)
         +room_id(room) String$
         +chapter_data(i) Dictionary
+        +map_data(id) Dictionary
+        +map_of_chapter(i) String
         +chapter_name(i) String
         +chamber_count() int
         +chamber_data(index) Dictionary
@@ -548,6 +551,14 @@ classDiagram
         +evaluate(source, sandbox) CodeMachine
         +perform(report)
     }
+    class BellsMachine {
+        +setup(bus, data, text, open_codex)
+        +make_values() Array
+        +api_for(song, record) Dictionary
+        +summary(done) String
+        +wanted(song) String
+        +value_text(v) String
+    }
     class BossQuiz {
         <<RefCounted>>
         +kinds() Array
@@ -662,6 +673,12 @@ classDiagram
     class FilterLevel {
         +wire()
     }
+    class FunctionRoundsMachine {
+        +setup(bus, data, text, open_codex)
+        +args_for(v) Array
+        +shown(returned) String
+        +after_run(result, sandbox, v, record) String
+    }
     class GardenMachine {
         +setup(bus, data, text, open_codex)
         +make_values() Array
@@ -686,6 +703,11 @@ classDiagram
         +mark_solved()
         +evaluate(source, sandbox) CodeMachine
         +perform(report)
+    }
+    class MillMachine {
+        +setup(bus, data, text, open_codex)
+        +make_values() Array
+        +wanted(sacks) String
     }
     class MineBoard {
         <<Node2D>>
@@ -742,7 +764,26 @@ classDiagram
         +send(to_chalice) String
         +end_round()
     }
+    class PumpMachine {
+        +setup(bus, data, text, open_codex)
+        +make_values() Array
+        +api_for(start, record) Dictionary
+        +summary(done) String
+        +wanted(start) String
+    }
+    class ForProblem {
+        <<Strategy>>
+        +make(rng) Dictionary
+    }
+    class FuncProblem {
+        <<Strategy>>
+        +make(rng) Dictionary
+    }
     class IfProblem {
+        <<Strategy>>
+        +make(rng) Dictionary
+    }
+    class ListProblem {
         <<Strategy>>
         +make(rng) Dictionary
     }
@@ -762,6 +803,7 @@ classDiagram
         <<Strategy>>
         +make(_rng) Dictionary
         +say(key, params) String
+        +pick(right, wrong, count) Dictionary$
     }
     class SolveProblem {
         <<Strategy>>
@@ -771,6 +813,10 @@ classDiagram
         <<Strategy>>
         +make(rng) Dictionary
         +program(rng, lines, start_max) Dictionary$
+    }
+    class WhileProblem {
+        <<Strategy>>
+        +make(rng) Dictionary
     }
     class RootsBuilder {
         <<Factory Method>>
@@ -800,9 +846,18 @@ classDiagram
         +make_values() Array
         +api_for(_value, _record) Dictionary
         +wanted(_value) String
+        +summary(done) String
+        +after_run(_result, _sandbox, _value, _record) String
+        +value_text(v) String
         +evaluate(source, sandbox) CodeMachine
         +perform(report)
         +mark_solved()
+    }
+    class ScaleMachine {
+        +make_values() Array
+        +api_for(weights, record) Dictionary
+        +wanted(weights) String
+        +value_text(v) String
     }
     class SceneBuilder {
         <<Factory Method>>
@@ -815,6 +870,14 @@ classDiagram
     class ThroneLevel {
         +wire()
         +restart_after_death()
+    }
+    class TwinsMachine {
+        +make_values() Array
+        +args_for(v) Array
+        +shown(returned) String
+        +wanted(v) String
+        +value_text(v) String
+        +polynomial(b, c) String$
     }
     class VortexBuilder {
         <<Factory Method>>
@@ -830,6 +893,7 @@ classDiagram
         +touch_actions() Array
     }
     CodeMachine <|-- BeaconMachine
+    RoundsMachine <|-- BellsMachine
     RoundsMachine <|-- BridgeMachine
     Level <|-- ChamberLevel
     ChamberBuilder <|-- CoreBuilder
@@ -840,25 +904,34 @@ classDiagram
     ChamberLevel <|-- FigureLevel
     ChamberBuilder <|-- FilterBuilder
     ChamberLevel <|-- FilterLevel
+    RoundsMachine <|-- FunctionRoundsMachine
     RoundsMachine <|-- GardenMachine
     CodeMachine <|-- GateMachine
     ChamberBuilder <|-- LockBuilder
     ChamberLevel <|-- LockLevel
     CodeMachine <|-- LockMachine
+    FunctionRoundsMachine <|-- MillMachine
     CodeMachine <|-- MuralMachine
+    RoundsMachine <|-- PumpMachine
+    QuizProblem <|-- ForProblem
+    QuizProblem <|-- FuncProblem
     QuizProblem <|-- IfProblem
+    QuizProblem <|-- ListProblem
     QuizProblem <|-- MultipleProblem
     QuizProblem <|-- OrderProblem
     QuizProblem <|-- ParityProblem
     QuizProblem <|-- SolveProblem
     QuizProblem <|-- VariableProblem
+    QuizProblem <|-- WhileProblem
     ChamberBuilder <|-- RootsBuilder
     ChamberLevel <|-- RootsLevel
     ChamberLevel <|-- RoundsLevel
     CodeMachine <|-- RoundsMachine
+    RoundsMachine <|-- ScaleMachine
     ChamberBuilder <|-- SceneBuilder
     ChamberBuilder <|-- ThroneBuilder
     ChamberLevel <|-- ThroneLevel
+    FunctionRoundsMachine <|-- TwinsMachine
     ChamberBuilder <|-- VortexBuilder
     ChamberLevel <|-- VortexLevel
 ```
@@ -867,6 +940,7 @@ classDiagram
 |---|---|---|
 | `AlarmDirector` | `Node` | `src/chambers/alarm_director.gd` |
 | `BeaconMachine` | `CodeMachine` | `src/chambers/beacon_machine.gd` |
+| `BellsMachine` | `RoundsMachine` | `src/chambers/bells_machine.gd` |
 | `BossQuiz` | `RefCounted` | `src/chambers/boss_quiz.gd` |
 | `BridgeMachine` | `RoundsMachine` | `src/chambers/bridge_machine.gd` |
 | `ChamberBuilder` | `RefCounted` | `src/chambers/chamber_builder.gd` |
@@ -886,32 +960,41 @@ classDiagram
 | `FilterBuilder` | `ChamberBuilder` | `src/chambers/filter_builder.gd` |
 | `FilterCommand` | `RefCounted` | `src/chambers/filter_command.gd` |
 | `FilterLevel` | `ChamberLevel` | `src/chambers/filter_level.gd` |
+| `FunctionRoundsMachine` | `RoundsMachine` | `src/chambers/function_rounds_machine.gd` |
 | `GardenMachine` | `RoundsMachine` | `src/chambers/garden_machine.gd` |
 | `GateMachine` | `CodeMachine` | `src/chambers/gate_machine.gd` |
 | `LockBuilder` | `ChamberBuilder` | `src/chambers/lock_builder.gd` |
 | `LockLevel` | `ChamberLevel` | `src/chambers/lock_level.gd` |
 | `LockMachine` | `CodeMachine` | `src/chambers/lock_machine.gd` |
+| `MillMachine` | `FunctionRoundsMachine` | `src/chambers/mill_machine.gd` |
 | `MineBoard` | `Node2D` | `src/chambers/mine_board.gd` |
 | `MinefieldGenerator` | `RefCounted` | `src/chambers/minefield_generator.gd` |
 | `MuralMachine` | `CodeMachine` | `src/chambers/mural_machine.gd` |
 | `NumberPath` | `Node2D` | `src/chambers/number_path.gd` |
 | `ParityFilter` | `RefCounted` | `src/chambers/parity_filter.gd` |
+| `PumpMachine` | `RoundsMachine` | `src/chambers/pump_machine.gd` |
+| `ForProblem` | `QuizProblem` | `src/chambers/quiz/for_problem.gd` |
+| `FuncProblem` | `QuizProblem` | `src/chambers/quiz/func_problem.gd` |
 | `IfProblem` | `QuizProblem` | `src/chambers/quiz/if_problem.gd` |
+| `ListProblem` | `QuizProblem` | `src/chambers/quiz/list_problem.gd` |
 | `MultipleProblem` | `QuizProblem` | `src/chambers/quiz/multiple_problem.gd` |
 | `OrderProblem` | `QuizProblem` | `src/chambers/quiz/order_problem.gd` |
 | `ParityProblem` | `QuizProblem` | `src/chambers/quiz/parity_problem.gd` |
 | `QuizProblem` | `RefCounted` | `src/chambers/quiz/quiz_problem.gd` |
 | `SolveProblem` | `QuizProblem` | `src/chambers/quiz/solve_problem.gd` |
 | `VariableProblem` | `QuizProblem` | `src/chambers/quiz/variable_problem.gd` |
+| `WhileProblem` | `QuizProblem` | `src/chambers/quiz/while_problem.gd` |
 | `RootsBuilder` | `ChamberBuilder` | `src/chambers/roots_builder.gd` |
 | `RootsCommand` | `RefCounted` | `src/chambers/roots_command.gd` |
 | `RootsLevel` | `ChamberLevel` | `src/chambers/roots_level.gd` |
 | `RootsTrial` | `RefCounted` | `src/chambers/roots_trial.gd` |
 | `RoundsLevel` | `ChamberLevel` | `src/chambers/rounds_level.gd` |
 | `RoundsMachine` | `CodeMachine` | `src/chambers/rounds_machine.gd` |
+| `ScaleMachine` | `RoundsMachine` | `src/chambers/scale_machine.gd` |
 | `SceneBuilder` | `ChamberBuilder` | `src/chambers/scene_builder.gd` |
 | `ThroneBuilder` | `ChamberBuilder` | `src/chambers/throne_builder.gd` |
 | `ThroneLevel` | `ChamberLevel` | `src/chambers/throne_level.gd` |
+| `TwinsMachine` | `FunctionRoundsMachine` | `src/chambers/twins_machine.gd` |
 | `VortexBuilder` | `ChamberBuilder` | `src/chambers/vortex_builder.gd` |
 | `VortexLevel` | `ChamberLevel` | `src/chambers/vortex_level.gd` |
 
@@ -1290,7 +1373,7 @@ classDiagram
     class Hud {
         <<RefCounted>>
         +draw(ui, info)
-        +draw_notice(ui, text, left, good, top)
+        +draw_notice(ui, text, left, good, top, place)
         +draw_hearts(ui, health, hurt)
         +draw_alarm(ui, level, guardians, label)
     }
@@ -1307,7 +1390,7 @@ classDiagram
     }
     class NoticeBoard {
         <<RefCounted>>
-        +notify(lines, seconds, is_good)
+        +notify(lines, seconds, is_good, is_place)
         +tick(delta)
     }
     class OverlayCanvas {
@@ -1369,6 +1452,11 @@ classDiagram
 
 ```mermaid
 classDiagram
+    class Barrier {
+        <<Node2D>>
+        +set_open(on)
+        +crumble()
+    }
     class CheckpointZone {
         +point() Vector2
     }
@@ -1418,6 +1506,8 @@ classDiagram
         +restart_after_death()
         +save_state() Dictionary
     }
+    class MapExit {
+    }
     class Npc {
         <<Node2D>>
     }
@@ -1448,11 +1538,13 @@ classDiagram
     }
     TriggerZone <|-- CheckpointZone
     Level <|-- HubLevel
+    TriggerZone <|-- MapExit
     Level <|-- TownLevel
 ```
 
 | Clase | Hereda de | Archivo |
 |---|---|---|
+| `Barrier` | `Node2D` | `src/world/barrier.gd` |
 | `CheckpointZone` | `TriggerZone` | `src/world/checkpoint_zone.gd` |
 | `Crusher` | `Node2D` | `src/world/crusher.gd` |
 | `FlickerLight` | `PointLight2D` | `src/world/flicker_light.gd` |
@@ -1462,6 +1554,7 @@ classDiagram
 | `HubLevel` | `Level` | `src/world/hub_level.gd` |
 | `Interactable` | `Area2D` | `src/world/interactable.gd` |
 | `Level` | `Node2D` | `src/world/level.gd` |
+| `MapExit` | `TriggerZone` | `src/world/map_exit.gd` |
 | `Npc` | `Node2D` | `src/world/npc.gd` |
 | `Pedestal` | `Node2D` | `src/world/pedestal.gd` |
 | `Pit` | `Node2D` | `src/world/pit.gd` |

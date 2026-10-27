@@ -34,6 +34,10 @@ func run(arg: String) -> void:
 		await _forest_tour()
 		game.get_tree().quit()
 		return
+	if parts.size() > 1 and parts[1] == "mundo":
+		await _world_tour()
+		game.get_tree().quit()
+		return
 	if parts.size() > 1 and parts[1] == "misiones":
 		await _quests_tour()
 		game.get_tree().quit()
@@ -606,6 +610,7 @@ func _phone_tour() -> void:
 	await _wait(0.3)
 	await _shot("c04_pueblo")
 	# Palanca a medias caminando; luego CORRER prendido
+	game.settings.set_value("pad", 0)
 	var base := Vector2(230, touch.size.y - 215)
 	touch._finger_down(1, base)
 	touch._finger_move(1, base + Vector2(0, -70))
@@ -618,6 +623,12 @@ func _phone_tour() -> void:
 	touch._finger_up(1)
 	touch._finger_down(2, touch._button_center("run"))
 	touch._finger_up(2)
+	# Cruceta fija
+	game.settings.set_value("pad", 1)
+	touch._finger_down(1, base + Vector2(78, 0))
+	await _wait(0.6)
+	await _shot("c05c_cruceta")
+	touch._finger_up(1)
 	var town := game.level as TownLevel
 	game.player.place(town.gate.global_position + Vector2(0, 16), Vector2.UP)
 	await _wait(0.5)
@@ -807,3 +818,107 @@ func _forest_tour() -> void:
 	throne._ask_question()
 	await _wait(1.6)
 	await _shot("b9_jefe_pregunta")
+
+## El mundo unido y los capítulos 3 a 5: mapas, salas nuevas y jefes.
+func _world_tour() -> void:
+	game.machine.change("play", {"mode": "new"})
+	await _wait(0.5)
+	game.dialog.close()
+	# Vuelta del templo: las rocas del este se deshacen
+	game.load_chamber(4)
+	await _wait(0.3)
+	game.chapter_done()
+	await _wait(2.2)
+	await _shot("w00_rocas_se_abren")
+	await _skip_dialog()
+	await _wait(1.2)
+	await _shot("w01_raiz_camino_este")
+	var maps := ["bosque", "cueva", "mirador", "cima"]
+	game.reached = 4
+	for i in maps.size():
+		game.go_to_map(maps[i], "Oeste")
+		await _wait(1.4)
+		await _shot("w1%d_%s_llegada" % [i, maps[i]])
+		game.player.place(game.level.get_node("Entradas/Puerta").global_position + Vector2(-40, 120), Vector2.UP)
+		await _wait(0.8)
+		await _shot("w1%d_%s_centro" % [i, maps[i]])
+		for npc in game.level.nodes_of(Npc):
+			game.player.place(npc.global_position + Vector2(0, 26), Vector2.UP)
+			await _wait(0.6)
+			await _shot("w1%d_%s_%s" % [i, maps[i], String(npc.name).to_lower()])
+	game.reached = 2
+	game.load_map("cueva", "Este")
+	await _wait(0.6)
+	await _shot("w20_cueva_rocas_cerradas")
+	game.player.place(game.level.get_node("Actores/Rocas3").global_position + Vector2(-34, 0), Vector2.RIGHT)
+	await _wait(0.5)
+	await _shot("w21_cueva_mirar_rocas")
+	game.reached = 4
+	game.load_map("mirador", "Oeste")
+	game.player.place(game.level.get_node("Zonas/Balcon").global_position + Vector2(0, -30), Vector2.DOWN)
+	await _wait(0.3)
+	game.level.call("_show_view")
+	await _wait(1.8)
+	await _shot("w22_mirador_valle")
+	await _skip_dialog()
+	# Salas nuevas
+	var rooms := [
+		[2, 0, "w30_bomba", "while tanque.nivel() < 10:\n    bomba.bombear()\n"],
+		[3, 0, "w31_molino", "def moler(sacos):\n    return sacos * 3\n"],
+		[4, 0, "w32_campanas", "notas = partitura.leer()\nfor n in notas:\n    campana.tocar(n)\n"],
+		[4, 1, "w33_balanza", "total = 0\nfor p in pesas.lista():\n    total = total + p\nbalanza.poner(total)\n"],
+		[4, 2, "w34_gemelas", "def factorizar(b, c):\n    for p in range(-10, 11):\n        q = b - p\n        if p * q == c:\n            return [p, q]\n"],
+	]
+	for r in rooms:
+		game.data.use_chapter(r[0])
+		game.practices_done["funciones"] = true
+		game.load_chamber(r[1])
+		await _wait(0.6)
+		var lvl := game.level as RoundsLevel
+		game.player.place(lvl.get_node("Zonas/EntradaSala").point(), Vector2.UP)
+		lvl._on_hall_entered()
+		await _wait(1.0)
+		await _shot(r[2] + "_intro")
+		game.dialog.close()
+		game.player.place(lvl.machine.global_position + Vector2(0, 40), Vector2.UP)
+		game.open_codex(lvl.machine.session)
+		while game.rig.is_gliding():
+			await _wait(0.1)
+		await _wait(0.4)
+		await _shot(r[2] + "_codice")
+		_arm(r[3])
+		await _wait(0.3)
+		await _shot(r[2] + "_bloques")
+		game.codex.write(r[3])
+		game.machine.current.run()
+		await _wait(1.0)
+		await _shot(r[2] + "_ronda")
+		await _wait(4.0)
+		await _shot(r[2] + "_fin")
+		game.dialog.close()
+		game.machine.change("play")
+	# Jefes nuevos y sus preguntas
+	for b in [[2, "w40_cueva"], [3, "w41_ruinas"], [4, "w42_cima"]]:
+		game.data.use_chapter(b[0])
+		game.load_chamber(game.data.chamber_count() - 1)
+		await _wait(0.6)
+		var throne := game.level as ThroneLevel
+		game.player.place(throne.get_node("Zonas/EntradaSala").point(), Vector2.UP)
+		throne._on_hall_entered()
+		await _wait(1.4)
+		await _shot(b[1] + "_jefe")
+		await _skip_dialog()
+		for phase in 3:
+			throne.boss.phase = phase + 1
+			throne._ask_question()
+			await _wait(1.6)
+			await _shot("%s_pregunta%d" % [b[1], phase + 1])
+			var quiz := game.machine.current as QuizState
+			if quiz:
+				quiz.choose(int(quiz.quiz.answer))
+				await _wait(QuizState.RESULT_TIME + 0.4)
+			game.machine.change("play")
+	game.reached = 4
+	game.chapter_done()
+	await _wait(2.5)
+	await _shot("w50_final")

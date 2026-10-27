@@ -114,6 +114,14 @@ func _wire_common() -> void:
 		zone.crossed.connect(func(): set_checkpoint(zone.point()))
 	for pit in nodes_of(Pit):
 		pit.fell.connect(_on_player_fell)
+	for exit in nodes_of(MapExit):
+		exit.crossed.connect(func(): _game.go_to_map(exit.target, exit.entry))
+	for barrier in nodes_of(Barrier):
+		barrier.set_open(_game.reached >= barrier.need)
+		barrier.reading.used.connect(func(): _game.dialog.say(_game.data.messages(barrier.text_key)))
+	# Con el jefe del mapa vencido, el objetivo apunta al camino nuevo
+	if _game.reached > int(data.get("chapter", 99)) and data.has("done_objective_key"):
+		objective_key = String(data.done_objective_key)
 
 
 func set_checkpoint(at: Vector2) -> void:

@@ -15,6 +15,13 @@ func _init(text: Callable = Callable(), settings: Dictionary = {}) -> void:
 		"orden": OrderProblem.new(text, settings.get("orden", {})),
 		"si": IfProblem.new(text, settings.get("si", {"with_else": 0})),
 		"si_sino": IfProblem.new(text, settings.get("si_sino", {"with_else": 1})),
+		"mientras": WhileProblem.new(text, settings.get("mientras", {})),
+		"mientras_veces": WhileProblem.new(text, settings.get("mientras_veces", {"times": 1})),
+		"funcion": FuncProblem.new(text, settings.get("funcion", {})),
+		"funcion_doble": FuncProblem.new(text, settings.get("funcion_doble", {"nested": 1})),
+		"lista": ListProblem.new(text, settings.get("lista", {})),
+		"para": ForProblem.new(text, settings.get("para", {})),
+		"para_lista": ForProblem.new(text, settings.get("para_lista", {"over_list": 1})),
 	}
 
 

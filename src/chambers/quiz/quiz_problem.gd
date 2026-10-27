@@ -19,3 +19,13 @@ func make(_rng: RandomNumberGenerator) -> Dictionary:
 
 func say(key: String, params: Dictionary = {}) -> String:
 	return String(_text.call(key, params)) if _text.is_valid() else key
+
+
+## Opciones con la respuesta y errores típicos, sin repetir. {options, answer}
+static func pick(right: int, wrong: Array, count: int) -> Dictionary:
+	var choices := [right]
+	for w in wrong + [right + 1, right - 1, right + 2, right + 3]:
+		if choices.size() < count and not w in choices and w >= 0:
+			choices.append(w)
+	choices.shuffle()
+	return {"options": choices.map(func(n): return str(n)), "answer": choices.find(right)}

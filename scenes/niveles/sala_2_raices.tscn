@@ -17,6 +17,7 @@
 [ext_resource type="Texture2D" uid="uid://ds4i5gcvgogx5" path="res://assets/pack/fx/Smoke/Smoke/SpriteSheet.png" id="18_qm7uh"]
 [ext_resource type="Texture2D" uid="uid://b3k42g1ao17ty" path="res://assets/efectos/luz_suave.tres" id="19_qfg73"]
 [ext_resource type="PackedScene" path="res://scenes/objetos/estatua_guardian.tscn" id="20_estatua"]
+[ext_resource type="PackedScene" path="res://scenes/objetos/engranaje.tscn" id="31_gear"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0fvx2"]
 size = Vector2(80, 8)
@@ -85,6 +86,12 @@ tile_set = ExtResource("3_b45vb")
 
 [node name="Actores" type="Node2D" parent="."]
 y_sort_enabled = true
+
+[node name="Objeto" parent="Actores" instance=ExtResource("31_gear")]
+position = Vector2(100, 300)
+item_id = "pergamino_3"
+quest_id = "pergaminos"
+look = "scroll"
 
 [node name="Letrero" parent="Actores" instance=ExtResource("4_yft3i")]
 position = Vector2(216, 672)

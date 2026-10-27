@@ -20,14 +20,14 @@ func make_values() -> Array:
 	return values
 
 
-func api_for(weight: int, record: Callable) -> Dictionary:
+func api_for(weight, record: Callable) -> Dictionary:
 	return {
 		"carreta": CallsAdapter.new("carreta", {"peso": func(): return weight}),
 		"puente": CallsAdapter.new("puente", {"reforzar": func(): record.call("reforzar")}),
 	}
 
 
-func wanted(weight: int) -> String:
+func wanted(weight) -> String:
 	return "reforzar" if weight > limit else ""
 
 

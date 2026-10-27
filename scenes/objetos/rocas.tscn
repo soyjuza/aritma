@@ -1,0 +1,66 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://src/world/barrier.gd" id="1_roca"]
+[ext_resource type="Texture2D" path="res://assets/pack/backgrounds/Tilesets/TilesetNature.png" id="2_nat"]
+[ext_resource type="Script" path="res://src/world/interactable.gd" id="3_uso"]
+[ext_resource type="Texture2D" path="res://assets/pack/fx/Smoke/Smoke/SpriteSheet.png" id="4_humo"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_roca"]
+atlas = ExtResource("2_nat")
+region = Rect2(256, 80, 64, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cuerpo"]
+size = Vector2(56, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_uso"]
+size = Vector2(72, 64)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_humo"]
+particles_animation = true
+particles_anim_h_frames = 6
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[node name="Rocas" type="Node2D"]
+script = ExtResource("1_roca")
+
+[node name="Rocas" type="Node2D" parent="."]
+
+[node name="Sprite" type="Sprite2D" parent="Rocas"]
+position = Vector2(0, -8)
+texture = SubResource("AtlasTexture_roca")
+
+[node name="Cuerpo" type="StaticBody2D" parent="."]
+
+[node name="Forma" type="CollisionShape2D" parent="Cuerpo"]
+shape = SubResource("RectangleShape2D_cuerpo")
+
+[node name="Lectura" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+script = ExtResource("3_uso")
+prompt_key = "prompt_look"
+
+[node name="Forma" type="CollisionShape2D" parent="Lectura"]
+shape = SubResource("RectangleShape2D_uso")
+
+[node name="Polvo" type="CPUParticles2D" parent="."]
+z_index = 20
+material = SubResource("CanvasItemMaterial_humo")
+emitting = false
+amount = 28
+texture = ExtResource("4_humo")
+lifetime = 1.4
+one_shot = true
+explosiveness = 0.85
+emission_shape = 3
+emission_rect_extents = Vector2(26, 18)
+spread = 180.0
+gravity = Vector2(0, -12)
+initial_velocity_min = 20.0
+initial_velocity_max = 60.0
+scale_amount_min = 0.4
+scale_amount_max = 0.7
+anim_speed_min = 1.0
+anim_speed_max = 1.0

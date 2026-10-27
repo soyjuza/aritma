@@ -20,7 +20,7 @@ func make_values() -> Array:
 	return values
 
 
-func api_for(water: int, record: Callable) -> Dictionary:
+func api_for(water, record: Callable) -> Dictionary:
 	return {"maceta": CallsAdapter.new("maceta", {
 		"medir": func(): return water,
 		"regar": func(): record.call("regar"),
@@ -28,7 +28,7 @@ func api_for(water: int, record: Callable) -> Dictionary:
 	})}
 
 
-func wanted(water: int) -> String:
+func wanted(water) -> String:
 	return "regar" if water < limit else "asolear"
 
 

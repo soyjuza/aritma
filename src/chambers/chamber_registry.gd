@@ -27,3 +27,8 @@ static func _register_defaults() -> void:
 	register("throne", ThroneBuilder.new())
 	register("bridge", SceneBuilder.new("res://scenes/niveles/bosque_1_puente.tscn"))
 	register("garden", SceneBuilder.new("res://scenes/niveles/bosque_2_jardin.tscn"))
+	register("pump", SceneBuilder.new("res://scenes/niveles/cueva_1_bomba.tscn"))
+	register("mill", SceneBuilder.new("res://scenes/niveles/mirador_1_molino.tscn"))
+	register("bells", SceneBuilder.new("res://scenes/niveles/cima_1_campanas.tscn"))
+	register("scale", SceneBuilder.new("res://scenes/niveles/cima_2_balanza.tscn"))
+	register("twins", SceneBuilder.new("res://scenes/niveles/cima_3_gemelas.tscn"))

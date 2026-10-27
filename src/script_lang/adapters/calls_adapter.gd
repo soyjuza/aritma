@@ -3,7 +3,7 @@ class_name CallsAdapter
 extends ScriptObject
 
 var _name: String
-var _methods: Dictionary    # nombre → Callable sin argumentos
+var _methods: Dictionary    # nombre → Callable (con o sin argumentos)
 
 
 func _init(p_name: String, methods: Dictionary) -> void:
@@ -18,5 +18,6 @@ func type_name() -> String:
 func get_method(attr: String) -> ScriptCallable:
 	if _methods.has(attr):
 		var fn: Callable = _methods[attr]
-		return HostFunction.new(attr, func(_c, _a, _l): return fn.call(), 0, 0)
+		var count := fn.get_argument_count()
+		return HostFunction.new(attr, func(_c, a, _l): return fn.callv(a), count, count)
 	return null

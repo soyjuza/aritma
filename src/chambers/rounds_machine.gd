@@ -14,7 +14,7 @@ const BAD := Color("ff5a4e")
 const GOLD := Color("ffd27a")
 
 var rounds := 3
-var value := -1               # número de la ronda que se ve (-1 = nada)
+var value = -1                # lo de la ronda que se ve: número, lista... (-1 = nada)
 var did := ""                 # lo que hizo el programa en la ronda
 var mark := Color(0, 0, 0, 0)
 
@@ -56,13 +56,28 @@ func make_values() -> Array:
 
 
 ## Los objetos del Códice para una ronda. record(texto) anota lo que hizo.
-func api_for(_value: int, _record: Callable) -> Dictionary:
+func api_for(_value, _record: Callable) -> Dictionary:
 	return {}
 
 
 ## Lo que debía hacer el programa con ese número ("" = nada).
-func wanted(_value: int) -> String:
+func wanted(_value) -> String:
 	return ""
+
+
+## Cómo se escribe lo que hizo el programa en la ronda.
+func summary(done: Array) -> String:
+	return " y ".join(done)
+
+
+## Después de correr el programa (las máquinas con funciones la llaman aquí). "" = bien, o el error.
+func after_run(_result: ScriptSandbox.Result, _sandbox: ScriptSandbox, _value, _record: Callable) -> String:
+	return ""
+
+
+## Cómo se muestra el número de la ronda en los mensajes.
+func value_text(v) -> String:
+	return str(v)
 
 
 # ------------------------------------------------------------------ evaluar (sin dibujar)
@@ -80,12 +95,17 @@ func evaluate(source: String, sandbox: ScriptSandbox) -> CodeMachine.Report:
 			report.ok = false
 			report.error = result.error_text()
 			return report
-		var got := " y ".join(done)
+		var problem := after_run(result, sandbox, values[i], func(what): done.append(what))
+		if problem != "":
+			report.ok = false
+			report.error = problem
+			return report
+		var got := summary(done)
 		report.commands.append({"value": values[i], "did": got})
 		if report.success and got != wanted(values[i]):
 			report.success = false
 			report.message = _text.call(String(_data.get("wrong_key", "rounds_wrong")), {
-				"round": i + 1, "n": values[i],
+				"round": i + 1, "n": value_text(values[i]),
 				"did": got if got != "" else _text.call("rounds_nothing", {}),
 				"want": wanted(values[i]) if wanted(values[i]) != "" else _text.call("rounds_nothing", {}),
 			})
