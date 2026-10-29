@@ -1,4 +1,4 @@
-## Patrón State: libro de reglas de las salas visitadas.
+## Patrón State: libro de reglas de las salas visitadas y la guía de SQL de los capítulos alcanzados.
 class_name BookState
 extends GameState
 
@@ -10,6 +10,9 @@ var _return_to := "play"
 func enter(params: Dictionary = {}) -> void:
 	_return_to = String(params.get("return_to", "play"))
 	_pages = [{"title": game.data.message("book_town_title"), "lines": game.data.messages("book_town")}]
+	var guide: Array = game.data.messages("book_sql")
+	for k in mini(maxi(game.reached, game.data.chapter), guide.size() - 1) + 1:
+		_pages.append({"title": "%s · %s" % [game.data.message("book_sql_title"), game.data.chapter_data(k).get("topic", "")], "lines": guide[k]})
 	for i in range(0, game.chamber_index + 1):
 		var chamber: Dictionary = game.data.chamber_data(i)
 		var lines: Array = chamber.get("intro", []).duplicate()

@@ -1,30 +1,33 @@
 {
 	"town": {
-		"gate_title": "La Puerta del Templo",
-		"gate_code": "# Ordénale a la puerta que se abra.\n",
-		"gate_help": [
-			[
-				"puerta.abrir()",
-				"abre la puerta"
+		"gate": {
+			"name": "La Puerta del Templo",
+			"file_name": "puerta.sql",
+			"rounds": 1,
+			"answer": "SELECT * FROM puerta",
+			"starter_code": "-- La puerta guarda su palabra secreta en la tabla puerta.\n-- Pídele TODO lo que tiene: SELECT * FROM puerta\n",
+			"help": [
+				[
+					"SELECT *",
+					"pide todas las columnas (el * quiere decir «todo»)"
+				],
+				[
+					"FROM puerta",
+					"de la tabla puerta"
+				]
 			],
-			[
-				"puerta.cerrar()",
-				"cierra la puerta"
+			"blocks": [
+				"SELECT *",
+				"FROM puerta",
+				"FROM ventana"
 			],
-			[
-				"puerta.abierta",
-				"True si está abierta"
-			]
-		],
-		"gate_blocks": [
-			"puerta.abrir()",
-			"puerta.cerrar()"
-		]
+			"solved_text": "La puerta leyó su palabra secreta y se abrió."
+		}
 	},
 	"chapters": [
 		{
 			"name": "Capítulo 1: El Templo de Aritma",
-			"topic": "instrucciones en orden, métodos y variables",
+			"topic": "SELECT y FROM: leer una tabla",
 			"goal": "Supera las salas del templo y vence al Guardián del Cero",
 			"chambers": [
 				"lock",
@@ -36,13 +39,13 @@
 			"outro": [
 				"El Guardián del Cero se deshace en chispas rojas y Tala sale del templo con el núcleo en las manos.",
 				"Un temblor recorre el pueblo: al este, las rocas que cerraban el camino se desmoronan. Detrás empieza el Bosque de Aritma.",
-				"CAPÍTULO 2: EL BOSQUE. Allí las máquinas deciden solas: aprenderás if y else. Sigue el camino del este."
+				"CAPÍTULO 2: EL BOSQUE. Allí las máquinas no quieren todas las filas: aprenderás WHERE. Sigue el camino del este."
 			],
 			"map": "pueblo"
 		},
 		{
 			"name": "Capítulo 2: El Bosque",
-			"topic": "if / else",
+			"topic": "WHERE: elegir filas",
 			"goal": "Cruza las ruinas del Bosque y vence al Guardián del Bosque",
 			"chambers": [
 				"bridge",
@@ -53,12 +56,12 @@
 			"outro": [
 				"El Guardián del Bosque se hunde entre las raíces y el claro se llena de luciérnagas.",
 				"Al este del bosque caen las rocas que tapaban el sendero: lleva a una cueva que atraviesa la montaña.",
-				"CAPÍTULO 3: LA CUEVA. Allí las máquinas repiten y repiten: aprenderás while."
+				"CAPÍTULO 3: LA CUEVA. Allí una condición no alcanza: aprenderás AND y OR."
 			]
 		},
 		{
 			"name": "Capítulo 3: La Cueva",
-			"topic": "while",
+			"topic": "AND y OR: juntar condiciones",
 			"goal": "Cruza la Cueva de Cristal y vence a su Guardián",
 			"map": "cueva",
 			"chambers": [
@@ -69,12 +72,12 @@
 			"outro": [
 				"El Guardián de la Cueva se apaga como un cristal sin luz.",
 				"Por el este entra aire frío: las rocas cayeron y la cueva sale al otro lado de la montaña.",
-				"CAPÍTULO 4: EL MIRADOR. Las máquinas de las ruinas piden funciones con return."
+				"CAPÍTULO 4: EL MIRADOR. Las máquinas de las ruinas ordenan sus tablas: ORDER BY y LIMIT."
 			]
 		},
 		{
 			"name": "Capítulo 4: El Mirador",
-			"topic": "funciones con return",
+			"topic": "ORDER BY y LIMIT: ordenar y cortar",
 			"goal": "Supera las Ruinas del Mural y vence a su Guardián",
 			"map": "mirador",
 			"chambers": [
@@ -85,12 +88,12 @@
 			"outro": [
 				"El Guardián de las Ruinas se rompe en letras doradas que el viento se lleva.",
 				"Al este, las rocas se deshacen y aparece un sendero blanco que sube a la Cima.",
-				"CAPÍTULO 5: LA CIMA. La última ruina: allí se trabaja con for y con listas."
+				"CAPÍTULO 5: LA CIMA. La última ruina: allí los datos están en dos tablas y se unen con JOIN."
 			]
 		},
 		{
 			"name": "Capítulo 5: La Cima",
-			"topic": "for y listas",
+			"topic": "JOIN e INNER JOIN: unir dos tablas",
 			"goal": "Llega al templo de la Cima y vence a la Sombra del Sol Negro",
 			"map": "cima",
 			"chambers": [
@@ -115,8 +118,8 @@
 			"objective_key": "objective_forest",
 			"done_objective_key": "objective_go_cave",
 			"sign": [
-				"LETRERO: Las máquinas del Bosque deciden solas. Para eso se usa if: «if agua < 5:» pregunta algo, y lo que va debajo, más a la derecha, solo pasa si la respuesta es sí.",
-				"LETRERO: Con else se dice qué hacer cuando la respuesta es no. Siempre pasa una de las dos: o lo del if, o lo del else."
+				"LETRERO: Las máquinas del Bosque no quieren TODAS las filas. WHERE elige solo las que cumplen una condición: «WHERE peso > 10» deja pasar las filas con peso mayor que 10.",
+				"LETRERO: Para comparar con un texto, el texto va entre comillas simples: «WHERE tierra = 'seca'». Los números van sin comillas."
 			]
 		},
 		"cueva": {
@@ -126,8 +129,8 @@
 			"objective_key": "objective_cave",
 			"done_objective_key": "objective_go_lookout",
 			"sign": [
-				"LETRERO: Las máquinas de la Cueva repiten. Para eso se usa while: «while tanque.nivel() < 10:» repite lo de abajo, una y otra vez, MIENTRAS la pregunta diga que sí.",
-				"LETRERO: Ojo: si lo de adentro nunca cambia la respuesta, el while no termina nunca. El Códice lo detiene y te avisa."
+				"LETRERO: En la Cueva una condición no alcanza. AND pide que se cumplan LAS DOS: «nivel < 5 AND valvula = 'abierta'».",
+				"LETRERO: OR se conforma con UNA: «color = 'oro' OR numero > 50» deja pasar las doradas y también las grandes."
 			]
 		},
 		"mirador": {
@@ -137,8 +140,8 @@
 			"objective_key": "objective_lookout",
 			"done_objective_key": "objective_go_peak",
 			"sign": [
-				"LETRERO: Las Ruinas del Mural guardan máquinas que piden funciones. «def moler(sacos):» crea una función, y «return» le devuelve el resultado a quien la llamó.",
-				"LETRERO: print solo escribe en la consola. return entrega el número: eso es lo que recibe la máquina."
+				"LETRERO: Las Ruinas del Mural ordenan sus tablas. «ORDER BY peso» pone las filas de menor a mayor; «ORDER BY peso DESC», de mayor a menor.",
+				"LETRERO: LIMIT corta la lista: «LIMIT 3» deja solo las 3 primeras filas. Va siempre al final de la consulta."
 			],
 			"view_sign": [
 				"LETRERO: «Desde aquí se ve todo Aritma». Asómate al borde del balcón."
@@ -146,7 +149,7 @@
 			"view": [
 				"Desde el balcón se ve todo el valle: el bosque, el río y, muy lejos, los techos del pueblo de Raíz.",
 				"Al este, una montaña blanca sube entre las nubes. En su cima brilla una luz cian: la última ruina de Aritma.",
-				"Allá arriba espera lo que queda del Sol Negro. Pero antes están las Ruinas del Mural, al norte: sus máquinas piden funciones."
+				"Allá arriba espera lo que queda del Sol Negro. Pero antes están las Ruinas del Mural, al norte: sus máquinas ordenan tablas."
 			]
 		},
 		"cima": {
@@ -155,8 +158,8 @@
 			"chapter": 4,
 			"objective_key": "objective_peak",
 			"sign": [
-				"LETRERO: En la Cima las máquinas trabajan con LISTAS: [3, 1, 4] son varios números guardados juntos, en orden.",
-				"LETRERO: «for n in notas:» repite lo de abajo una vez por cada número de la lista. En cada vuelta, n vale el número que sigue."
+				"LETRERO: En la Cima los datos están repartidos en DOS tablas. JOIN las une: «FROM partitura JOIN campanas ON partitura.campana = campanas.nombre».",
+				"LETRERO: ON dice cómo se emparejan las filas. Con dos tablas, escribe tabla.columna (campanas.numero). INNER JOIN es lo mismo que JOIN: solo salen las filas que encontraron pareja."
 			]
 		}
 	},
@@ -164,216 +167,175 @@
 		{
 			"name": "La Compuerta del Nivel",
 			"kind": "lock",
-			"file_name": "compuerta.py",
+			"file_name": "compuerta.sql",
 			"rounds": 3,
-			"add": 3,
 			"practices": [
 				"pasos",
 				"pelea",
 				"bloques"
 			],
-			"starter_code": "# El sensor marca un número distinto en cada ronda.\n# La compuerta se abre con ese número MÁS 3.\n# Guárdalo en una variable, súmale 3 y sube la compuerta.\n\n",
+			"starter_code": "-- La tabla sensor tiene una fila con tres columnas: color, nivel y hora.\n-- La compuerta solo entiende el NIVEL: pide solo esa columna.\n-- En cada ronda el sensor marca otro número.\n\n",
 			"help": [
 				[
-					"nivel = sensor.leer()",
-					"guarda en la variable nivel el número del sensor"
+					"SELECT nivel",
+					"elige la columna nivel"
 				],
 				[
-					"nivel = nivel + 3",
-					"le suma 3 a nivel y lo guarda otra vez en nivel"
+					"FROM sensor",
+					"de la tabla sensor"
 				],
 				[
-					"compuerta.subir(nivel)",
-					"sube la compuerta hasta ese nivel"
-				],
-				[
-					"print(nivel)",
-					"muestra el valor de nivel en la consola"
+					"SELECT *",
+					"trae TODAS las columnas (aquí sobran)"
 				]
 			],
-			"blocks": [
-				"nivel = sensor.leer()",
-				"nivel = nivel + 3",
-				"nivel = nivel - 3",
-				"compuerta.subir(nivel)",
-				"print(nivel)"
-			],
 			"intro": [
-				"INSCRIPCIÓN: La Compuerta del Nivel solo se abre a la altura justa. El sensor de la izquierda marca un número; la compuerta debe subir a ese número MÁS 3, como dice el dintel.",
-				"Usa el atril (E). Un programa se lee de arriba abajo, una línea tras otra: primero guarda el número en una variable, después cámbiala y al final úsala.",
-				"La compuerta probará tu programa con tres números distintos, así que un número fijo no sirve: usa la variable.",
-				"INSCRIPCIÓN: Dos guardianes de piedra vigilan la Compuerta. Cada vez que rechace tu código —aunque sea por un error de escritura— despertarán más. Golpéalos con el garrote (J o clic)."
+				"INSCRIPCIÓN: La Compuerta del Nivel solo se abre a la altura justa. Su número está guardado en una TABLA: la tabla sensor.",
+				"Una tabla es como una hoja de cuaderno: tiene COLUMNAS (color, nivel, hora) y FILAS. Para leerla se escribe una CONSULTA: SELECT dice qué columnas quieres y FROM dice de qué tabla.",
+				"Usa el atril (E) y arma: SELECT nivel, y debajo FROM sensor. La compuerta probará tu consulta con tres números distintos.",
+				"INSCRIPCIÓN: Dos guardianes de piedra vigilan la Compuerta. Cada vez que rechace tu consulta —aunque sea por un error de escritura— despertarán más. Golpéalos con el garrote (J o clic)."
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
-			]
+			],
+			"answer": "SELECT nivel FROM sensor",
+			"blocks": [
+				"SELECT nivel",
+				"SELECT color",
+				"SELECT *",
+				"FROM sensor"
+			],
+			"solved_text": "¡La Compuerta sube a la altura justa en las tres rondas! El sello de la salida se abre."
 		},
 		{
 			"name": "El Filtro de la Dualidad",
 			"kind": "filter",
 			"seed": 0,
 			"fog": 0.01,
-			"file_name": "criba.py",
+			"file_name": "criba.sql",
 			"console_title": "LA CRIBA",
-			"console_idle": "> esperando programa_",
-			"glyph": "n % 2",
-			"chalice_label": "PAR",
-			"crucible_label": "IMPAR",
-			"rounds": [
-				{
-					"count": [
-						9,
-						10
-					],
-					"min": 1,
-					"max": 20
-				},
-				{
-					"count": [
-						6,
-						7
-					],
-					"min": 11,
-					"max": 99
-				},
-				{
-					"count": [
-						12,
-						13
-					],
-					"min": 0,
-					"max": 60,
-					"zero": true
-				}
-			],
+			"console_idle": "> esperando consulta_",
+			"glyph": "oro OR > 50",
+			"chalice_label": "CÁLIZ",
+			"crucible_label": "CRISOL",
+			"rounds": 3,
 			"playback_speed": [
 				1.0,
 				1.9,
 				2.8
 			],
-			"starter_code": "# Las esferas PARES van al cáliz (izquierda).\n# Las IMPARES, al crisol (derecha).\n# La Criba prueba tu programa con 3 rondas: solo ves la primera.\n\n",
+			"starter_code": "-- Al Cáliz van las esferas doradas ('oro') O las que tienen un número mayor que 50.\n-- Las demás caen al Crisol.\n-- Pide el NUMERO de las esferas que van al Cáliz.\n\n",
 			"help": [
 				[
-					"tolva.quedan()",
-					"cuántas esferas faltan en la tolva"
+					"SELECT numero FROM esferas",
+					"los números de la tabla esferas"
 				],
 				[
-					"tolva.soltar()",
-					"deja caer la siguiente a la compuerta y devuelve su número"
+					"WHERE color = 'oro'",
+					"las doradas"
 				],
 				[
-					"caliz.recibir()",
-					"la esfera de la compuerta va al cáliz (PAR)"
+					"OR numero > 50",
+					"O las mayores que 50 (basta con una de las dos)"
 				],
 				[
-					"crisol.desintegrar()",
-					"la esfera de la compuerta va al crisol (IMPAR)"
-				],
-				[
-					"n % 2",
-					"el resto de dividir n entre 2"
+					"AND",
+					"pediría las dos a la vez: doradas Y grandes"
 				]
 			],
 			"intro": [
-				"INSCRIPCIÓN: La Criba separa la materia en dos esencias. Solo lo PAR puede llegar al Cáliz; lo IMPAR se deshace en el Crisol.",
-				"Usa el atril (E) y programa la Criba. Ella pondrá a prueba tu programa con tres rondas de esferas: solo la primera se ve en el tubo.",
-				"Si una sola esfera cae del lado equivocado, la Criba se traba y mezcla esferas nuevas.",
-				"INSCRIPCIÓN: Dos guardianes de piedra vigilan la Criba. Cada vez que la Criba rechace tu código —aunque sea por un «;» mal puesto— despertarán más. Golpéalos con el garrote (J o clic)."
+				"INSCRIPCIÓN: La Criba separa las esferas. Al Cáliz van las DORADAS y también las que tienen un número MAYOR QUE 50; las demás se deshacen en el Crisol.",
+				"Usa el atril (E). Aquí aparece OR: «WHERE color = 'oro' OR numero > 50» deja pasar una fila si cumple UNA de las condiciones (o las dos).",
+				"La Criba probará tu consulta con tres rondas de esferas. Si una sola cae del lado equivocado, se traba y cambia las esferas de las rondas ocultas.",
+				"INSCRIPCIÓN: Dos guardianes de piedra vigilan la Criba. Cada vez que rechace tu consulta —aunque sea por un error de escritura— despertarán más. Golpéalos con el garrote (J o clic)."
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
 			],
-			"max_lines": 0,
 			"blocks": [
-				"while tolva.quedan() > 0:",
-				"n = tolva.soltar()",
-				"if n % 2 == 0:",
-				"caliz.recibir()",
-				"else:",
-				"crisol.desintegrar()",
-				"if n % 2 == 1:"
-			]
+				"SELECT numero",
+				"FROM esferas",
+				"WHERE color = 'oro'",
+				"OR numero > 50",
+				"AND numero > 50"
+			],
+			"limit": 50,
+			"write_first": true,
+			"answer": "SELECT numero FROM esferas WHERE color = 'oro' OR numero > 50",
+			"solved_text": "¡Las tres rondas, perfectas! El cáliz desborda de luz y la energía corre hacia el sello."
 		},
 		{
-			"name": "El Mural de la Incógnita",
+			"name": "El Mural de los Récords",
 			"kind": "roots",
 			"seed": 0,
-			"file_name": "incognita.py",
-			"max_steps": 2000,
-			"cases": [
-				"plus",
-				"minus",
-				"negative"
-			],
+			"file_name": "records.sql",
 			"press_periods": [
 				2.4,
 				2.0,
 				1.6
 			],
-			"mural_title": "ax + b = c   →   x = ?",
-			"hidden_label": "? ? ?",
-			"starter_code": "# El Mural llama a despejar(a, b, c) con tres ecuaciones ax + b = c.\n# Devuelve el valor de x.\n# Ejemplo: 3x + 5 = 20  ->  3x = 20 - 5  ->  x = 15 / 3 = 5\n\ndef despejar(a, b, c):\n    \n",
+			"mural_title": "LOS TRES MEJORES DE ARITMA",
+			"starter_code": "-- El Mural muestra a los TRES aritmanos con más puntos, del primero al tercero.\n-- Pide nombre y puntos, ordena por puntos de mayor a menor\n-- y quédate solo con 3 filas: LIMIT 3\n\n",
 			"help": [
 				[
-					"def despejar(a, b, c):",
-					"el Mural la llama con a, b y c"
+					"SELECT nombre, puntos",
+					"dos columnas"
 				],
 				[
-					"return ...",
-					"devuelve el valor de x"
+					"FROM aritmanos",
+					"de la tabla aritmanos"
 				],
 				[
-					"c - b",
-					"pasa b al otro lado (restando)"
+					"ORDER BY puntos DESC",
+					"de más puntos a menos"
 				],
 				[
-					"(c - b) / a",
-					"y luego divide entre a"
-				],
-				[
-					"3x + 5 = 20",
-					"a = 3, b = 5, c = 20  ->  x = 5"
+					"LIMIT 3",
+					"solo las 3 primeras filas (va al final)"
 				]
 			],
 			"intro": [
-				"INSCRIPCIÓN: El Mural de la Incógnita guarda ecuaciones de la forma ax + b = c. Quien despeje la x abrirá la reja.",
-				"Escribe la función despejar(a, b, c) y haz que devuelva el valor de x. El Mural la probará con tres ecuaciones: solo ves la primera.",
-				"Recuerda cómo se despeja: lo que suma pasa restando y lo que multiplica pasa dividiendo. Ejemplo: 3x + 5 = 20 → 3x = 15 → x = 5, así que despejar(3, 5, 20) devuelve 5.",
-				"INSCRIPCIÓN: Dos caballeros de piedra vigilan el Mural. Cada vez que el Mural rechace tu código —aunque sea por un error de escritura— despertarán más guardianes."
+				"INSCRIPCIÓN: El Mural de los Récords guarda los nombres de los mejores aritmanos. Tres placas esperan: el primero, el segundo y el tercero.",
+				"Usa el atril (E). Ordena la tabla aritmanos por puntos, de mayor a menor, y corta la lista con LIMIT 3: así solo quedan los tres primeros.",
+				"El orden de las partes importa: SELECT … FROM … ORDER BY … LIMIT. LIMIT siempre va al final.",
+				"INSCRIPCIÓN: Dos caballeros de piedra vigilan el Mural. Cada consulta rechazada despierta a más guardianes."
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Las prensas del pasillo se cierran con su propio ritmo. La lámpara roja avisa justo antes de cerrar."
 			],
 			"blocks": [
-				"def despejar(a, b, c):",
-				"return (c - b) / a",
-				"return (c + b) / a",
-				"return (c - b) * a"
-			]
+				"SELECT nombre, puntos",
+				"FROM aritmanos",
+				"ORDER BY puntos DESC",
+				"ORDER BY puntos",
+				"LIMIT 3",
+				"LIMIT 1"
+			],
+			"write_first": true,
+			"ordered": true,
+			"slots": 3,
+			"answer": "SELECT nombre, puntos FROM aritmanos ORDER BY puntos DESC LIMIT 3",
+			"solved_text": "¡Las tres placas muestran a los mejores de Aritma! Los engranajes giran juntos y la reja del este se levanta."
 		},
 		{
 			"name": "El Vórtice de Celdas",
 			"kind": "vortex",
 			"seed": 0,
-			"file_name": "faro.py",
+			"file_name": "faro.sql",
 			"board": {
 				"cols": 8,
 				"rows": 8,
 				"mines": 10
 			},
-			"starter_code": "# La sala está a oscuras: enciende las luces del Faro.\n# Es como la puerta del pueblo: puerta.abrir()\n\n",
+			"starter_code": "-- El Faro necesita su COLOR y su BRILLO para encenderse.\n-- Pide esas dos columnas de la tabla faro, separadas por una coma.\n\n",
 			"help": [
 				[
-					"luces.encender()",
-					"enciende el Faro y el tablero"
+					"SELECT color, brillo",
+					"dos columnas: se separan con una coma"
 				],
 				[
-					"luces.apagar()",
-					"apaga las luces"
-				],
-				[
-					"luces.encendidas",
-					"True si están encendidas"
+					"FROM faro",
+					"de la tabla faro"
 				],
 				[
 					"E / Q",
@@ -382,7 +344,7 @@
 			],
 			"intro": [
 				"INSCRIPCIÓN: El Vórtice guarda diez minas bajo sus baldosas. Todas se ven iguales: solo los números dicen dónde está el peligro.",
-				"Primero enciende el Faro: usa su atril (E) y ordénale a las luces que se enciendan con luces.encender(), como abriste la puerta del pueblo.",
+				"Primero enciende el Faro: usa su atril (E) y pídele a la tabla faro dos columnas, color y brillo: SELECT color, brillo FROM faro. Con una coma se piden varias columnas.",
 				"Encendido el tablero, párate sobre una baldosa: E la destapa y Q le pone o quita una bandera. Cada número dice cuántas minas la rodean. Destapa todas las que no son mina.",
 				"La primera baldosa nunca es mina y el tablero siempre se resuelve pensando, sin adivinar. Si destapas una mina pierdes 2 corazones y el tablero vuelve a empezar, con las minas en otro lugar."
 			],
@@ -390,15 +352,20 @@
 				"INSCRIPCIÓN: Más allá, el Vórtice de Celdas. Aquí no hay trampas en el camino: el peligro está en el piso de la sala."
 			],
 			"blocks": [
-				"luces.encender()",
-				"luces.apagar()"
+				"SELECT color, brillo",
+				"SELECT color",
+				"SELECT *",
+				"FROM faro"
 			],
 			"practices": [
 				"buscaminas",
 				"buscaminas_2",
 				"buscaminas_3",
 				"buscaminas_4"
-			]
+			],
+			"rounds": 1,
+			"answer": "SELECT color, brillo FROM faro",
+			"solved_text": "¡El Faro se enciende y el tablero se ilumina! Párate sobre una baldosa: E la destapa y Q le pone una bandera."
 		},
 		{
 			"name": "La Mesa de las Figuras",
@@ -474,67 +441,24 @@
 			"name": "El Trono del Cero",
 			"kind": "throne",
 			"quiz": {
-				"seconds": 20,
+				"seconds": 30,
 				"kinds": [
-					"variable",
-					"orden",
-					"paridad"
+					"palabra",
+					"columnas",
+					"cuantas_columnas"
 				],
 				"problems": {
-					"variable": {
-						"min_lines": 2,
-						"max_lines": 3,
-						"max_start": 9,
+					"palabra": {
+						"words": [
+							"SELECT",
+							"FROM"
+						],
 						"options": 4
 					},
-					"orden": {
-						"options": 4,
-						"programs": [
-							[
-								"n = 3",
-								"doble = n * 2",
-								"print(doble)"
-							],
-							[
-								"lado = 4",
-								"area = lado * lado",
-								"print(area)"
-							],
-							[
-								"precio = 5",
-								"total = precio + 2",
-								"print(total)"
-							],
-							[
-								"a = 6",
-								"b = a - 1",
-								"print(b)"
-							],
-							[
-								"x = 2",
-								"x = x + 5",
-								"print(x)"
-							],
-							[
-								"llaves = 1",
-								"llaves = llaves * 3",
-								"print(llaves)"
-							]
-						]
-					},
-					"paridad": {
-						"min_number": 11,
-						"max_number": 99,
-						"code_lines": 2
-					},
-					"multiplo": {
-						"min_divisor": 3,
-						"max_divisor": 6,
-						"min_factor": 3,
-						"max_factor": 12,
+					"columnas": {
 						"options": 4
 					},
-					"despejar": {
+					"cuantas_columnas": {
 						"options": 4
 					}
 				}
@@ -543,7 +467,7 @@
 				"Una sombra roja baja del techo y abre las alas sobre el trono: el Guardián del Cero.",
 				"EL GUARDIÁN DEL CERO: «Tomaste el núcleo, pero no saldrás con él mientras yo exista».",
 				"Golpéalo con J o clic. Cuando el círculo rojo marque su pisotón, sal corriendo o salta con ESPACIO. Los orbes se esquivan o se deshacen con el garrote.",
-				"Cada vez que pierda una cuarta parte de su vida se cubrirá con un escudo y te pondrá a prueba con un problema: tienes 20 segundos (1 a 4 o clic). Si aciertas, el escudo cae; si fallas, llamará a sus guardianes.",
+				"Cada vez que pierda una cuarta parte de su vida se cubrirá con un escudo y te pondrá a prueba con una consulta: tienes 30 segundos (1 a 4 o clic). Si aciertas, el escudo cae; si fallas, llamará a sus guardianes.",
 				"Al entrar recuperas 2 corazones, y cada vez que caiga su escudo dejará una poción en el suelo."
 			],
 			"tunnel_intro": [
@@ -553,113 +477,107 @@
 		{
 			"name": "El Puente Colgante",
 			"kind": "bridge",
-			"file_name": "puente.py",
+			"file_name": "puente.sql",
 			"rounds": 3,
 			"limit": 10,
 			"objective_key": "objective_bridge",
-			"solved_text": "¡El puente aguanta las tres carretas! Solo lo reforzaste cuando hacía falta. El sello de la salida se abre.",
-			"starter_code": "# La carreta llega con un peso distinto cada vez.\n# Si pesa MÁS de 10, refuerza el puente. Si no, no hagas nada.\n\n",
+			"solved_text": "¡El puente aguanta los tres grupos de carretas! Lo reforzaste solo para las pesadas. El sello de la salida se abre.",
+			"starter_code": "-- Pasarán varias carretas y algunas pesan demasiado.\n-- Pide el NOMBRE de las carretas que pesan MÁS de 10:\n-- esas necesitan el puente reforzado.\n\n",
 			"help": [
 				[
-					"peso = carreta.peso()",
-					"guarda en peso lo que pesa la carreta"
+					"SELECT nombre",
+					"la columna nombre"
 				],
 				[
-					"if peso > 10:",
-					"lo de abajo (con sangría) solo pasa si peso es mayor que 10"
+					"FROM carretas",
+					"de la tabla carretas"
 				],
 				[
-					"    puente.reforzar()",
-					"refuerza el puente (va más a la derecha, dentro del if)"
+					"WHERE peso > 10",
+					"solo las filas con peso MAYOR que 10"
 				],
 				[
-					"print(peso)",
-					"muestra el peso en la consola"
+					"> < =",
+					"mayor que, menor que, igual a"
 				]
 			],
 			"blocks": [
-				"peso = carreta.peso()",
-				"if peso > 10:",
-				"if peso < 10:",
-				"puente.reforzar()",
-				"print(peso)"
+				"SELECT nombre",
+				"FROM carretas",
+				"WHERE peso > 10",
+				"WHERE peso < 10",
+				"WHERE peso = 10"
 			],
 			"intro": [
-				"INSCRIPCIÓN: El Puente Colgante solo aguanta carretas livianas. Si una carreta pesa MÁS de 10, hay que reforzarlo antes; si pesa 10 o menos, reforzarlo lo traba.",
-				"Usa el atril (E). Aquí aparece el if: «if peso > 10:» pregunta algo, y las líneas de abajo, más a la derecha, solo se cumplen si la respuesta es sí.",
-				"Pasarán tres carretas con pesos distintos: tu programa tiene que decidir solo.",
-				"INSCRIPCIÓN: Dos guardianes de piedra vigilan el puente. Cada código rechazado despierta a más. Golpéalos con el garrote (J o clic)."
+				"INSCRIPCIÓN: El Puente Colgante solo aguanta carretas livianas. Las que pesan MÁS de 10 necesitan que lo refuercen antes de cruzar.",
+				"Usa el atril (E). Aquí aparece WHERE: va después de FROM y deja pasar SOLO las filas que cumplen la condición. «WHERE peso > 10» se queda con las pesadas.",
+				"Pasarán tres grupos de carretas distintos: tu consulta tiene que elegir sola. Ojo: una carreta de 10 justo NO pesa más de 10.",
+				"INSCRIPCIÓN: Dos guardianes de piedra vigilan el puente. Cada vez que rechace tu consulta —aunque sea por un error de escritura— despertarán más. Golpéalos con el garrote (J o clic)."
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
-			]
+			],
+			"answer": "SELECT nombre FROM carretas WHERE peso > 10"
 		},
 		{
 			"name": "El Jardín de las Macetas",
 			"kind": "garden",
-			"file_name": "maceta.py",
+			"file_name": "macetas.sql",
 			"rounds": 3,
-			"limit": 5,
 			"objective_key": "objective_garden",
-			"solved_text": "¡Las tres plantas quedaron sanas! Regaste las secas y asoleaste las mojadas. El sello de la salida se abre.",
-			"starter_code": "# Mide el agua de la maceta.\n# Si tiene MENOS de 5, riégala. Si no (else), asoléala.\n\n",
+			"solved_text": "¡Las plantas secas recibieron agua en las tres rondas! El sello de la salida se abre.",
+			"starter_code": "-- Cada maceta tiene la tierra 'seca' o 'mojada'.\n-- Pide el NOMBRE de las macetas con tierra seca: esas se riegan.\n-- Los textos van entre comillas simples: 'seca'\n\n",
 			"help": [
 				[
-					"agua = maceta.medir()",
-					"guarda en agua cuánta agua tiene la tierra"
+					"SELECT nombre",
+					"la columna nombre"
 				],
 				[
-					"if agua < 5:",
-					"pregunta si tiene menos de 5"
+					"FROM macetas",
+					"de la tabla macetas"
 				],
 				[
-					"    maceta.regar()",
-					"riega (dentro del if, más a la derecha)"
+					"WHERE tierra = 'seca'",
+					"solo las filas cuya tierra es el texto 'seca'"
 				],
 				[
-					"else:",
-					"si la respuesta fue NO, pasa lo de abajo"
-				],
-				[
-					"    maceta.asolear()",
-					"le da sol (dentro del else)"
+					"'seca'",
+					"un texto va entre comillas simples; un número, sin comillas"
 				]
 			],
 			"blocks": [
-				"agua = maceta.medir()",
-				"if agua < 5:",
-				"if agua > 5:",
-				"maceta.regar()",
-				"else:",
-				"maceta.asolear()"
+				"SELECT nombre",
+				"FROM macetas",
+				"WHERE tierra = 'seca'",
+				"WHERE tierra = 'mojada'",
+				"WHERE tierra = seca"
 			],
 			"intro": [
-				"INSCRIPCIÓN: Las macetas del jardín se marchitan si nadie las cuida. Tierra seca (menos de 5 de agua): hay que regarla. Tierra mojada (5 o más): hay que darle sol.",
-				"Usa el atril (E). Ahora el if tiene compañero: else. Si la pregunta del if dice que no, se cumple lo que está debajo del else. Siempre pasa una de las dos.",
-				"El jardín probará tu programa con tres macetas distintas.",
-				"INSCRIPCIÓN: También aquí vigilan guardianes de piedra. Cada código rechazado despierta a más."
+				"INSCRIPCIÓN: Las macetas del jardín se marchitan si nadie las cuida. Las de tierra seca necesitan agua; las mojadas, no.",
+				"Usa el atril (E). Esta vez la condición compara con un TEXTO: «WHERE tierra = 'seca'». Los textos van entre comillas simples; sin comillas, el Códice cree que seca es el nombre de una columna.",
+				"El jardín probará tu consulta con tres grupos de macetas distintos.",
+				"INSCRIPCIÓN: También aquí vigilan guardianes de piedra. Cada consulta rechazada despierta a más."
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
-			]
+			],
+			"answer": "SELECT nombre FROM macetas WHERE tierra = 'seca'"
 		},
 		{
 			"name": "El Claro del Guardián",
 			"kind": "throne",
 			"quiz": {
-				"seconds": 20,
+				"seconds": 30,
 				"kinds": [
-					"si",
-					"si_sino",
-					"si_sino"
+					"donde",
+					"donde",
+					"donde_cuantas"
 				],
 				"problems": {
-					"si": {
-						"with_else": 0,
+					"donde": {
 						"options": 4
 					},
-					"si_sino": {
-						"with_else": 1,
+					"donde_cuantas": {
 						"options": 4
 					}
 				}
@@ -667,7 +585,7 @@
 			"intro": [
 				"Entre las raíces del claro despierta el Guardián del Bosque, primo verde del Guardián del Cero.",
 				"EL GUARDIÁN DEL BOSQUE: «Aquí todo decide por sí mismo. Veamos si tú sabes decidir».",
-				"Pelea igual que el anterior: golpéalo con J o clic y esquiva su pisotón. Cuando se cubra con su escudo te preguntará qué imprime un if. Tienes 20 segundos.",
+				"Pelea igual que el anterior: golpéalo con J o clic y esquiva su pisotón. Cuando se cubra con su escudo te preguntará qué filas deja pasar un WHERE. Tienes 30 segundos.",
 				"Al entrar recuperas 2 corazones, y cada escudo que cae deja una poción."
 			],
 			"tunnel_intro": [
@@ -684,64 +602,66 @@
 		{
 			"name": "La Bomba de la Cueva",
 			"kind": "pump",
-			"file_name": "bomba.py",
+			"file_name": "tanques.sql",
 			"rounds": 3,
-			"limit": 10,
+			"limit": 5,
 			"objective_key": "objective_pump",
 			"wrong_key": "pump_wrong",
-			"solved_text": "¡El tanque quedó justo en 10 las tres veces! El while bombeó lo necesario y paró solo. El sello de la salida se abre.",
-			"starter_code": "# El tanque empieza con un nivel distinto en cada ronda.\n# MIENTRAS tenga menos de 10, bombea.\n# while repite lo de adentro hasta que la pregunta diga que no.\n\n",
+			"solved_text": "¡Los tanques correctos quedaron llenos en las tres rondas! AND pidió las dos cosas a la vez. El sello de la salida se abre.",
+			"starter_code": "-- Hay que llenar los tanques con POCA agua (nivel menor que 5)\n-- que además tengan la válvula 'abierta'. Con la válvula cerrada no entra agua.\n-- AND pide que se cumplan LAS DOS condiciones.\n\n",
 			"help": [
 				[
-					"while tanque.nivel() < 10:",
-					"repite lo de abajo mientras el tanque tenga menos de 10"
+					"SELECT nombre FROM tanques",
+					"los nombres de la tabla tanques"
 				],
 				[
-					"    bomba.bombear()",
-					"sube el agua 1 (dentro del while, más a la derecha)"
+					"WHERE nivel < 5",
+					"primera condición"
 				],
 				[
-					"tanque.nivel()",
-					"cuánta agua tiene ahora el tanque"
+					"AND valvula = 'abierta'",
+					"y TAMBIÉN esta (las dos a la vez)"
 				],
 				[
-					"print(tanque.nivel())",
-					"muestra el nivel en la consola"
+					"OR",
+					"basta con que se cumpla UNA de las dos"
 				]
 			],
 			"blocks": [
-				"while tanque.nivel() < 10:",
-				"while tanque.nivel() > 10:",
-				"bomba.bombear()",
-				"print(tanque.nivel())"
+				"SELECT nombre",
+				"FROM tanques",
+				"WHERE nivel < 5",
+				"AND valvula = 'abierta'",
+				"OR valvula = 'abierta'"
 			],
 			"intro": [
-				"INSCRIPCIÓN: La Bomba llena el tanque de la cueva. Debe quedar justo en 10: ni una gota menos, ni una más.",
-				"Usa el atril (E). Aquí aparece while: «while tanque.nivel() < 10:» repite lo de abajo, una y otra vez, MIENTRAS la respuesta sea sí. Cuando el tanque llega a 10, para solo.",
-				"El tanque empieza en un nivel distinto en cada ronda: no sirve contar a mano cuántas veces bombear.",
-				"INSCRIPCIÓN: Guardianes de piedra vigilan la Bomba. Cada código rechazado despierta a más. Golpéalos con el garrote (J o clic)."
+				"INSCRIPCIÓN: La Bomba llena los tanques de la cueva. Solo sirve bombear a los que tienen poca agua (nivel menor que 5) Y la válvula abierta.",
+				"Usa el atril (E). Aquí aparece AND: «WHERE nivel < 5 AND valvula = 'abierta'» deja pasar una fila solo si cumple LAS DOS condiciones.",
+				"Desde aquí el Códice se abre para ESCRIBIR A MANO, como los programadores de verdad. Si prefieres las piezas, toca USAR BLOQUES.",
+				"INSCRIPCIÓN: Guardianes de piedra vigilan la Bomba. Cada consulta rechazada despierta a más. Golpéalos con el garrote (J o clic)."
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
-			]
+			],
+			"write_first": true,
+			"answer": "SELECT nombre FROM tanques WHERE nivel < 5 AND valvula = 'abierta'"
 		},
 		{
 			"name": "El Claro de Cristal",
 			"kind": "throne",
 			"id": "throne_cave",
 			"quiz": {
-				"seconds": 20,
+				"seconds": 30,
 				"kinds": [
-					"mientras_veces",
-					"mientras",
-					"mientras"
+					"y_o",
+					"y_o",
+					"y_o_cuantas"
 				],
 				"problems": {
-					"mientras": {
+					"y_o": {
 						"options": 4
 					},
-					"mientras_veces": {
-						"times": 1,
+					"y_o_cuantas": {
 						"options": 4
 					}
 				}
@@ -749,7 +669,7 @@
 			"intro": [
 				"Los cristales del techo se encienden de golpe y del más grande sale el Guardián de la Cueva.",
 				"EL GUARDIÁN DE LA CUEVA: «Aquí abajo todo se repite. ¿Sabrás cuándo parar?».",
-				"Pelea igual que antes: golpéalo con J o clic y esquiva su pisotón. Cuando se cubra con su escudo te preguntará por un while. Tienes 20 segundos.",
+				"Pelea igual que antes: golpéalo con J o clic y esquiva su pisotón. Cuando se cubra con su escudo te preguntará por AND y OR. Tienes 30 segundos.",
 				"Al entrar recuperas 2 corazones, y cada escudo que cae deja una poción."
 			],
 			"tunnel_intro": [
@@ -765,72 +685,73 @@
 		{
 			"name": "El Molino de la Montaña",
 			"kind": "mill",
-			"file_name": "molino.py",
-			"function": "moler",
-			"factor": 3,
+			"file_name": "sacos.sql",
 			"rounds": 3,
 			"objective_key": "objective_mill",
 			"wrong_key": "mill_wrong",
 			"practices": [
-				"funciones"
+				"ordenar"
 			],
-			"solved_text": "¡El Molino recibió la harina justa las tres veces! Tu función devolvió el resultado con return. El sello de la salida se abre.",
-			"starter_code": "# El Molino llama a moler(sacos) con un número distinto en cada ronda.\n# Cada saco de trigo da 3 bolsas de harina.\n# Devuelve con return cuántas bolsas salen.\n\ndef moler(sacos):\n    \n",
+			"solved_text": "¡El Molino molió los sacos en el orden justo las tres veces! El sello de la salida se abre.",
+			"starter_code": "-- El Molino muele primero los sacos MÁS PESADOS.\n-- Pide los nombres de los sacos ordenados por peso, de mayor a menor.\n-- ORDER BY peso los ordena de menor a mayor; con DESC, al revés.\n\n",
 			"help": [
 				[
-					"def moler(sacos):",
-					"el Molino la llama; sacos es el número de sacos"
+					"SELECT nombre FROM sacos",
+					"los nombres de la tabla sacos"
 				],
 				[
-					"    return sacos * 3",
-					"devuelve 3 bolsas por cada saco (dentro de la función)"
+					"ORDER BY peso",
+					"ordena de menor a mayor"
 				],
 				[
-					"print(sacos * 3)",
-					"solo escribe en la consola: el Molino no recibe nada"
+					"ORDER BY peso DESC",
+					"ordena de mayor a menor (DESC = descendente)"
 				]
 			],
 			"blocks": [
-				"def moler(sacos):",
-				"return sacos * 3",
-				"return sacos + 3",
-				"print(sacos * 3)"
+				"SELECT nombre",
+				"FROM sacos",
+				"ORDER BY peso",
+				"ORDER BY peso DESC",
+				"ORDER BY nombre"
 			],
 			"intro": [
-				"INSCRIPCIÓN: El Molino de la Montaña muele trigo. Cada saco da 3 bolsas de harina.",
-				"Usa el atril (E). El Molino no lee órdenes sueltas: llama a tu función moler(sacos) y espera que le DEVUELVAS el número de bolsas con return.",
-				"Te llamará con tres números distintos. print no sirve: solo escribe en la consola, no le entrega nada al Molino.",
-				"INSCRIPCIÓN: Guardianes de piedra vigilan el Molino. Cada código rechazado despierta a más. Golpéalos con el garrote (J o clic)."
+				"INSCRIPCIÓN: El Molino de la Montaña muele los sacos de trigo uno por uno: primero el más pesado, al final el más liviano.",
+				"Usa el atril (E). Aquí aparece ORDER BY: va al final de la consulta y ordena las filas. «ORDER BY peso» las deja de menor a mayor; «ORDER BY peso DESC», de mayor a menor.",
+				"El Molino probará tu consulta con tres grupos de sacos. Aquí el orden importa: si las filas salen en otro orden, el Molino se traba.",
+				"INSCRIPCIÓN: Guardianes de piedra vigilan el Molino. Cada consulta rechazada despierta a más. Golpéalos con el garrote (J o clic)."
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
-			]
+			],
+			"write_first": true,
+			"ordered": true,
+			"answer": "SELECT nombre FROM sacos ORDER BY peso DESC"
 		},
 		{
 			"name": "El Salón del Mural",
 			"kind": "throne",
 			"id": "throne_ruins",
 			"quiz": {
-				"seconds": 20,
+				"seconds": 30,
 				"kinds": [
-					"funcion",
-					"funcion",
-					"funcion_doble"
+					"ordenar",
+					"ordenar",
+					"limite"
 				],
 				"problems": {
-					"funcion": {
+					"ordenar": {
 						"options": 4
 					},
-					"funcion_doble": {
-						"nested": 1,
+					"limite": {
 						"options": 4
 					}
 				}
 			},
 			"intro": [
 				"Las letras del Mural se despegan de la pared y forman un cuerpo dorado: el Guardián de las Ruinas.",
-				"EL GUARDIÁN DE LAS RUINAS: «Una función recibe y devuelve. Veamos si sabes qué devuelve la mía».",
-				"Golpéalo con J o clic y esquiva su pisotón. Cuando se cubra con su escudo te preguntará qué imprime una función. Tienes 20 segundos.",
+				"EL GUARDIÁN DE LAS RUINAS: «Todo tiene su lugar en la fila. Veamos si sabes quién va primero».",
+				"Golpéalo con J o clic y esquiva su pisotón. Cuando se cubra con su escudo te preguntará en qué orden salen las filas. Tienes 30 segundos.",
 				"Al entrar recuperas 2 corazones, y cada escudo que cae deja una poción."
 			],
 			"tunnel_intro": [
@@ -846,163 +767,160 @@
 		{
 			"name": "Las Campanas de la Cima",
 			"kind": "bells",
-			"file_name": "campanas.py",
+			"file_name": "campanas.sql",
 			"rounds": 3,
 			"bells": 5,
 			"objective_key": "objective_bells",
 			"wrong_key": "bells_wrong",
-			"solved_text": "¡Las campanas tocaron las tres partituras sin un error! El for recorrió cada lista. El sello de la salida se abre.",
-			"starter_code": "# La partitura cambia en cada ronda: es una LISTA de números.\n# Toca cada nota, en orden, con un for.\n\n",
+			"solved_text": "¡Las campanas tocaron las tres partituras sin un error! JOIN unió cada nota con su campana. El sello de la salida se abre.",
+			"starter_code": "-- La partitura dice el NOMBRE de cada campana (Sol, Luna...).\n-- La tabla campanas dice qué NÚMERO tiene cada nombre.\n-- Une las dos tablas con JOIN y pide el número de cada nota.\n\n",
 			"help": [
 				[
-					"notas = partitura.leer()",
-					"guarda la lista de notas, por ejemplo [3, 1, 4]"
+					"FROM partitura",
+					"empieza por la partitura (así las notas salen en su orden)"
 				],
 				[
-					"for n in notas:",
-					"repite lo de abajo una vez por cada nota; n vale cada nota"
+					"JOIN campanas",
+					"une la tabla campanas"
 				],
 				[
-					"    campana.tocar(n)",
-					"toca la campana n (dentro del for)"
+					"ON partitura.campana = campanas.nombre",
+					"cómo se emparejan: el nombre de la nota con el de la campana"
 				],
 				[
-					"print(notas)",
-					"muestra la lista en la consola"
+					"SELECT campanas.numero",
+					"tabla.columna: el número, de la tabla campanas"
 				]
 			],
 			"blocks": [
-				"notas = partitura.leer()",
-				"for n in notas:",
-				"campana.tocar(n)",
-				"campana.tocar(notas)",
-				"print(notas)"
+				"SELECT campanas.numero",
+				"FROM partitura",
+				"JOIN campanas",
+				"ON partitura.campana = campanas.nombre",
+				"ON partitura.orden = campanas.numero"
 			],
 			"intro": [
-				"INSCRIPCIÓN: Cinco campanas, numeradas del 1 al 5. La partitura dice cuáles tocar y en qué orden.",
-				"Usa el atril (E). partitura.leer() te da una LISTA, como [3, 1, 4]. Con «for n in notas:» lo de abajo se repite una vez por cada nota, y n vale esa nota.",
-				"Cada ronda trae una partitura distinta, más larga o más corta: el for se adapta solo.",
-				"INSCRIPCIÓN: Guardianes de piedra vigilan las Campanas. Cada código rechazado despierta a más. Golpéalos con el garrote (J o clic)."
+				"INSCRIPCIÓN: Cinco campanas, numeradas del 1 al 5, cada una con su nombre. La partitura no dice números: dice NOMBRES.",
+				"Usa el atril (E). Aquí aparece JOIN: une dos tablas, fila con fila. ON dice cómo se emparejan: «ON partitura.campana = campanas.nombre».",
+				"Con dos tablas, escribe tabla.columna (campanas.numero) para que el Códice sepa de cuál hablas. Cada ronda trae otra partitura y otros números.",
+				"INSCRIPCIÓN: Guardianes de piedra vigilan las Campanas. Cada consulta rechazada despierta a más. Golpéalos con el garrote (J o clic)."
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
-			]
+			],
+			"write_first": true,
+			"ordered": true,
+			"answer": "SELECT campanas.numero FROM partitura JOIN campanas ON partitura.campana = campanas.nombre ORDER BY partitura.orden"
 		},
 		{
 			"name": "La Balanza de las Pesas",
 			"kind": "scale",
-			"file_name": "balanza.py",
+			"file_name": "balanza.sql",
 			"rounds": 3,
 			"objective_key": "objective_scale",
 			"wrong_key": "scale_wrong",
-			"solved_text": "¡La balanza quedó en equilibrio las tres veces! Sumaste la lista con un for. El sello de la salida se abre.",
-			"starter_code": "# pesas.lista() da la lista de pesas (cambia en cada ronda).\n# Súmalas todas con un for y pon el total en la balanza.\n\n",
+			"solved_text": "¡La balanza quedó en equilibrio las tres veces! INNER JOIN dejó fuera las cajas vacías. El sello de la salida se abre.",
+			"starter_code": "-- Cada caja dice qué pesa lleva (pesa_id). La tabla pesas dice cuántos kilos tiene cada una.\n-- Algunas cajas están vacías: su pesa_id es 0 y no tiene pareja.\n-- Une las tablas con INNER JOIN y pide la caja y sus kilos.\n\n",
 			"help": [
 				[
-					"total = 0",
-					"empieza la suma en cero"
+					"SELECT cajas.caja, pesas.kilos",
+					"dos columnas, cada una de su tabla"
 				],
 				[
-					"for p in pesas.lista():",
-					"repite una vez por cada pesa; p vale esa pesa"
+					"FROM cajas",
+					"de la tabla cajas"
 				],
 				[
-					"    total = total + p",
-					"suma la pesa al total (dentro del for)"
+					"INNER JOIN pesas",
+					"une pesas: solo salen las filas que tienen pareja"
 				],
 				[
-					"balanza.poner(total)",
-					"pone el total (fuera del for, sin sangría)"
+					"ON cajas.pesa_id = pesas.id",
+					"la pesa de la caja es la que tiene ese id"
 				]
 			],
 			"blocks": [
-				"total = 0",
-				"for p in pesas.lista():",
-				"total = total + p",
-				"total = p",
-				"balanza.poner(total)"
+				"SELECT cajas.caja, pesas.kilos",
+				"FROM cajas",
+				"INNER JOIN pesas",
+				"ON cajas.pesa_id = pesas.id",
+				"ON cajas.pesa_id = pesas.kilos"
 			],
 			"intro": [
-				"INSCRIPCIÓN: La Balanza solo se equilibra con el peso exacto: la suma de todas las pesas.",
-				"Usa el atril (E). Empieza con total = 0 y, con un for, súmale cada pesa. Al final, fuera del for, pon el total en la balanza.",
-				"Si pones el total dentro del for, la balanza recibe un número en cada vuelta y se traba.",
-				"INSCRIPCIÓN: Guardianes de piedra vigilan la Balanza. Cada código rechazado despierta a más. Golpéalos con el garrote (J o clic)."
+				"INSCRIPCIÓN: La Balanza solo se equilibra con las pesas que de verdad están en las cajas.",
+				"Usa el atril (E). INNER JOIN es lo mismo que JOIN: une las filas que tienen pareja. Las cajas vacías (pesa_id 0) no encuentran ninguna pesa, así que se quedan afuera.",
+				"Pide la caja y sus kilos. La balanza sumará los kilos que traiga tu consulta.",
+				"INSCRIPCIÓN: Guardianes de piedra vigilan la Balanza. Cada consulta rechazada despierta a más. Golpéalos con el garrote (J o clic)."
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
-			]
+			],
+			"write_first": true,
+			"answer": "SELECT cajas.caja, pesas.kilos FROM cajas INNER JOIN pesas ON cajas.pesa_id = pesas.id"
 		},
 		{
-			"name": "Las Raíces Gemelas",
+			"name": "Los Árboles Gemelos",
 			"kind": "twins",
-			"file_name": "gemelas.py",
-			"function": "factorizar",
+			"file_name": "huerto.sql",
 			"rounds": 3,
 			"objective_key": "objective_twins",
 			"wrong_key": "twins_wrong",
-			"solved_text": "¡Los árboles gemelos florecen! Tu función encontró los dos números cada vez. El sello de la salida se abre.",
-			"starter_code": "# Las Raíces Gemelas piden factorizar x² + bx + c.\n# Busca dos números p y q con p + q = b y p * q = c.\n# Prueba todos los p de -10 a 10 con un for; q sale de b - p.\n\ndef factorizar(b, c):\n    \n",
+			"solved_text": "¡Los árboles gemelos florecen! Tu consulta unió las dos tablas y encontró a quienes cuidan los manzanos. El sello de la salida se abre.",
+			"starter_code": "-- Cada niño cuida un árbol (arbol_id). La tabla arboles dice qué fruta da cada uno.\n-- Pide el NOMBRE de los niños que cuidan un árbol de manzanas.\n-- Une las tablas con INNER JOIN y después filtra con WHERE.\n\n",
 			"help": [
 				[
-					"def factorizar(b, c):",
-					"los árboles la llaman con b y c"
+					"FROM ninos INNER JOIN arboles",
+					"une las dos tablas"
 				],
 				[
-					"for p in range(-10, 11):",
-					"prueba p = -10, -9, ... hasta 10"
+					"ON ninos.arbol_id = arboles.id",
+					"el árbol del niño es el que tiene ese id"
 				],
 				[
-					"    q = b - p",
-					"si p + q = b, entonces q = b - p"
+					"WHERE arboles.fruta = 'manzana'",
+					"después de unir, quédate con las manzanas"
 				],
 				[
-					"    if p * q == c:",
-					"¿se cumple también p · q = c?"
-				],
-				[
-					"        return [p, q]",
-					"devuelve la lista con los dos números"
+					"SELECT ninos.nombre",
+					"el nombre, de la tabla ninos"
 				]
 			],
 			"blocks": [
-				"def factorizar(b, c):",
-				"for p in range(-10, 11):",
-				"q = b - p",
-				"q = b + p",
-				"if p * q == c:",
-				"return [p, q]",
-				"return p * q"
+				"SELECT ninos.nombre",
+				"FROM ninos",
+				"INNER JOIN arboles",
+				"ON ninos.arbol_id = arboles.id",
+				"WHERE arboles.fruta = 'manzana'",
+				"WHERE ninos.nombre = 'manzana'"
 			],
 			"intro": [
-				"INSCRIPCIÓN: Dos árboles gemelos guardan un polinomio: x² + bx + c. Sus raíces son dos números p y q que suman b y multiplicados dan c.",
-				"Ejemplo: x² + 5x + 6 → 2 + 3 = 5 y 2 · 3 = 6, así que factorizar(5, 6) devuelve [2, 3].",
-				"Usa el atril (E). Esta sala junta todo: una función, un for que prueba números, un if que revisa y un return que devuelve una lista.",
-				"INSCRIPCIÓN: Guardianes de piedra vigilan los árboles. Cada código rechazado despierta a más. Golpéalos con el garrote (J o clic)."
+				"INSCRIPCIÓN: Dos árboles gemelos guardan dos tablas: la de los niños que cuidan el huerto y la de los árboles.",
+				"Esta sala junta todo lo que aprendiste: SELECT, FROM, INNER JOIN con su ON y, al final, WHERE para quedarte solo con los árboles de manzanas.",
+				"El orden de las partes es: SELECT … FROM … INNER JOIN … ON … WHERE …",
+				"INSCRIPCIÓN: Guardianes de piedra vigilan los árboles. Cada consulta rechazada despierta a más. Golpéalos con el garrote (J o clic)."
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
-			]
+			],
+			"write_first": true,
+			"answer": "SELECT ninos.nombre FROM ninos INNER JOIN arboles ON ninos.arbol_id = arboles.id WHERE arboles.fruta = 'manzana'"
 		},
 		{
 			"name": "El Trono de la Cima",
 			"kind": "throne",
 			"id": "throne_peak",
 			"quiz": {
-				"seconds": 20,
+				"seconds": 30,
 				"kinds": [
-					"lista",
-					"para",
-					"para_lista"
+					"unir",
+					"unir_cuantas",
+					"unir"
 				],
 				"problems": {
-					"lista": {
+					"unir": {
 						"options": 4
 					},
-					"para": {
-						"options": 4
-					},
-					"para_lista": {
-						"over_list": 1,
+					"unir_cuantas": {
 						"options": 4
 					}
 				}
@@ -1010,7 +928,7 @@
 			"intro": [
 				"En lo alto del templo, una sombra sin forma se enrosca sobre el trono: lo que queda del Sol Negro.",
 				"LA SOMBRA DEL SOL NEGRO: «Yo quemé las máquinas de Aritma. Tu Códice es lo último que me falta».",
-				"Golpéala con J o clic y esquiva su pisotón. Cuando se cubra con su escudo te preguntará por listas y por for. Tienes 20 segundos.",
+				"Golpéala con J o clic y esquiva su pisotón. Cuando se cubra con su escudo te preguntará por JOIN e INNER JOIN. Tienes 30 segundos.",
 				"Al entrar recuperas 2 corazones, y cada escudo que cae deja una poción. Es la última pelea: ¡tú puedes!"
 			],
 			"tunnel_intro": [

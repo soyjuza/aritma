@@ -1,10 +1,10 @@
-## Sala con una máquina de rondas (Bosque). Los textos vienen de chambers.json.
+## Sala con una máquina de consultas que prueba varias rondas. Los textos vienen de chambers.json.
 class_name RoundsLevel
 extends ChamberLevel
 
 var _in_hall := false
 
-@onready var machine: RoundsMachine = $Actores/Maquina
+@onready var machine: SqlMachine = $Actores/Maquina
 
 
 func wire() -> void:

@@ -3,10 +3,9 @@
 class_name SelfTest
 extends RefCounted
 
-const ROOTS_OK := "def despejar(a, b, c):\n    return (c - b) / a\n"
-const CRIBA_OK := "while tolva.quedan() > 0:\n    n = tolva.soltar()\n    if n % 2 == 0:\n        caliz.recibir()\n    else:\n        crisol.desintegrar()\n"
-
-const LOCK_OK := "nivel = sensor.leer()\nnivel = nivel + 3\ncompuerta.subir(nivel)\n"
+const CRIBA_OK := "SELECT numero\nFROM esferas\nWHERE color = 'oro'\nOR numero > 50\n"
+const LOCK_OK := "SELECT nivel\nFROM sensor\n"
+const MURAL_OK := "SELECT nombre, puntos FROM aritmanos ORDER BY puntos DESC LIMIT 3"
 ## Orden de antes: el resto de la prueba recorre Criba → Mural → Vórtice...
 const OLD_ORDER := ["filter", "roots", "vortex", "figures", "core", "throne"]
 
@@ -25,15 +24,14 @@ func run() -> void:
 		print("SELFTEST ", "OK" if _failures == 0 else "FALLO (%d)" % _failures)
 		game.get_tree().quit()
 		return
-	ScriptLangTests.new().run_all(_check)
+	_test_sql()
 	_test_quality()
 	_test_health_and_alarm_rules()
 	await _test_movement()
 	await _test_town_and_gate()
 	await _test_corridor()
-	_test_parity_filter()
+	_test_sphere_rules()
 	await _test_criba()
-	_test_roots_trial()
 	await _test_presses()
 	await _test_mural()
 	_test_mine_rules()
@@ -47,11 +45,16 @@ func run() -> void:
 	await _test_mine_practices()
 	await _test_quests()
 	await _test_forest()
-	_test_new_quizzes()
+	await _test_new_quizzes()
 	await _test_world()
 	await _test_late_chapters()
 	print("SELFTEST ", "OK" if _failures == 0 else "FALLO (%d)" % _failures)
 	game.get_tree().quit(0 if _failures == 0 else 1)
+
+
+## El SQL del Códice, sin el juego.
+func _test_sql() -> void:
+	SqlLangTests.new().run_all(_check)
 
 
 func _check(condition: bool, label: String) -> void:
@@ -158,19 +161,21 @@ func _test_town_and_gate() -> void:
 	_check(game.machine.current is CodexState and game.codex.docked and game.rig.fixed_shot, "Códice: se abre al costado y la cámara encuadra la puerta")
 	# Bloques: arrastrar la pieza con el ratón
 	var board := game.codex.board
-	_check(board.visible and not game.codex.editor.visible and town.gate.session.blocks.size() == 2, "Bloques: el Códice abre con las piezas y sin el editor de texto")
-	var piece: int = town.gate.session.blocks.find("puerta.abrir()")
+	_check(board.visible and not game.codex.editor.visible and town.gate.session.blocks.size() == 3, "Bloques: el Códice abre con las piezas y sin el editor de texto")
+	var piece: int = town.gate.session.blocks.find("SELECT *")
 	var from: Vector2 = (board.tray_layout()[piece] as Rect2).get_center()
 	var origin := board.get_global_rect().position
 	_mouse(origin + from, true)
 	_mouse(origin + Vector2(80, BlockBoard.HEADER + 40), false, true)
 	_mouse(origin + Vector2(80, BlockBoard.HEADER + 40), false)
 	await _wait(0.1)
-	_check(game.codex.source() == "puerta.abrir()\n" and board.session.free_pieces().size() == 1, "Bloques: arrastrar «puerta.abrir()» al programa lo arma")
+	_check(game.codex.source() == "SELECT *\n" and board.session.free_pieces().size() == 2, "Bloques: arrastrar «SELECT *» a la consulta la arma")
 	game.codex.toggle_mode()
-	_check(game.codex.editor.visible and game.codex.editor.text == "puerta.abrir()\n", "Bloques: «Escribir a mano» pasa el programa al editor")
+	_check(game.codex.editor.visible and game.codex.editor.text == "SELECT *\n", "Bloques: «Escribir a mano» pasa la consulta al editor")
 	game.codex.toggle_mode()
-	_check(board.visible and game.codex.source() == "puerta.abrir()\n", "Bloques: «Usar bloques» vuelve con las piezas como estaban")
+	_check(board.visible and game.codex.source() == "SELECT *\n", "Bloques: «Usar bloques» vuelve con las piezas como estaban")
+	board.place(board.session.blocks.find("FROM puerta"), 1, 0)
+	_check(game.codex.source() == "SELECT *\nFROM puerta\n", "Bloques: la segunda pieza va debajo de la primera")
 	game.machine.current.run()
 	var t := 0.0
 	while not town.gate.is_solved and t < 5.0:
@@ -178,7 +183,7 @@ func _test_town_and_gate() -> void:
 		t += 0.1
 	await _wait(0.8)
 	game.dialog.close()
-	_check(town.gate.gate_open and game.machine.current is PlayState, "Códice + Adapter: puerta.abrir() abre la puerta del templo")
+	_check(town.gate.gate_open and game.machine.current is PlayState, "Códice + SQL: SELECT * FROM puerta abre la puerta del templo")
 	# Entrar al templo
 	game.player.place(town.get_node("Zonas/EntradaTemplo").global_position + Vector2(0, 80), Vector2.UP)
 	await _walk_up_until(func(): return game.level is PracticeLevel, 6.0)
@@ -201,25 +206,25 @@ func _test_town_and_gate() -> void:
 	_check(game.level is FilterLevel, "Orden viejo para las pruebas: la Criba carga sola")
 
 
-## Sala 1 del capítulo 1: variables.
+## Sala 1 del capítulo 1: SELECT de una columna.
 func _test_lock() -> void:
 	var lvl := game.level as LockLevel
 	game.dialog.close()
 	var m := lvl.machine
-	var sandbox := ScriptSandbox.new()
-	var fixed := m.evaluate("compuerta.subir(5)\n", sandbox)
-	var still := m.evaluate("nivel = sensor.leer()\n", sandbox)
-	var bad := m.evaluate("compuerta.subir(\"alto\")\n", sandbox)
-	_check(not fixed.success or fixed.commands.all(func(c): return c.sensor == 2), "Compuerta: un número fijo no sirve en las 3 rondas")
-	_check(not still.success and "no se movió" in still.message, "Compuerta: sin compuerta.subir() avisa que no se movió")
-	_check(not bad.ok, "Compuerta: subir() con texto es un error del código")
-	var good := m.evaluate(LOCK_OK, sandbox)
-	_check(good.success and good.commands.size() == 3, "Compuerta: nivel = sensor.leer(); nivel = nivel + 3; compuerta.subir(nivel) pasa las 3 rondas")
+	var engine := SqlEngine.new()
+	var star := m.evaluate("SELECT * FROM sensor", engine)
+	var other := m.evaluate("SELECT color FROM sensor", engine)
+	var bad := m.evaluate("SELECT nivel FROM sensores", engine)
+	_check(star.ok and not star.success and "columnas" in star.message, "Compuerta: SELECT * trae columnas de más y la máquina lo dice")
+	_check(other.ok and not other.success, "Compuerta: otra columna no sirve")
+	_check(not bad.ok and "«sensor»" in bad.error, "Compuerta: una tabla mal escrita es un error que sugiere el nombre bueno")
+	var good := m.evaluate(LOCK_OK, engine)
+	_check(good.success and good.commands.size() == 3 and good.output.size() > 2, "Compuerta: SELECT nivel FROM sensor pasa las 3 rondas y la consola muestra la tabla")
 	await m.perform(good)
 	_check(lvl.solved and m.is_solved, "Compuerta: al acertar se abre el sello de la salida")
 	# Capítulos
 	var kinds := game.data.chambers.map(func(c): return c.kind)
-	_check(kinds == ["lock", "vortex", "figures", "core", "throne"], "Capítulo 1: Compuerta, Faro, Figuras, Sendero y Jefe, sin bucles")
+	_check(kinds == ["lock", "vortex", "figures", "core", "throne"], "Capítulo 1: Compuerta, Faro, Figuras, Sendero y Jefe")
 	var all_ok := true
 	for chapter in game.data.chapters:
 		for id in chapter.chambers:
@@ -271,42 +276,18 @@ func _test_corridor() -> void:
 	_check(lvl._in_hall and lvl.objective_key == "objective_filter_machine", "Pasillo: se llega caminando a la sala de la Criba")
 
 
-func _run_filter(rules: ParityFilter, code: String) -> Array:
-	var sandbox := ScriptSandbox.new()
-	var text := func(key, args): return game.data.message(key, args)
-	var errors: Array = []
-	for i in rules.rounds.size():
-		rules.start_round(i)
-		var result := sandbox.run(code, FilterAdapter.objects(rules, text))
-		if not result.ok:
-			errors.append(result.error_text())
-			break
-		rules.end_round()
-		if rules.failed():
-			break
-	return errors
-
-
-func _test_parity_filter() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 42
-	var config: Array = game.data.chamber_data(0).get("rounds", [])
-	var rules := ParityFilter.new(config, rng)
-	_check(rules.rounds.size() == 3, "Criba: hay 3 rondas")
-	var errors := _run_filter(rules, CRIBA_OK)
-	_check(errors.is_empty() and not rules.failed(), "Criba: el programa correcto pasa las 3 rondas")
-	rules = ParityFilter.new(config, rng)
-	_run_filter(rules, "while tolva.quedan() > 0:\n    tolva.soltar()\n    caliz.recibir()\n")
-	_check(rules.fault == ParityFilter.Fault.WRONG_SIDE, "Criba: mandar todo al cáliz falla en la primera impar")
-	rules = ParityFilter.new(config, rng)
-	var hand := ""
-	for v in rules.rounds[0]:
-		hand += "tolva.soltar()\n" + ("caliz.recibir()\n" if v % 2 == 0 else "crisol.desintegrar()\n")
-	errors = _run_filter(rules, hand)
-	_check((rules.failed() or not errors.is_empty()) and rules.round_index >= 1, "Criba: copiar a mano la ronda 1 no sirve para las ocultas")
-	rules = ParityFilter.new(config, rng)
-	errors = _run_filter(rules, "caliz.recibir()\n")
-	_check(errors.size() == 1 and "soltar" in errors[0], "Criba: recibir sin soltar da un error claro")
+## Reglas de la Criba, sin dibujar: cada esfera va al lado que dice la consulta.
+func _test_sphere_rules() -> void:
+	var rows := [[12, "oro"], [70, "gris"], [30, "gris"]]
+	var sorter := SphereSorter.new()
+	var ok := sorter.add_round(0, rows, ["12", "70"], ["12", "70"], true)
+	_check(ok and sorter.commands.size() == 8, "Criba: SphereSorter manda cada esfera a su lado (8 órdenes)")
+	sorter = SphereSorter.new()
+	ok = sorter.add_round(0, rows, ["12"], ["12", "70"], true)
+	_check(not ok and sorter.fault_value == 70, "Criba: si la consulta olvida una esfera, cae mal y la Criba se traba")
+	sorter = SphereSorter.new()
+	ok = sorter.add_round(0, rows, ["12", "70"], ["12", "70"], false)
+	_check(not ok and sorter.commands[-1] is FilterCommand.Jam, "Criba: con columnas de más, la Criba se traba al final")
 
 
 func _test_criba() -> void:
@@ -315,10 +296,12 @@ func _test_criba() -> void:
 		return
 	game.dialog.close()
 	var machine := lvl.machine
-	var first_round: Array = machine.rules.rounds[0].duplicate()
+	var first: Array = machine._dbs[0]
+	var hidden: Array = machine._dbs[1]
 	game.open_codex(machine.session)
 	await _wait(0.8)
-	game.codex.write("while tolva.quedan() > 0:\n    tolva.soltar()\n    caliz.recibir()\n")
+	_check(game.codex.editor.visible and not game.codex.board.visible, "Códice: desde la Cueva se abre para escribir a mano")
+	game.codex.write("SELECT numero FROM esferas WHERE color = 'oro'\n")
 	Engine.time_scale = 4.0
 	game.machine.current.run()
 	await _wait(0.2)
@@ -327,7 +310,7 @@ func _test_criba() -> void:
 	while not game.codex.visible and t < 40.0:
 		await _wait(0.2)
 		t += 0.2
-	_check(not machine.is_solved and machine.rules.rounds[0] != first_round, "Máquina: con un programa equivocado se traba y trae esferas nuevas")
+	_check(not machine.is_solved and machine._dbs[0] == first and machine._dbs[1] != hidden, "Máquina: con una consulta equivocada se traba; la ronda que se ve queda y las ocultas cambian")
 	Engine.time_scale = 1.0
 	await _test_guardians(lvl)
 	await _test_runic(lvl)
@@ -337,7 +320,7 @@ func _test_criba() -> void:
 	await _wait(0.8)
 	Engine.time_scale = 4.0
 	_arm_blocks(CRIBA_OK)
-	_check(game.codex.source() == CRIBA_OK, "Bloques: la Criba se arma con las piezas y su sangría")
+	_check(game.codex.source() == CRIBA_OK, "Bloques: la Criba se arma con las piezas, una por línea")
 	game.machine.current.run()
 	t = 0.0
 	while not machine.is_solved and t < 60.0:
@@ -609,16 +592,16 @@ func _test_vortex() -> void:
 	game.open_codex(lvl.machine.session)
 	await _wait(0.6)
 	Engine.time_scale = 4.0
-	game.codex.write("luces.apagar()\n")
+	game.codex.write("SELECT color FROM faro\n")
 	game.machine.current.run()
 	await _wait(0.3)
 	var t := 0.0
 	while not game.codex.visible and t < 20.0:
 		await _wait(0.2)
 		t += 0.2
-	_check(not lvl.machine.is_solved and not lvl.board.powered and game.machine.current is CodexState, "Faro: un programa que no enciende las luces no enciende el tablero (y no despierta guardianes)")
+	_check(not lvl.machine.is_solved and not lvl.board.powered and game.machine.current is CodexState, "Faro: una consulta que no trae el brillo no enciende el tablero (y no despierta guardianes)")
 	# El error sigue en la consola al volver
-	game.codex.write("luces.encender(\n")
+	game.codex.write("SELECT color, FROM faro\n")
 	game.machine.current.run()
 	await _wait(0.3)
 	var before: String = game.codex.console.get_parsed_text()
@@ -626,7 +609,7 @@ func _test_vortex() -> void:
 	game.open_codex(lvl.machine.session)
 	await _wait(0.3)
 	_check(game.codex.console.get_parsed_text() == before and before.count("\n") > 3, "Códice: al salir y volver, la consola conserva los errores")
-	game.codex.write("luces.encender()\n")
+	game.codex.write("SELECT color, brillo FROM faro\n")
 	game.machine.current.run()
 	t = 0.0
 	while not lvl.board.powered and t < 30.0:
@@ -635,7 +618,7 @@ func _test_vortex() -> void:
 	Engine.time_scale = 1.0
 	await _wait(0.8)
 	game.dialog.close()
-	_check(lvl.board.powered and game.machine.current is PlayState, "Faro: con luces.encender() el tablero se enciende")
+	_check(lvl.board.powered and game.machine.current is PlayState, "Faro: con SELECT color, brillo FROM faro el tablero se enciende")
 	# E destapa y Q pone bandera
 	var start := Vector2i(3, 6)
 	game.player.place(lvl.board.cell_center(start), Vector2.UP)
@@ -759,10 +742,10 @@ func _test_boss(lvl: ThroneLevel) -> void:
 		await _wait(0.2)
 		t += 0.2
 	var waited := 0.0
-	while game.machine.current is QuizState and waited < 26.0:
+	while game.machine.current is QuizState and waited < 36.0:
 		await _wait(0.5)
 		waited += 0.5
-	_check(waited >= 20.0 and lvl.alarm.fighting() and lvl.alarm.alive_count() == 6, "Jefe: sin responder, a los 20 s llama a 6 guardianes")
+	_check(waited >= 30.0 and lvl.alarm.fighting() and lvl.alarm.alive_count() == 6, "Jefe: sin responder, a los 30 s llama a 6 guardianes")
 	# Tala cae: la pelea empieza de nuevo
 	lvl.restart_after_death()
 	await _wait(0.5)
@@ -789,36 +772,51 @@ func _test_boss(lvl: ThroneLevel) -> void:
 	_check(game.skills.earned == points_before + 2, "Habilidades: vencer al jefe da 2 puntos")
 
 
-## Cada problema tiene una sola respuesta buena.
+## Cada problema tiene una sola respuesta buena, y es la que da el motor SQL.
 func _test_boss_quiz() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 9
-	var settings: Dictionary = game.data.chamber_data(5).get("quiz", {}).get("problems", {})
+	var settings: Dictionary = game.data.chamber_data(5).get("quiz", {}).get("problems", {}).duplicate()
+	settings["orden"] = game.quests.quest("tuerca").get("settings", {})
 	var quiz := BossQuiz.new(game.data.message, settings)
 	var ok := true
-	var all_kinds := ["variable", "orden", "paridad", "multiplo", "despejar", "si", "si_sino"]
-	for i in 500:
-		var kind: String = all_kinds[i % all_kinds.size()]
+	var kinds := quiz.kinds()
+	for i in 600:
+		var kind: String = kinds[i % kinds.size()]
 		var q := quiz.make(kind, rng)
 		var options: Array = q.options
 		var unique := {}
 		for o in options:
 			unique[o] = true
-		ok = ok and unique.size() == options.size() and q.answer >= 0 and q.answer < options.size()
-		ok = ok and options.size() == (2 if kind == "paridad" else 4)
-	_check(ok, "Prueba del jefe: 500 problemas, opciones distintas y una sola buena")
-	# La respuesta de "orden" arma el programa en su orden
+		ok = ok and unique.size() == options.size() and q.answer >= 0 and q.answer < options.size() and options.size() == 4
+	_check(ok, "Prueba del jefe: 600 problemas de SQL, 4 opciones distintas y una sola buena")
+	# La respuesta de "orden" arma la consulta en su orden
 	var o := quiz.make("orden", rng)
 	var lines: Array = []
 	for letter in String(o.options[o.answer]).split(", "):
 		lines.append(String(o.code[OrderProblem.LETTERS.find(letter)]).substr(4))
-	var programs: Array = settings.orden.programs
-	_check(lines in programs, "Prueba del jefe: el orden correcto arma el programa")
-	var v := quiz.make("variable", rng)
-	_check(v.code.size() >= 2 and int(v.options[v.answer]) >= 0, "Prueba del jefe: variable muestra código y su valor")
-	var p := quiz.make("despejar", rng)
-	var parts := String(p.question).split(" = ")
-	_check(p.options[p.answer] != "" and "x" in parts[0], "Prueba del jefe: despejar muestra ax + b = c")
+	_check(lines in settings.orden.programs, "Prueba del jefe: el orden correcto arma la consulta")
+	# La buena es lo que de verdad trae la consulta
+	var engine := SqlEngine.new()
+	var right := true
+	for kind in ["columnas", "donde", "y_o", "ordenar", "limite", "unir"]:
+		for i in 40:
+			var q := quiz.make(kind, rng)
+			var tables: Array = q.tables.map(func(t): return SqlTable.from_data(t))
+			var got := engine.run(" ".join(q.code), tables)
+			var text := ", ".join(got.rows.map(func(r): return SqlEngine.show(r[0]))) if not got.rows.is_empty() else game.data.message("quiz_sql_none")
+			right = right and got.ok and q.options[q.answer] == text
+	_check(right, "Prueba del jefe: en SELECT, WHERE, AND/OR, ORDER BY y JOIN la buena es lo que trae la consulta")
+	var counted := true
+	for kind in ["cuantas_columnas", "donde_cuantas", "y_o_cuantas", "unir_cuantas"]:
+		for i in 40:
+			var q := quiz.make(kind, rng)
+			var got := engine.run(" ".join(q.code), q.tables.map(func(t): return SqlTable.from_data(t)))
+			var n := got.columns.size() if kind == "cuantas_columnas" else got.rows.size()
+			counted = counted and got.ok and int(q.options[q.answer]) == n
+	_check(counted, "Prueba del jefe: «¿cuántas filas/columnas?» cuenta lo que trae la consulta")
+	var j := quiz.make("unir", rng)
+	_check(j.tables.size() == 2 and "JOIN" in str(j.code), "Prueba del jefe: JOIN muestra las dos tablas")
 
 
 ## Prensas de la Sala 2.
@@ -861,41 +859,17 @@ func _test_presses() -> void:
 	_check(lvl._in_hall, "Prensas: se llega caminando a la sala del Mural")
 
 
-## Reglas del Mural.
-func _test_roots_trial() -> void:
-	_check(RootsTrial.equation(3, 5, 20) == "3x + 5 = 20" and RootsTrial.equation(2, -4, 10) == "2x − 4 = 10" and RootsTrial.equation(4, 9, -7) == "4x + 9 = −7", "Mural: la ecuación se escribe con sus signos")
-	var case := {"a": 3, "b": 5, "c": 20, "x": 5}
-	_check(RootsTrial.judge(case, 5) == RootsTrial.Verdict.RIGHT and RootsTrial.judge(case, 5.0) == RootsTrial.Verdict.RIGHT, "Mural: 5 y 5.0 son correctos para 3x + 5 = 20")
-	_check(RootsTrial.judge(case, 15) == RootsTrial.Verdict.WRONG, "Mural: 15 (olvidar dividir) está mal")
-	_check(RootsTrial.judge(case, "5") == RootsTrial.Verdict.BAD_SHAPE and RootsTrial.judge(case, null) == RootsTrial.Verdict.BAD_SHAPE, "Mural: un texto o nada (sin return) no sirve")
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 5
-	var trial := RootsTrial.new(game.data.chamber_data(1).get("cases", []), rng)
-	var kinds_ok: bool = trial.cases.size() == 3 and trial.cases[1].b < 0 and trial.cases[2].x < 0
-	for c in trial.cases:
-		kinds_ok = kinds_ok and c.a * c.x + c.b == c.c
-	_check(kinds_ok, "Mural: tres ecuaciones (b positivo, b negativo, x negativa) con solución entera")
-	var sandbox := ScriptSandbox.new()
-	var program := sandbox.run(ROOTS_OK, {}, 2000)
-	var all_right := true
-	for i in 100:
-		var c := RootsTrial.make_case(["plus", "minus", "negative"][i % 3], rng)
-		var answer := sandbox.call_function(program, "despejar", [c.a, c.b, c.c])
-		all_right = all_right and answer[0] and RootsTrial.judge(c, answer[1]) == RootsTrial.Verdict.RIGHT
-	_check(all_right, "Mural: return (c - b) / a despeja 100 ecuaciones al azar")
-
-
-## La Sala 2 completa.
+## La Sala del Mural: ORDER BY y LIMIT.
 func _test_mural() -> void:
 	var lvl := game.level as RootsLevel
 	if lvl == null:
 		return
 	game.dialog.close()
 	var machine := lvl.machine
-	var cases_before: Array = machine.trial.cases.duplicate(true)
+	var first: Array = machine._dbs[0]
 	game.open_codex(machine.session)
 	await _wait(0.6)
-	game.codex.write("def despejar(a, b, c):\n    return c - b\n")
+	game.codex.write("SELECT nombre, puntos FROM aritmanos ORDER BY puntos LIMIT 3\n")
 	Engine.time_scale = 4.0
 	game.machine.current.run()
 	await _wait(0.2)
@@ -904,24 +878,24 @@ func _test_mural() -> void:
 		await _wait(0.2)
 		t += 0.2
 	Engine.time_scale = 1.0
-	_check(not machine.is_solved and machine.trial.cases != cases_before, "Mural: olvidar dividir entre a no sirve y el Mural cambia sus ecuaciones")
+	_check(not machine.is_solved and machine._dbs[0] == first, "Mural: ordenar al revés no sirve; la tabla que se ve sigue igual")
 	_check(lvl.alarm.level == 1 and lvl.machine.locked, "Sala 2: el error del Mural despierta a sus guardianes y lo bloquea")
 	await _clear_guardians(lvl)
 	game.open_codex(machine.session)
 	await _wait(0.6)
-	game.codex.write("def despejar(a, b, c):\n    return %d\n" % machine.trial.cases[0].x)
+	game.codex.write("SELECT nombre, puntos FROM aritmanos ORDER BY puntos DESC\n")
 	game.machine.current.run()
 	t = 0.0
 	await _wait(0.2)
 	while not game.machine.current is PlayState and t < 30.0:
 		await _wait(0.2)
 		t += 0.2
-	_check(not machine.is_solved and lvl.alarm.level == 2, "Mural: devolver la x de la primera ecuación a mano no sirve (y la alarma sube a 2)")
+	_check(not machine.is_solved and lvl.alarm.level == 2, "Mural: sin LIMIT sobran filas (y la alarma sube a 2)")
 	await _clear_guardians(lvl)
 	game.open_codex(machine.session)
 	await _wait(0.6)
 	Engine.time_scale = 4.0
-	game.codex.write(ROOTS_OK)
+	game.codex.write(MURAL_OK)
 	game.machine.current.run()
 	t = 0.0
 	while not machine.is_solved and t < 40.0:
@@ -930,7 +904,7 @@ func _test_mural() -> void:
 	Engine.time_scale = 1.0
 	await _wait(1.0)
 	game.dialog.close()
-	_check(machine.is_solved and lvl.solved, "Mural: return (c - b) / a despeja las tres ecuaciones")
+	_check(machine.is_solved and lvl.solved, "Mural: ORDER BY puntos DESC LIMIT 3 llena las tres placas")
 	game.player.place(Level.cell_center(Vector2i(27, 12)), Vector2.RIGHT)
 	_key("move_right", true)
 	t = 0.0
@@ -947,14 +921,14 @@ func _test_save_and_load() -> void:
 	game.saves.path = "user://save_prueba.cfg"
 	game.load_chamber(0)
 	var filter := game.level as FilterLevel
-	filter.machine.session.code = "print(1)\n"
+	filter.machine.session.code = "SELECT numero FROM esferas\n"
 	filter.machine.mark_solved()
 	await _wait(0.3)
 	game.save_game()
 	game.load_game()
 	await _wait(0.3)
 	filter = game.level as FilterLevel
-	_check(filter != null and filter.solved and filter.machine.is_solved and filter.machine.session.code == "print(1)\n", "Guardar: la Sala 1 resuelta sigue resuelta al cargar, con el código en la máquina")
+	_check(filter != null and filter.solved and filter.machine.is_solved and filter.machine.session.code == "SELECT numero FROM esferas\n", "Guardar: la Sala 1 resuelta sigue resuelta al cargar, con el código en la máquina")
 	_check(game.player.global_position.distance_to(filter.room_entrance()) < 4.0, "Guardar: al cargar, Tala aparece en la entrada de la sala")
 	game.dialog.close()
 	game.load_chamber(2)
@@ -978,15 +952,14 @@ func _test_save_and_load() -> void:
 	game.saves.path = SaveRepository.PATH
 
 
-## Arma el programa con las piezas, en orden y con su sangría.
+## Arma la consulta con las piezas, una por línea.
 func _arm_blocks(code: String) -> void:
 	var board := game.codex.board
 	board.session.use_blocks = true
 	board.session.placed.clear()
 	for line in code.split("\n"):
 		if line.strip_edges() != "":
-			var indent := (line.length() - line.strip_edges(true, false).length()) / 4
-			board.place(board.session.blocks.find(line.strip_edges()), board.session.placed.size(), indent)
+			board.place(board.session.blocks.find(line.strip_edges()), board.session.placed.size(), 0)
 	game.codex.show_mode()
 
 
@@ -1278,7 +1251,7 @@ func _test_quests() -> void:
 	_check(String(mila.quest_state.call()) == "", "Misiones: Mila tiene una misión para dar («!»)")
 	game.talk_to(mila)
 	await _finish_dialog()
-	_check(game.quests.state("cuentas") == "active" and game.machine.current is QuizState, "Misiones: al hablar con Mila empieza su misión y sale la primera cuenta")
+	_check(game.quests.state("cuentas") == "active" and game.machine.current is QuizState, "Misiones: al hablar con Mila empieza su misión y sale la primera consulta")
 	await _answer_quiz(false)
 	await _finish_dialog()
 	_check(game.quests.state("cuentas") == "active" and game.machine.current is PlayState, "Misiones: si falla no pasa nada malo; se vuelve a hablar con ella")
@@ -1287,11 +1260,11 @@ func _test_quests() -> void:
 	for i in 3:
 		await _answer_quiz(true)
 	await _finish_dialog()
-	_check(game.quests.state("cuentas") == "done" and game.skills.free_points() == 1, "Misiones: 3 cuentas bien → 1 punto de habilidad")
+	_check(game.quests.state("cuentas") == "done" and game.skills.free_points() == 1, "Misiones: 3 consultas bien → 1 punto de habilidad")
 	game.quests.talk("tuerca")
 	await _finish_dialog()
 	var q := game.machine.current as QuizState
-	_check(q != null and "tuerca." in str(q.quiz.get("code", [])), "Misiones: Tuerca pide ordenar sus propias órdenes")
+	_check(q != null and "SELECT" in str(q.quiz.get("code", [])), "Misiones: Tuerca pide ordenar las partes de una consulta")
 	for i in 2:
 		await _answer_quiz(true)
 	await _finish_dialog()
@@ -1345,39 +1318,29 @@ func _test_quests() -> void:
 
 ## Capítulo 2: el Bosque (if / else).
 func _test_forest() -> void:
-	# Preguntas de if: la respuesta buena es lo que de verdad imprime el programa
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 21
-	var quiz := BossQuiz.new(game.data.message)
-	var sandbox := ScriptSandbox.new()
-	var ok := true
-	for i in 200:
-		var q := quiz.make("si" if i % 2 == 0 else "si_sino", rng)
-		var result := sandbox.run("\n".join(q.code) + "\n", {})
-		var printed := " ".join(result.output) if not result.output.is_empty() else game.data.message("quiz_if_nothing")
-		ok = ok and result.ok and String(q.options[q.answer]).replace("−", "-") == printed and q.options.size() == 4
-	_check(ok, "Bosque: 200 preguntas de if, la respuesta buena es lo que imprime el programa")
-	# Las máquinas
+	var engine := SqlEngine.new()
 	game.data.use_chapter(1)
 	_check(game.data.chambers.map(func(c): return DataRepository.room_id(c)) == ["bridge", "garden", "throne_forest"], "Bosque: capítulo 2 = Puente, Jardín y Guardián del Bosque")
 	game.load_chamber(0)
 	await _wait(0.5)
 	game.dialog.close()
 	var bridge := game.level as RoundsLevel
-	var good := "peso = carreta.peso()\nif peso > 10:\n    puente.reforzar()\n"
-	_check(bridge != null and bridge.machine.evaluate(good, sandbox).success, "Puente: if peso > 10: puente.reforzar() pasa las 3 rondas")
-	_check(not bridge.machine.evaluate("puente.reforzar()\n", sandbox).success, "Puente: reforzar siempre (sin if) no sirve")
-	var report := bridge.machine.evaluate(good, sandbox)
+	var good := "SELECT nombre\nFROM carretas\nWHERE peso > 10\n"
+	_check(bridge != null and bridge.machine.evaluate(good, engine).success, "Puente: SELECT nombre FROM carretas WHERE peso > 10 pasa las 3 rondas")
+	var all := bridge.machine.evaluate("SELECT nombre FROM carretas", engine)
+	_check(all.ok and not all.success and "Sobra la fila" in all.message, "Puente: sin WHERE sobran carretas y la máquina dice cuál")
+	var equal := bridge.machine.evaluate("SELECT nombre FROM carretas WHERE peso >= 10", engine)
+	_check(not equal.success and "Ronda 2" in equal.message, "Puente: con >= se cuela la carreta de 10 justo (ronda 2)")
+	var report := bridge.machine.evaluate(good, engine)
 	await bridge.machine.perform(report)
 	_check(bridge.solved, "Puente: al acertar se abre la salida")
 	game.load_chamber(1)
 	await _wait(0.5)
 	game.dialog.close()
 	var garden := game.level as RoundsLevel
-	var good2 := "agua = maceta.medir()\nif agua < 5:\n    maceta.regar()\nelse:\n    maceta.asolear()\n"
-	_check(garden != null and garden.machine.evaluate(good2, sandbox).success, "Jardín: if/else con regar y asolear pasa las 3 rondas")
-	var only_if := garden.machine.evaluate("agua = maceta.medir()\nif agua < 5:\n    maceta.regar()\n", sandbox)
-	_check(not only_if.success and "nada" in only_if.message, "Jardín: sin else, la maceta mojada se queda sin sol (avisa «nada»)")
+	_check(garden != null and garden.machine.evaluate("SELECT nombre FROM macetas WHERE tierra = 'seca'", engine).success, "Jardín: WHERE tierra = 'seca' pasa las 3 rondas")
+	var bare := garden.machine.evaluate("SELECT nombre FROM macetas WHERE tierra = seca", engine)
+	_check(not bare.ok and "'seca'" in bare.error, "Jardín: sin comillas es un error que explica las comillas")
 	game.load_chamber(2)
 	await _wait(0.5)
 	game.dialog.close()
@@ -1449,24 +1412,23 @@ func _test_forest() -> void:
 	game.quests.reset()
 	game.data.use_chapter(0)
 
-## Preguntas de while, funciones, listas y for: la buena es lo que imprime el programa.
+## Cada máquina rechaza las consultas que se parecen pero no son, y acepta otra forma de escribir la buena.
 func _test_new_quizzes() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 33
-	var quiz := BossQuiz.new(game.data.message)
-	var sandbox := ScriptSandbox.new()
-	for kind in ["mientras", "mientras_veces", "funcion", "funcion_doble", "lista", "para", "para_lista"]:
-		var ok := true
-		for i in 150:
-			var q := quiz.make(kind, rng)
-			var code: Array = q.code.duplicate()
-			if kind == "mientras_veces":
-				# Cuenta las vueltas en vez de imprimir la variable
-				code = ["vueltas = 0"] + code.slice(0, 3) + ["    vueltas = vueltas + 1", "print(vueltas)"]
-			var result := sandbox.run("\n".join(code) + "\n", {})
-			ok = ok and result.ok and q.options.size() == 4 and String(q.options[q.answer]) == " ".join(result.output)
-			ok = ok and q.options.size() == q.options.filter(func(o): return q.options.count(o) == 1).size()
-		_check(ok, "Preguntas «%s»: 150 al azar, la respuesta buena es lo que imprime" % kind)
+	var engine := SqlEngine.new()
+	var rooms := [
+		[1, 0, "select NOMBRE from CARRETAS where 10 < peso;"],
+		[1, 1, "SELECT nombre FROM macetas WHERE NOT tierra = 'mojada'"],
+		[2, 0, "SELECT nombre FROM tanques WHERE valvula = 'abierta' AND nivel <= 4"],
+		[3, 0, "SELECT s.nombre FROM sacos AS s ORDER BY s.peso DESC"],
+	]
+	for r in rooms:
+		game.data.use_chapter(r[0])
+		game.load_chamber(r[1])
+		await _wait(0.2)
+		game.dialog.close()
+		var report: CodeMachine.Report = (game.level as RoundsLevel).machine.evaluate(r[2], engine)
+		_check(report.success, "Otra forma de escribirla también vale: %s" % r[2])
+	game.data.use_chapter(0)
 
 
 ## El mundo: mapas unidos por los bordes, rocas que se abren y salidas que llegan a algún lado.
@@ -1533,7 +1495,7 @@ func _test_world() -> void:
 
 ## Capítulos 3, 4 y 5: salas, jefes y final.
 func _test_late_chapters() -> void:
-	var sandbox := ScriptSandbox.new()
+	var engine := SqlEngine.new()
 	var plan := [
 		[2, ["pump", "filter", "throne_cave"], "EL GUARDIÁN DE LA CUEVA"],
 		[3, ["mill", "roots", "throne_ruins"], "EL GUARDIÁN DE LAS RUINAS"],
@@ -1547,11 +1509,11 @@ func _test_late_chapters() -> void:
 		game.dialog.close()
 		_check((game.level as ThroneLevel).boss.title == p[2], "Capítulo %d: el jefe es %s" % [p[0] + 1, p[2]])
 	var cases := [
-		[2, 0, "while tanque.nivel() < 10:\n    bomba.bombear()\n", ["bomba.bombear()\n", "while tanque.nivel() <= 10:\n    bomba.bombear()\n"], "Bomba"],
-		[3, 0, "def moler(sacos):\n    return sacos * 3\n", ["def moler(sacos):\n    print(sacos * 3)\n", "def moler(sacos):\n    return sacos + 3\n"], "Molino"],
-		[4, 0, "notas = partitura.leer()\nfor n in notas:\n    campana.tocar(n)\n", ["campana.tocar(partitura.leer())\n", "notas = partitura.leer()\ncampana.tocar(notas[0])\n"], "Campanas"],
-		[4, 1, "total = 0\nfor p in pesas.lista():\n    total = total + p\nbalanza.poner(total)\n", ["total = 0\nfor p in pesas.lista():\n    total = total + p\n    balanza.poner(total)\n"], "Balanza"],
-		[4, 2, "def factorizar(b, c):\n    for p in range(-10, 11):\n        q = b - p\n        if p * q == c:\n            return [p, q]\n", ["def factorizar(b, c):\n    return [b, c]\n"], "Raíces Gemelas"],
+		[2, 0, "SELECT nombre FROM tanques WHERE nivel < 5 AND valvula = 'abierta'", ["SELECT nombre FROM tanques WHERE nivel < 5 OR valvula = 'abierta'", "SELECT nombre FROM tanques WHERE nivel < 5"], "Bomba"],
+		[3, 0, "SELECT nombre FROM sacos ORDER BY peso DESC", ["SELECT nombre FROM sacos ORDER BY peso", "SELECT nombre FROM sacos"], "Molino"],
+		[4, 0, "SELECT campanas.numero FROM partitura JOIN campanas ON partitura.campana = campanas.nombre", ["SELECT numero FROM campanas", "SELECT campanas.numero FROM partitura JOIN campanas ON partitura.orden = campanas.numero"], "Campanas"],
+		[4, 1, "SELECT cajas.caja, pesas.kilos FROM cajas INNER JOIN pesas ON cajas.pesa_id = pesas.id", ["SELECT caja, pesa_id FROM cajas", "SELECT cajas.caja, pesas.kilos FROM cajas JOIN pesas ON cajas.pesa_id = pesas.kilos"], "Balanza"],
+		[4, 2, "SELECT ninos.nombre FROM ninos INNER JOIN arboles ON ninos.arbol_id = arboles.id WHERE arboles.fruta = 'manzana'", ["SELECT nombre FROM ninos", "SELECT ninos.nombre FROM ninos INNER JOIN arboles ON ninos.arbol_id = arboles.id", "SELECT nombre FROM ninos JOIN arboles ON arbol_id = id WHERE fruta = manzana"], "Árboles Gemelos"],
 	]
 	var on_floor := true
 	for c in cases:
@@ -1560,10 +1522,10 @@ func _test_late_chapters() -> void:
 		await _wait(0.3)
 		game.dialog.close()
 		var room := game.level as RoundsLevel
-		var good: CodeMachine.Report = room.machine.evaluate(c[2], sandbox)
+		var good: CodeMachine.Report = room.machine.evaluate(c[2], engine)
 		_check(good.success, "%s: la solución pasa las 3 rondas" % c[4])
 		for bad in c[3]:
-			var r: CodeMachine.Report = room.machine.evaluate(bad, sandbox)
+			var r: CodeMachine.Report = room.machine.evaluate(bad, engine)
 			_check(not r.success and (r.message != "" or r.error != ""), "%s: «%s» no sirve y dice por qué" % [c[4], bad.strip_edges().replace("\n", " / ")])
 		await room.machine.perform(good)
 		_check(room.solved, "%s: al acertar se abre la salida" % c[4])
@@ -1571,13 +1533,12 @@ func _test_late_chapters() -> void:
 			var cell: Vector2i = room.ground.local_to_map(room.ground.to_local(item.global_position))
 			on_floor = on_floor and room.ground.get_cell_source_id(cell) != -1 and room.walls.get_cell_source_id(cell) == -1
 	_check(on_floor, "Capítulos 3-5: los cristales y pergaminos de las salas están sobre piso")
-	# Los gemelos aceptan los dos números en cualquier orden
+	# Con JOIN, la columna sin tabla sirve si solo está en una de las dos
 	game.data.use_chapter(4)
 	game.load_chamber(2)
 	await _wait(0.2)
 	var twins := (game.level as RoundsLevel).machine
-	var flipped := "def factorizar(b, c):\n    for p in range(10, -11, -1):\n        q = b - p\n        if p * q == c:\n            return [p, q]\n"
-	_check(twins.evaluate(flipped, sandbox).success, "Raíces Gemelas: da igual el orden de [p, q]")
+	_check(twins.evaluate("SELECT nombre FROM ninos JOIN arboles ON arbol_id = id WHERE fruta = 'manzana'", engine).success, "Árboles Gemelos: sin tabla.columna también vale cuando no hay dudas")
 	# Vencer a la Sombra del Sol Negro termina el juego
 	game.reached = 4
 	await game.chapter_done()

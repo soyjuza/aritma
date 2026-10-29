@@ -1,4 +1,4 @@
-## La Criba (capítulo 3, while + if). Las pares van al cáliz.
+## La Criba (capítulo 3, OR). Al cáliz van las esferas que trae la consulta.
 class_name FilterLevel
 extends ChamberLevel
 
@@ -8,7 +8,8 @@ var _in_hall := false
 
 
 func wire() -> void:
-	machine.setup(kit, _game.bus, data, func(key, args): return _game.data.message(key, args), _open_machine)
+	machine.kit = kit
+	machine.setup(_game.bus, data, func(key, args): return _game.data.message(key, args), _open_machine)
 	machine.solved.connect(_on_solved)
 	$Zonas/EntradaSala.crossed.connect(_on_hall_entered)
 

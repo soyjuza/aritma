@@ -1,4 +1,4 @@
-## Sala 1: la Compuerta. Variables: el nivel del sensor más algo.
+## Sala 1: la Compuerta. SELECT de una columna: el nivel del sensor.
 class_name LockLevel
 extends ChamberLevel
 

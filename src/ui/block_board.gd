@@ -1,5 +1,5 @@
-## Tablero para armar el programa ordenando piezas (bloques) con el ratón.
-## Arriba el programa, abajo las piezas. La sangría sale de dónde se suelta la pieza.
+## Tablero para armar la consulta ordenando piezas (bloques) con el ratón.
+## Arriba la consulta, abajo las piezas. Cada parte de SQL tiene su color.
 class_name BlockBoard
 extends Control
 
@@ -8,8 +8,15 @@ signal changed
 const INDENT := 34.0
 const PAD := 12.0
 const HEADER := 30.0
-const MAX_INDENT := 3
-const KEYWORDS := ["while", "if", "elif", "else", "for", "def", "return"]
+const MAX_INDENT := 0    # en SQL la sangría no cambia nada
+const KEYWORDS := ["SELECT", "FROM", "WHERE", "AND", "OR", "NOT", "ORDER", "BY", "ASC", "DESC", "LIMIT", "JOIN", "INNER", "ON"]
+## Color del borde según la parte de la consulta.
+const CLAUSE_COLORS := {
+	"SELECT": Color("4fe3ff"), "FROM": Color("e2b44f"),
+	"WHERE": Color("ff9a6b"), "AND": Color("ff9a6b"), "OR": Color("ff9a6b"),
+	"ORDER": Color("c79bff"), "LIMIT": Color("c79bff"),
+	"JOIN": Color("6be38b"), "INNER": Color("6be38b"), "ON": Color("6be38b"),
+}
 
 const BG := Color("090d12")
 const LINE := Color("1f4b57")
@@ -332,19 +339,24 @@ func _label(text: String, at: Vector2, color: Color) -> void:
 	draw_string(_body, at + Vector2(0, 17), text, HORIZONTAL_ALIGNMENT_LEFT, size.x - at.x - PAD, 20, color)
 
 
-## Una pieza: borde naranja si es while/if/def, cian si es una orden.
+## Una pieza: el borde y las palabras de SQL van del color de su parte.
 func _piece(piece: int, r: Rect2, lit: bool, alpha: float) -> void:
 	var line: String = session.blocks[piece]
-	var first: String = line.split(" ")[0].trim_suffix(":")
-	var control: bool = first in KEYWORDS
-	var edge := KEYWORD if control else ACTION
+	var words := line.split(" ")
+	var first := ""
+	for w in words:
+		if not w.to_upper() in KEYWORDS:
+			break
+		first += w + " "
+	var control: bool = first != ""
+	var edge: Color = CLAUSE_COLORS.get(words[0].to_upper(), ACTION)
 	draw_rect(r, Color(Color("141c26").lerp(edge, 0.12), alpha))
 	draw_rect(Rect2(r.position, Vector2(4, r.size.y)), Color(edge, alpha))
 	draw_rect(r, Color(GOLD if lit else edge.darkened(0.35), alpha), false, 2.0 if lit else 1.0)
 	var fs := font_size()
 	var base := r.position + Vector2(11, (r.size.y + _mono.get_ascent(fs) - _mono.get_descent(fs)) / 2.0)
 	if control:
-		draw_string(_mono, base, first, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(KEYWORD, alpha))
+		draw_string(_mono, base, first, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(edge, alpha))
 		base.x += _mono.get_string_size(first, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		line = line.substr(first.length())
 	draw_string(_mono, base, line, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(TEXT, alpha))

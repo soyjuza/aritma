@@ -1,4 +1,4 @@
-## Sala 2: el Mural. Hay que escribir despejar(a, b, c).
+## El Mural de los Récords (capítulo 4): ORDER BY y LIMIT.
 class_name RootsLevel
 extends ChamberLevel
 
@@ -14,7 +14,8 @@ func wire() -> void:
 		if i < periods.size():
 			presses[i].period = float(periods[i])
 		presses[i].crushed.connect(_on_crushed)
-	machine.setup(kit, _game.bus, data, func(key, args): return _game.data.message(key, args), _open_machine)
+	machine.kit = kit
+	machine.setup(_game.bus, data, func(key, args): return _game.data.message(key, args), _open_machine)
 	machine.solved.connect(_on_solved)
 	$Zonas/EntradaSala.crossed.connect(_on_hall_entered)
 

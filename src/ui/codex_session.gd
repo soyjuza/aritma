@@ -3,31 +3,25 @@ class_name CodexSession
 extends RefCounted
 
 var title := ""
-var file_name := "programa.py"
+var file_name := "consulta.sql"
 var code := ""
 var max_lines := 0    # 0 = sin límite
-var help: Array = []               # [["avanzar(n=1)", "avanza n casillas"], ...]
-var api_factory: Callable
-var on_result: Callable
-var max_steps := 200000
-var close_after_run := false
+var help: Array = []    # [["SELECT nombre", "muestra la columna nombre"], ...]
+var tables: Array = []    # SqlTable que se ven en la ayuda (los datos de la ronda 1)
 var machine: CodeMachine = null
 var log: Array = []    # lo que mostraba la consola
 
 
 ## Líneas que cuentan (sin vacías ni comentarios).
 static func count_lines(source: String) -> int:
-	var n := 0
-	for line in source.split("\n"):
-		var t := line.strip_edges()
-		if t != "" and not t.begins_with("#"):
-			n += 1
-	return n
+	return SqlEngine.count_lines(source)
 
 
-var blocks: Array = []    # piezas para armar el programa
+var blocks: Array = []    # piezas para armar la consulta
 var placed: Array = []    # [[pieza, sangría], ...]
 var use_blocks := false
+var write_first := false    # en el PC, la primera vez abre para escribir a mano
+var opened := false
 var goal: Array = []    # los comentarios del código inicial, para el modo bloques
 
 
@@ -39,7 +33,7 @@ func set_blocks(lines: Array) -> void:
 		blocks.shuffle()
 	placed.clear()
 	use_blocks = not blocks.is_empty()
-	goal = Array(code.split("\n")).filter(func(l): return l.begins_with("#")).map(func(l): return l.trim_prefix("#").strip_edges())
+	goal = Array(code.split("\n")).filter(func(l): return l.begins_with("--")).map(func(l): return l.trim_prefix("--").strip_edges())
 
 
 ## Piezas que siguen en la bandeja.
@@ -48,11 +42,11 @@ func free_pieces() -> Array:
 	return range(blocks.size()).filter(func(i): return not used.has(i))
 
 
-## Programa armado con las piezas.
+## Consulta armada con las piezas, una por línea.
 func blocks_source() -> String:
 	var out := ""
 	for p in placed:
-		out += "    ".repeat(int(p[1])) + String(blocks[p[0]]) + "\n"
+		out += String(blocks[p[0]]) + "\n"
 	return out
 
 

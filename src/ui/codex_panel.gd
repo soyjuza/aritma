@@ -4,8 +4,8 @@ extends Control
 
 signal run_requested
 
-const KEYWORDS := ["if", "elif", "else", "while", "for", "in", "def", "return", "break", "continue", "pass", "and", "or", "not", "True", "False", "None"]
-const BUILTINS := ["range", "len", "print", "decir", "abs", "min", "max", "int", "str", "bin", "sum", "round", "sorted"]
+const KEYWORDS := ["SELECT", "FROM", "WHERE", "AND", "OR", "NOT", "ORDER", "BY", "ASC", "DESC", "LIMIT", "JOIN", "INNER", "ON", "AS"]
+const FUNCTIONS := ["COUNT", "SUM", "MIN", "MAX", "AVG"]
 
 var editor := CodeEdit.new()
 var title_label := Label.new()
@@ -164,7 +164,7 @@ func _setup_editor() -> void:
 	editor.add_theme_color_override("current_line_color", Color(0.31, 0.89, 1.0, 0.07))
 	editor.add_theme_color_override("line_number_color", Color("3e4a58"))
 	editor.gutters_draw_line_numbers = true
-	editor.indent_automatic = true
+	editor.indent_automatic = false
 	editor.indent_size = 4
 	editor.indent_use_spaces = true
 	editor.auto_brace_completion_enabled = true
@@ -175,12 +175,14 @@ func _setup_editor() -> void:
 	hl.symbol_color = Color("8d97a8")
 	hl.function_color = UIKit.CYAN
 	hl.member_variable_color = Color("e2b44f")
+	# SQL no distingue mayúsculas: se pintan las dos formas
 	for word in KEYWORDS:
 		hl.add_keyword_color(word, Color("ff9a6b"))
-	for word in BUILTINS:
+		hl.add_keyword_color(word.to_lower(), Color("ff9a6b"))
+	for word in FUNCTIONS:
 		hl.add_keyword_color(word, Color("e2b44f"))
-	hl.add_color_region("#", "", Color("6b7a8c"), true)
-	hl.add_color_region("\"", "\"", Color("a6e3a1"))
+		hl.add_keyword_color(word.to_lower(), Color("e2b44f"))
+	hl.add_color_region("--", "", Color("6b7a8c"), true)
 	hl.add_color_region("'", "'", Color("a6e3a1"))
 	editor.syntax_highlighter = hl
 	editor.text_changed.connect(_update_counter)
@@ -191,6 +193,8 @@ func _setup_rich(label: RichTextLabel, font: Font, size: int) -> void:
 	label.scroll_following = true
 	label.add_theme_font_override("normal_font", font)
 	label.add_theme_font_override("bold_font", font)
+	label.add_theme_font_override("mono_font", _mono)
+	label.add_theme_font_size_override("mono_font_size", size - 2)
 	label.add_theme_font_size_override("normal_font_size", size)
 	label.add_theme_font_size_override("bold_font_size", size)
 	label.add_theme_color_override("default_color", Color("c9d4e2"))
@@ -212,6 +216,11 @@ func _t(key: String, params: Dictionary = {}) -> String:
 
 func open(session: CodexSession, keys_text: String, side := false) -> void:
 	_session = session
+	# En el PC, algunas salas abren la primera vez para escribir a mano; en el celular, con piezas
+	if not session.opened:
+		session.opened = true
+		if session.write_first and zoom == 1.0 and not session.blocks.is_empty():
+			session.use_blocks = false
 	_fit()
 	# En el celular no cabe al costado: pantalla completa
 	side = side and zoom == 1.0
@@ -236,6 +245,14 @@ func open(session: CodexSession, keys_text: String, side := false) -> void:
 			help += "[color=#4fe3ff]%s[/color]  [color=#8d97a8]%s[/color]\n" % [entry[0], entry[1]]
 		else:
 			help += "[color=#4fe3ff]%s[/color]\n[color=#8d97a8]%s[/color]\n\n" % [entry[0], entry[1]]
+	if not session.tables.is_empty():
+		help += "\n[color=#e2b44f][b]%s[/b][/color]\n" % _t("codex_tables_title")
+		for t: SqlTable in session.tables:
+			help += "[color=#4fe3ff]%s[/color]\n[code]" % t.name
+			for line in t.lines():
+				help += String(line).replace("[", "[lb]") + "\n"
+			help += "[/code]\n"
+		help += "[color=#8d97a8]%s[/color]\n\n" % _t("codex_tables_note")
 	if not side:
 		help += "[color=#8d97a8]%s[/color]" % _t("codex_language")
 	help_label.text = help
@@ -252,7 +269,7 @@ func close() -> String:
 	return source()
 
 
-## El programa que se va a correr.
+## La consulta que se va a correr.
 func source() -> String:
 	return _session.blocks_source() if _blocks_on() else editor.text
 
@@ -265,7 +282,7 @@ func write(code: String) -> void:
 	show_mode()
 
 
-## Cambia entre bloques y escribir a mano.
+## Cambia entre piezas y escribir a mano.
 func toggle_mode() -> void:
 	if _session == null or _session.blocks.is_empty():
 		return

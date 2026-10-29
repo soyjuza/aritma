@@ -3,11 +3,11 @@
 class_name RouteTour
 extends RefCounted
 
-const CRIBA := "while tolva.quedan() > 0:\n    n = tolva.soltar()\n    if n % 2 == 0:\n        caliz.recibir()\n    else:\n        crisol.desintegrar()\n"
+const CRIBA := "SELECT numero\nFROM esferas\nWHERE color = 'oro'\nOR numero > 50\n"
 
 ## Orden de antes (Criba → Mural → ...): los recorridos viejos usan estos números
 const OLD_ORDER := ["filter", "roots", "vortex", "figures", "core", "throne"]
-const LOCK_OK := "nivel = sensor.leer()\nnivel = nivel + 3\ncompuerta.subir(nivel)\n"
+const LOCK_OK := "SELECT nivel\nFROM sensor\n"
 
 var game: Game
 var folder := ""
@@ -95,7 +95,7 @@ func run(arg: String) -> void:
 	game.open_codex(town.gate.session)
 	await _wait(1.2)
 	await _shot("05_codice_puerta_vacio")
-	_arm("puerta.abrir()\n")
+	_arm("SELECT *\nFROM puerta\n")
 	await _shot("05_codice_puerta")
 	game.machine.current.run()
 	await _wait(2.0)
@@ -170,7 +170,7 @@ func _roots_room() -> void:
 	while game.rig.is_gliding():
 		await _wait(0.1)
 	await _wait(0.4)
-	game.codex.write("def despejar(a, b, c):\n    return (c - b) / a\n")
+	game.codex.write("SELECT nombre, puntos\nFROM aritmanos\nORDER BY puntos DESC\nLIMIT 3\n")
 	await _shot("24_codice_mural")
 	game.machine.current.run()
 	await _wait(1.6)
@@ -194,13 +194,13 @@ func _vortex_room() -> void:
 	while game.rig.is_gliding():
 		await _wait(0.1)
 	await _wait(0.4)
-	game.codex.write("luces.encender(\n")
+	game.codex.write("SELECT color, FROM faro\n")
 	game.machine.current.run()
 	game.machine.change("play")
 	game.open_codex(lvl.machine.session)
 	await _wait(0.6)
 	await _shot("31a_error_conservado")
-	game.codex.write("luces.encender()\n")
+	game.codex.write("SELECT color, brillo\nFROM faro\n")
 	await _shot("31_codice_luces")
 	game.machine.current.run()
 	await _wait(2.5)
@@ -376,15 +376,14 @@ func _shot(name: String) -> void:
 	print("recorrido ", name)
 
 
-## Arma con las piezas las primeras lines líneas del programa.
+## Arma con las piezas las primeras lines líneas de la consulta.
 func _arm(code: String, lines := 99) -> void:
 	var board := game.codex.board
 	board.session.use_blocks = true
 	board.session.placed.clear()
 	for line in code.split("\n").slice(0, lines):
 		if line.strip_edges() != "":
-			var indent := (line.length() - line.strip_edges(true, false).length()) / 4
-			board.place(board.session.blocks.find(line.strip_edges()), board.session.placed.size(), indent)
+			board.place(board.session.blocks.find(line.strip_edges()), board.session.placed.size(), 0)
 	game.codex.show_mode()
 
 
@@ -398,7 +397,7 @@ func _blocks_tour() -> void:
 	game.open_codex(town.gate.session)
 	await _wait(1.2)
 	await _shot("b1_puerta_vacia")
-	_arm("puerta.abrir()\n")
+	_arm("SELECT *\nFROM puerta\n")
 	await _shot("b2_puerta_armada")
 	game.machine.change("play")
 	game.load_chamber(0)
@@ -430,7 +429,7 @@ func _blocks_tour() -> void:
 		await _wait(0.1)
 	await _wait(0.4)
 	await _shot("b7_mural_vacio")
-	_arm("def despejar(a, b, c):\n    return (c - b) / a\n")
+	_arm("SELECT nombre, puntos\nFROM aritmanos\nORDER BY puntos DESC\nLIMIT 3\n")
 	await _shot("b8_mural_armado")
 
 
@@ -450,7 +449,7 @@ func _lock_room() -> void:
 		await _wait(0.1)
 	await _wait(0.4)
 	await _shot("l2_codice_vacio")
-	game.codex.write("nivel = sensor.leer()\ncompuerta.subir(nivel)\n")
+	game.codex.write("SELECT *\nFROM sensor\n")
 	game.machine.current.run()
 	await _wait(1.6)
 	await _shot("l3_ronda_mal")
@@ -527,8 +526,8 @@ func _practice_tour() -> void:
 	game.player.place(blocks.machine.global_position + Vector2(0, 18), Vector2.UP)
 	await _wait(0.5)
 	await _shot("p3_bloques_atril")
-	await _code_stage(blocks, "p3_bloques_etapa1", "antorchas.encender()\n")
-	await _code_stage(blocks, "p3_bloques_etapa2", "antorchas.encender()\nantorchas.encender()\nantorchas.encender()\n")
+	await _code_stage(blocks, "p3_bloques_etapa1", "SELECT *\nFROM braseros\n")
+	await _code_stage(blocks, "p3_bloques_etapa2", "SELECT numero\nFROM braseros\n")
 	await _shot("p3_bloques_fin")
 	game.dialog.close()
 	game.leave_practice()
@@ -542,10 +541,10 @@ func _practice_tour() -> void:
 	var funcs := game.level as PracticeCodeLevel
 	game.player.place(funcs.machine.global_position + Vector2(0, 18), Vector2.UP)
 	await _wait(0.5)
-	await _shot("p4_funciones_atril")
-	await _code_stage(funcs, "p4_funciones_etapa1", "def doble(n):\n    return n * 2\n")
-	await _code_stage(funcs, "p4_funciones_etapa2", "def restar(a, b):\n    return a - b\n")
-	await _shot("p4_funciones_fin")
+	await _shot("p4_ordenar_atril")
+	await _code_stage(funcs, "p4_ordenar_etapa1", "SELECT nombre\nFROM frutas\nORDER BY precio\n")
+	await _code_stage(funcs, "p4_ordenar_etapa2", "SELECT nombre\nFROM frutas\nORDER BY precio DESC\n")
+	await _shot("p4_ordenar_fin")
 	game.dialog.close()
 	game.enter_chamber(2)
 	await _until(func(): return game.level is PracticeMinesLevel)
@@ -786,7 +785,7 @@ func _forest_tour() -> void:
 	await _shot("b5_habilidades")
 	game.machine.change("pause")
 	game.machine.change("play")
-	var rooms := [["b6_puente", "peso = carreta.peso()\nif peso > 10:\n    puente.reforzar()\n"], ["b7_jardin", "agua = maceta.medir()\nif agua < 5:\n    maceta.regar()\nelse:\n    maceta.asolear()\n"]]
+	var rooms := [["b6_puente", "SELECT nombre\nFROM carretas\nWHERE peso > 10\n"], ["b7_jardin", "SELECT nombre\nFROM macetas\nWHERE tierra = 'seca'\n"]]
 	for i in 2:
 		game.load_chamber(i)
 		await _wait(0.6)
@@ -863,15 +862,15 @@ func _world_tour() -> void:
 	await _skip_dialog()
 	# Salas nuevas
 	var rooms := [
-		[2, 0, "w30_bomba", "while tanque.nivel() < 10:\n    bomba.bombear()\n"],
-		[3, 0, "w31_molino", "def moler(sacos):\n    return sacos * 3\n"],
-		[4, 0, "w32_campanas", "notas = partitura.leer()\nfor n in notas:\n    campana.tocar(n)\n"],
-		[4, 1, "w33_balanza", "total = 0\nfor p in pesas.lista():\n    total = total + p\nbalanza.poner(total)\n"],
-		[4, 2, "w34_gemelas", "def factorizar(b, c):\n    for p in range(-10, 11):\n        q = b - p\n        if p * q == c:\n            return [p, q]\n"],
+		[2, 0, "w30_bomba", "SELECT nombre\nFROM tanques\nWHERE nivel < 5\nAND valvula = 'abierta'\n"],
+		[3, 0, "w31_molino", "SELECT nombre\nFROM sacos\nORDER BY peso DESC\n"],
+		[4, 0, "w32_campanas", "SELECT campanas.numero\nFROM partitura\nJOIN campanas\nON partitura.campana = campanas.nombre\n"],
+		[4, 1, "w33_balanza", "SELECT cajas.caja, pesas.kilos\nFROM cajas\nINNER JOIN pesas\nON cajas.pesa_id = pesas.id\n"],
+		[4, 2, "w34_gemelas", "SELECT ninos.nombre\nFROM ninos\nINNER JOIN arboles\nON ninos.arbol_id = arboles.id\nWHERE arboles.fruta = 'manzana'\n"],
 	]
 	for r in rooms:
 		game.data.use_chapter(r[0])
-		game.practices_done["funciones"] = true
+		game.practices_done["ordenar"] = true
 		game.load_chamber(r[1])
 		await _wait(0.6)
 		var lvl := game.level as RoundsLevel

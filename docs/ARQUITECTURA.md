@@ -6,13 +6,13 @@
 | Creacional | **Factory Method** | `ChamberBuilder` → `FilterBuilder`, `RootsBuilder`, `VortexBuilder`, `FigureBuilder`, `CoreBuilder`, `ThroneBuilder`; `ChamberRegistry` | Cada creador instancia la escena de su sala según el `kind` de `chambers.json`. Para agregar una sala se crea una escena y un creador nuevos, sin tocar los demás. |
 | Creacional | **Factory** | `AlarmDirector` (instancia `centinela.tscn`, `hechicero.tscn`, `runico.tscn`); `OrbShot` (instancia `orbe.tscn`) | Crea los guardianes de cada ola y los orbes del hechicero. |
 | Estructural | **Facade** | `TileKit`, `AudioService` | Ocultan cómo se arman las partículas y el sonido con el pack de arte. |
-| Estructural | **Adapter** | `DoorAdapter`, `FilterAdapter`, `LightsAdapter`, `CallsAdapter` | Pasan los objetos del juego al lenguaje del Códice (`puerta.abrir()`, `tolva.soltar()`, `luces.encender()`, `campana.tocar(n)`). |
+| Estructural | **Facade** (SQL) | `SqlEngine` | El juego solo llama `run(consulta, tablas)`; por dentro pasan el lexer, el parser, la revisión de nombres, el JOIN, el WHERE, el ORDER BY y el LIMIT. |
 | Comportamiento | **State** | `StateMachine` + `GameState` (título, juego, pausa, Códice, reto de teclas, rompecabezas de figuras…); `MoveState` (quieta, caminar, correr, saltar, golpear, caer); `GuardianState` (dormido, despertando, cayendo, persiguiendo, preparando, golpeando, aturdido, vencido); `BossState` (escondido, aparece, espera, persigue, ráfaga, pisotón, cansado, escudo, vencido) | Fases del juego, movimiento de Tala y comportamiento de los guardianes y del jefe. |
 | Comportamiento | **Observer** | `EventBus` + `SoundObserver`, `CameraShakeObserver`, `AlarmDirector` (escucha `MACHINE_FAILED`); `PlayerHealth` publica golpes y caídas; señales de los nodos (`used`, `crossed`, `fell`, `solved`, `defeated`) | El sonido, la cámara y la alarma reaccionan a los eventos sin que quien los emite sepa de ellos. |
-| Comportamiento | **Strategy** | `QualityProfile` → `HighQuality`, `LowQuality`; `GuardianAttack` → `MeleeStrike` (caballero), `OrbShot` (hechicero), `RuneBlast` (rúnico); `QuizProblem` → `ParityProblem`, `MultipleProblem`, `SolveProblem`, `VariableProblem`, `OrderProblem`, `IfProblem`, `WhileProblem`, `FuncProblem`, `ListProblem`, `ForProblem` (con `BossQuiz` como contexto) | Calidad de efectos; cómo ataca cada tipo de guardián; qué problema pone el jefe en cada fase. |
-| Comportamiento | **Command** | `FilterCommand`, `RootsCommand` | El programa del jugador deja órdenes que la máquina ejecuta y anima una por una. |
-| Comportamiento | **Template Method** | `CodeMachine` → `GateMachine`, `CribaMachine`, `MuralMachine`, `BeaconMachine`, `RoundsMachine`; `RoundsMachine` → `BridgeMachine`, `GardenMachine`, `PumpMachine`, `BellsMachine`, `ScaleMachine`, `FunctionRoundsMachine` → `MillMachine`, `TwinsMachine` | Pasos fijos para correr el código. Cada máquina redefine `evaluate()` y `perform()`; las de rondas solo dicen qué API dan (`api_for`), qué esperan (`wanted`) y cómo se ve cada ronda. |
-| Comportamiento | **Interpreter** | `src/script_lang/` (Lexer, Parser, nodos, ScriptSandbox) | Ejecuta el código estilo Python que escribe el jugador. |
+| Comportamiento | **Strategy** | `QualityProfile` → `HighQuality`, `LowQuality`; `GuardianAttack` → `MeleeStrike` (caballero), `OrbShot` (hechicero), `RuneBlast` (rúnico); `QuizProblem` → `OrderProblem`, `SqlProblem` → `KeywordProblem`, `SelectProblem`, `WhereProblem`, `SortProblem`, `JoinProblem` (con `BossQuiz` como contexto) | Calidad de efectos; cómo ataca cada tipo de guardián; qué problema pone el jefe en cada fase. |
+| Comportamiento | **Command** | `FilterCommand` (armadas por `SphereSorter`) | Lo que trajo la consulta se vuelve órdenes (soltar esfera, mandarla al cáliz o al crisol) que la Criba anima una por una. |
+| Comportamiento | **Template Method** | `CodeMachine` → `SqlMachine` → `GateMachine`, `LockMachine`, `BeaconMachine`, `BridgeMachine`, `GardenMachine`, `PumpMachine`, `CribaMachine`, `MillMachine`, `MuralMachine`, `BellsMachine`, `ScaleMachine`, `TwinsMachine`; `CodeMachine` → `TorchMachine`, `QueryMachine` (prácticas) | `SqlMachine.evaluate()` corre la consulta en cada ronda y la compara con la respuesta (`SqlCheck`); `perform()` la muestra. Cada máquina solo dice qué tablas inventa (`make_tables`), cómo reacciona (`react`) y cómo se dibuja. |
+| Comportamiento | **Interpreter** | `src/sql_lang/` (`SqlLexer`, `SqlParser`, `SqlQuery`, `SqlEngine`) | Lee y corre las consultas SQL que escribe el jugador. |
 
 ## SOLID y bajo acoplamiento
 - **S**: cada clase hace una sola cosa. `Grate` abre y cierra una reja, `TriggerZone` avisa
@@ -37,7 +37,7 @@
   `data/chambers.json`; la velocidad de Tala, el combate y los números de la pelea con el jefe
   en `data/config.json`. Las posiciones están en las escenas (Inspector).
 
-**UML completo:** `docs/UML_COMPLETO.md` tiene las 190 clases, una por una, generado desde el
+**UML completo:** `docs/UML_COMPLETO.md` tiene las 175 clases, una por una, generado desde el
 código con `python3 tools/generar_uml.py` (siempre coincide con el código). El diagrama de abajo
 muestra las clases principales y cómo se relacionan.
 
@@ -100,34 +100,45 @@ classDiagram
 
     class CodeMachine {
         <<abstract>>
-        +evaluate(source, sandbox) Report
+        +evaluate(source, engine) Report
         +perform(report)
         +connect_console(open_codex)
     }
-    CodeMachine <|-- GateMachine
-    CodeMachine <|-- CribaMachine
-    CodeMachine <|-- MuralMachine
+    class SqlMachine {
+        <<abstract>>
+        +answer +ordered +rounds
+        +make_tables(round)* Array
+        +react(right)
+    }
+    class SqlEngine {
+        <<facade>>
+        +run(source, tables) Result
+    }
+    SqlEngine ..> SqlLexer
+    SqlEngine ..> SqlParser
+    SqlParser ..> SqlQuery
+    SqlEngine ..> SqlTable
+    SqlMachine ..> SqlCheck
+    CodeMachine <|-- SqlMachine
+    SqlMachine <|-- GateMachine
+    SqlMachine <|-- LockMachine
+    SqlMachine <|-- BeaconMachine
+    SqlMachine <|-- CribaMachine
+    SqlMachine <|-- MuralMachine
+    SqlMachine <|-- BridgeMachine
+    SqlMachine <|-- GardenMachine
+    SqlMachine <|-- PumpMachine
+    SqlMachine <|-- MillMachine
+    SqlMachine <|-- BellsMachine
+    SqlMachine <|-- ScaleMachine
+    SqlMachine <|-- TwinsMachine
     TownLevel o-- GateMachine
     FilterLevel o-- CribaMachine
     RootsLevel o-- MuralMachine
-    CribaMachine ..> FilterCommand
-    MuralMachine ..> RootsCommand
-    GateMachine ..> DoorAdapter
-    CribaMachine ..> FilterAdapter
-    CodexState ..> ScriptSandbox
-    CodeMachine <|-- BeaconMachine
-    BeaconMachine ..> LightsAdapter
     VortexLevel o-- BeaconMachine
-    CodeMachine <|-- RoundsMachine
-    RoundsMachine <|-- BridgeMachine
-    RoundsMachine <|-- GardenMachine
-    RoundsMachine <|-- PumpMachine
-    RoundsMachine <|-- BellsMachine
-    RoundsMachine <|-- ScaleMachine
-    RoundsMachine <|-- FunctionRoundsMachine
-    FunctionRoundsMachine <|-- MillMachine
-    FunctionRoundsMachine <|-- TwinsMachine
-    RoundsMachine ..> CallsAdapter
+    CribaMachine ..> SphereSorter
+    SphereSorter ..> FilterCommand
+    CodexState ..> SqlEngine
     VortexLevel o-- MineBoard
     MineBoard ..> MinefieldGenerator : sin adivinar
     FigureLevel o-- FigureTable
@@ -233,13 +244,14 @@ classDiagram
     LifeRules ..> EventBus : PLAYER_DIED
     class BossQuiz { +make(kind, rng) }
     class QuizProblem { <<strategy>> +make(rng) }
-    QuizProblem <|-- ParityProblem
-    QuizProblem <|-- MultipleProblem
-    QuizProblem <|-- SolveProblem
-    QuizProblem <|-- WhileProblem
-    QuizProblem <|-- FuncProblem
-    QuizProblem <|-- ListProblem
-    QuizProblem <|-- ForProblem
+    QuizProblem <|-- OrderProblem
+    QuizProblem <|-- SqlProblem
+    SqlProblem <|-- KeywordProblem
+    SqlProblem <|-- SelectProblem
+    SqlProblem <|-- WhereProblem
+    SqlProblem <|-- SortProblem
+    SqlProblem <|-- JoinProblem
+    SqlProblem ..> SqlEngine
     BossQuiz o-- QuizProblem
     ThroneLevel o-- BossQuiz
     CribaMachine ..> CribaView : dibuja con

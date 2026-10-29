@@ -1,6 +1,6 @@
 # UML completo (generado)
 
-Generado por `tools/generar_uml.py` a partir del código: **190 clases**, un diagrama
+Generado por `tools/generar_uml.py` a partir del código: **175 clases**, un diagrama
 por carpeta de `src/`. Las flechas `<|--` son herencia. Las relaciones entre paquetes
 (composición, uso, eventos) están en el diagrama principal de `docs/ARQUITECTURA.md`.
 Para actualizarlo: `python3 tools/generar_uml.py`.
@@ -548,16 +548,14 @@ classDiagram
     class BeaconMachine {
         +setup(bus, data, text, open_codex)
         +status_text() String
-        +evaluate(source, sandbox) CodeMachine
-        +perform(report)
+        +make_tables(_i) Array
+        +react(right)
     }
     class BellsMachine {
         +setup(bus, data, text, open_codex)
-        +make_values() Array
-        +api_for(song, record) Dictionary
-        +summary(done) String
-        +wanted(song) String
-        +value_text(v) String
+        +make_tables(_i) Array
+        +show_round(i)
+        +react(_right)
     }
     class BossQuiz {
         <<RefCounted>>
@@ -566,9 +564,7 @@ classDiagram
     }
     class BridgeMachine {
         +setup(bus, data, text, open_codex)
-        +make_values() Array
-        +api_for(weight, record) Dictionary
-        +wanted(weight) String
+        +make_tables(i) Array
     }
     class ChamberBuilder {
         <<Factory Method>>
@@ -592,7 +588,7 @@ classDiagram
     }
     class CodeMachine {
         <<Template Method>>
-        +evaluate(_source, _sandbox) Report
+        +evaluate(_source, _engine) Report
         +perform(_report)
         +status_text() String
         +view_center() Vector2
@@ -613,12 +609,13 @@ classDiagram
     }
     class CribaMachine {
         <<Command>>
-        +setup(kit, bus, data, text, open_codex)
-        +new_rules()
-        +evaluate(source, sandbox) CodeMachine
+        +setup(bus, data, text, open_codex)
+        +make_tables(i) Array
+        +new_rounds(keep_first)
+        +evaluate(source, engine) CodeMachine
         +status_text() String
         +perform(report)
-        +load_round(index, values)
+        +load_round(index, rows)
         +drop_to_gate()
         +send_from_gate(to_chalice, right)
         +jam()
@@ -673,22 +670,16 @@ classDiagram
     class FilterLevel {
         +wire()
     }
-    class FunctionRoundsMachine {
-        +setup(bus, data, text, open_codex)
-        +args_for(v) Array
-        +shown(returned) String
-        +after_run(result, sandbox, v, record) String
-    }
     class GardenMachine {
-        +setup(bus, data, text, open_codex)
-        +make_values() Array
-        +api_for(water, record) Dictionary
-        +wanted(water) String
+        +make_tables(_i) Array
     }
     class GateMachine {
-        +setup(data, text, open_fn, close_fn, open_codex)
-        +evaluate(source, sandbox) CodeMachine
-        +perform(report)
+        +on_open(open_fn)
+        +setup(bus, data, text, open_codex)
+        +status_text() String
+        +make_tables(_i) Array
+        +react(right)
+        +mark_solved()
     }
     class LockBuilder {
         <<Factory Method>>
@@ -700,14 +691,15 @@ classDiagram
     class LockMachine {
         +setup(bus, data, text, open_codex)
         +status_text() String
+        +make_tables(i) Array
+        +show_round(i)
+        +react(_right)
         +mark_solved()
-        +evaluate(source, sandbox) CodeMachine
-        +perform(report)
     }
     class MillMachine {
-        +setup(bus, data, text, open_codex)
-        +make_values() Array
-        +wanted(sacks) String
+        +make_tables(_i) Array
+        +show_round(i)
+        +react(_right)
     }
     class MineBoard {
         <<Node2D>>
@@ -732,13 +724,12 @@ classDiagram
         +count_mines(field, mines, cell) int
     }
     class MuralMachine {
-        <<Command>>
-        +setup(kit, bus, data, text, open_codex)
-        +new_trial()
+        +setup(bus, data, text, open_codex)
         +status_text() String
-        +evaluate(source, sandbox) CodeMachine
-        +perform(report)
-        +test_row(index, verdict, shown, _steps)
+        +make_tables(_i) Array
+        +show_round(i)
+        +react(_right)
+        +mark_solved()
     }
     class NumberPath {
         <<Node2D>>
@@ -752,50 +743,21 @@ classDiagram
         +over_void(world) bool
         +crumble(c)
     }
-    class ParityFilter {
-        <<RefCounted>>
-        +make_round(rule, rng) Array$
-        +is_even(value) bool$
-        +start_round(index)
-        +failed() bool
-        +remaining() int
-        +held() Variant
-        +release() String
-        +send(to_chalice) String
-        +end_round()
-    }
     class PumpMachine {
         +setup(bus, data, text, open_codex)
-        +make_values() Array
-        +api_for(start, record) Dictionary
-        +summary(done) String
-        +wanted(start) String
+        +make_tables(_i) Array
+        +show_round(i)
+        +react(_right)
     }
-    class ForProblem {
+    class JoinProblem {
         <<Strategy>>
         +make(rng) Dictionary
     }
-    class FuncProblem {
-        <<Strategy>>
-        +make(rng) Dictionary
-    }
-    class IfProblem {
-        <<Strategy>>
-        +make(rng) Dictionary
-    }
-    class ListProblem {
-        <<Strategy>>
-        +make(rng) Dictionary
-    }
-    class MultipleProblem {
+    class KeywordProblem {
         <<Strategy>>
         +make(rng) Dictionary
     }
     class OrderProblem {
-        <<Strategy>>
-        +make(rng) Dictionary
-    }
-    class ParityProblem {
         <<Strategy>>
         +make(rng) Dictionary
     }
@@ -805,16 +767,25 @@ classDiagram
         +say(key, params) String
         +pick(right, wrong, count) Dictionary$
     }
-    class SolveProblem {
+    class SelectProblem {
         <<Strategy>>
         +make(rng) Dictionary
     }
-    class VariableProblem {
+    class SortProblem {
         <<Strategy>>
         +make(rng) Dictionary
-        +program(rng, lines, start_max) Dictionary$
     }
-    class WhileProblem {
+    class SqlProblem {
+        <<Strategy>>
+        +make_table(rng) SqlTable
+        +run_text(query, tables) String
+        +run_count(query, tables) int
+        +choices(right, wrong, extra, rng) Dictionary
+        +name_lists(t, rng) Array
+        +problem(title_key, question_key, tables, code, pick, params) Dictionary
+        +shuffled(list, rng) Array$
+    }
+    class WhereProblem {
         <<Strategy>>
         +make(rng) Dictionary
     }
@@ -822,46 +793,44 @@ classDiagram
         <<Factory Method>>
         +create_level() ChamberLevel
     }
-    class RootsCommand {
-        <<Command>>
-        +run(machine)
-    }
     class RootsLevel {
         +wire()
-    }
-    class RootsTrial {
-        <<RefCounted>>
-        +make_case(kind, rng) Dictionary$
-        +equation(a, b, c) String$
-        +answer(value) String$
-        +judge(case, value) Verdict$
     }
     class RoundsLevel {
         +wire()
     }
-    class RoundsMachine {
-        <<Template Method>>
-        +setup(bus, data, text, open_codex)
-        +status_text() String
-        +make_values() Array
-        +api_for(_value, _record) Dictionary
-        +wanted(_value) String
-        +summary(done) String
-        +after_run(_result, _sandbox, _value, _record) String
-        +value_text(v) String
-        +evaluate(source, sandbox) CodeMachine
-        +perform(report)
-        +mark_solved()
-    }
     class ScaleMachine {
-        +make_values() Array
-        +api_for(weights, record) Dictionary
-        +wanted(weights) String
-        +value_text(v) String
+        +make_tables(_i) Array
+        +show_round(i)
+        +react(_right)
     }
     class SceneBuilder {
         <<Factory Method>>
         +create_level() ChamberLevel
+    }
+    class SphereSorter {
+        <<RefCounted>>
+        +add_round(index, rows, chosen, wanted, columns_ok) bool
+    }
+    class SqlMachine {
+        <<Template Method>>
+        +setup(bus, data, text, open_codex)
+        +status_text() String
+        +make_tables(_i) Array
+        +new_rounds(keep_first)
+        +show_round(i)
+        +table(name) SqlTable
+        +got_values(name) Array
+        +evaluate(source, engine) CodeMachine
+        +perform(report)
+        +react(_right)
+        +mark_solved()
+    }
+    class TableSign {
+        <<RefCounted>>
+        +measure(font, columns, rows, size, title) Vector2$
+        +draw(ci, font, columns, rows, at, size, title, marks) Rect2$
+        +text(ci, font, s, at, size, color, centered)$
     }
     class ThroneBuilder {
         <<Factory Method>>
@@ -872,12 +841,7 @@ classDiagram
         +restart_after_death()
     }
     class TwinsMachine {
-        +make_values() Array
-        +args_for(v) Array
-        +shown(returned) String
-        +wanted(v) String
-        +value_text(v) String
-        +polynomial(b, c) String$
+        +make_tables(_i) Array
     }
     class VortexBuilder {
         <<Factory Method>>
@@ -892,46 +856,42 @@ classDiagram
         +restart_after_death()
         +touch_actions() Array
     }
-    CodeMachine <|-- BeaconMachine
-    RoundsMachine <|-- BellsMachine
-    RoundsMachine <|-- BridgeMachine
+    SqlMachine <|-- BeaconMachine
+    SqlMachine <|-- BellsMachine
+    SqlMachine <|-- BridgeMachine
     Level <|-- ChamberLevel
     ChamberBuilder <|-- CoreBuilder
     ChamberLevel <|-- CoreLevel
-    CodeMachine <|-- CribaMachine
+    SqlMachine <|-- CribaMachine
     TriggerZone <|-- ExitZone
     ChamberBuilder <|-- FigureBuilder
     ChamberLevel <|-- FigureLevel
     ChamberBuilder <|-- FilterBuilder
     ChamberLevel <|-- FilterLevel
-    RoundsMachine <|-- FunctionRoundsMachine
-    RoundsMachine <|-- GardenMachine
-    CodeMachine <|-- GateMachine
+    SqlMachine <|-- GardenMachine
+    SqlMachine <|-- GateMachine
     ChamberBuilder <|-- LockBuilder
     ChamberLevel <|-- LockLevel
-    CodeMachine <|-- LockMachine
-    FunctionRoundsMachine <|-- MillMachine
-    CodeMachine <|-- MuralMachine
-    RoundsMachine <|-- PumpMachine
-    QuizProblem <|-- ForProblem
-    QuizProblem <|-- FuncProblem
-    QuizProblem <|-- IfProblem
-    QuizProblem <|-- ListProblem
-    QuizProblem <|-- MultipleProblem
+    SqlMachine <|-- LockMachine
+    SqlMachine <|-- MillMachine
+    SqlMachine <|-- MuralMachine
+    SqlMachine <|-- PumpMachine
+    SqlProblem <|-- JoinProblem
+    SqlProblem <|-- KeywordProblem
     QuizProblem <|-- OrderProblem
-    QuizProblem <|-- ParityProblem
-    QuizProblem <|-- SolveProblem
-    QuizProblem <|-- VariableProblem
-    QuizProblem <|-- WhileProblem
+    SqlProblem <|-- SelectProblem
+    SqlProblem <|-- SortProblem
+    QuizProblem <|-- SqlProblem
+    SqlProblem <|-- WhereProblem
     ChamberBuilder <|-- RootsBuilder
     ChamberLevel <|-- RootsLevel
     ChamberLevel <|-- RoundsLevel
-    CodeMachine <|-- RoundsMachine
-    RoundsMachine <|-- ScaleMachine
+    SqlMachine <|-- ScaleMachine
     ChamberBuilder <|-- SceneBuilder
+    CodeMachine <|-- SqlMachine
     ChamberBuilder <|-- ThroneBuilder
     ChamberLevel <|-- ThroneLevel
-    FunctionRoundsMachine <|-- TwinsMachine
+    SqlMachine <|-- TwinsMachine
     ChamberBuilder <|-- VortexBuilder
     ChamberLevel <|-- VortexLevel
 ```
@@ -939,17 +899,17 @@ classDiagram
 | Clase | Hereda de | Archivo |
 |---|---|---|
 | `AlarmDirector` | `Node` | `src/chambers/alarm_director.gd` |
-| `BeaconMachine` | `CodeMachine` | `src/chambers/beacon_machine.gd` |
-| `BellsMachine` | `RoundsMachine` | `src/chambers/bells_machine.gd` |
+| `BeaconMachine` | `SqlMachine` | `src/chambers/beacon_machine.gd` |
+| `BellsMachine` | `SqlMachine` | `src/chambers/bells_machine.gd` |
 | `BossQuiz` | `RefCounted` | `src/chambers/boss_quiz.gd` |
-| `BridgeMachine` | `RoundsMachine` | `src/chambers/bridge_machine.gd` |
+| `BridgeMachine` | `SqlMachine` | `src/chambers/bridge_machine.gd` |
 | `ChamberBuilder` | `RefCounted` | `src/chambers/chamber_builder.gd` |
 | `ChamberLevel` | `Level` | `src/chambers/chamber_level.gd` |
 | `ChamberRegistry` | `RefCounted` | `src/chambers/chamber_registry.gd` |
 | `CodeMachine` | `Node2D` | `src/chambers/code_machine.gd` |
 | `CoreBuilder` | `ChamberBuilder` | `src/chambers/core_builder.gd` |
 | `CoreLevel` | `ChamberLevel` | `src/chambers/core_level.gd` |
-| `CribaMachine` | `CodeMachine` | `src/chambers/criba_machine.gd` |
+| `CribaMachine` | `SqlMachine` | `src/chambers/criba_machine.gd` |
 | `CribaSphere` | `Node2D` | `src/chambers/criba_sphere.gd` |
 | `CribaView` | `RefCounted` | `src/chambers/criba_view.gd` |
 | `ExitZone` | `TriggerZone` | `src/chambers/exit_zone.gd` |
@@ -960,176 +920,91 @@ classDiagram
 | `FilterBuilder` | `ChamberBuilder` | `src/chambers/filter_builder.gd` |
 | `FilterCommand` | `RefCounted` | `src/chambers/filter_command.gd` |
 | `FilterLevel` | `ChamberLevel` | `src/chambers/filter_level.gd` |
-| `FunctionRoundsMachine` | `RoundsMachine` | `src/chambers/function_rounds_machine.gd` |
-| `GardenMachine` | `RoundsMachine` | `src/chambers/garden_machine.gd` |
-| `GateMachine` | `CodeMachine` | `src/chambers/gate_machine.gd` |
+| `GardenMachine` | `SqlMachine` | `src/chambers/garden_machine.gd` |
+| `GateMachine` | `SqlMachine` | `src/chambers/gate_machine.gd` |
 | `LockBuilder` | `ChamberBuilder` | `src/chambers/lock_builder.gd` |
 | `LockLevel` | `ChamberLevel` | `src/chambers/lock_level.gd` |
-| `LockMachine` | `CodeMachine` | `src/chambers/lock_machine.gd` |
-| `MillMachine` | `FunctionRoundsMachine` | `src/chambers/mill_machine.gd` |
+| `LockMachine` | `SqlMachine` | `src/chambers/lock_machine.gd` |
+| `MillMachine` | `SqlMachine` | `src/chambers/mill_machine.gd` |
 | `MineBoard` | `Node2D` | `src/chambers/mine_board.gd` |
 | `MinefieldGenerator` | `RefCounted` | `src/chambers/minefield_generator.gd` |
-| `MuralMachine` | `CodeMachine` | `src/chambers/mural_machine.gd` |
+| `MuralMachine` | `SqlMachine` | `src/chambers/mural_machine.gd` |
 | `NumberPath` | `Node2D` | `src/chambers/number_path.gd` |
-| `ParityFilter` | `RefCounted` | `src/chambers/parity_filter.gd` |
-| `PumpMachine` | `RoundsMachine` | `src/chambers/pump_machine.gd` |
-| `ForProblem` | `QuizProblem` | `src/chambers/quiz/for_problem.gd` |
-| `FuncProblem` | `QuizProblem` | `src/chambers/quiz/func_problem.gd` |
-| `IfProblem` | `QuizProblem` | `src/chambers/quiz/if_problem.gd` |
-| `ListProblem` | `QuizProblem` | `src/chambers/quiz/list_problem.gd` |
-| `MultipleProblem` | `QuizProblem` | `src/chambers/quiz/multiple_problem.gd` |
+| `PumpMachine` | `SqlMachine` | `src/chambers/pump_machine.gd` |
+| `JoinProblem` | `SqlProblem` | `src/chambers/quiz/join_problem.gd` |
+| `KeywordProblem` | `SqlProblem` | `src/chambers/quiz/keyword_problem.gd` |
 | `OrderProblem` | `QuizProblem` | `src/chambers/quiz/order_problem.gd` |
-| `ParityProblem` | `QuizProblem` | `src/chambers/quiz/parity_problem.gd` |
 | `QuizProblem` | `RefCounted` | `src/chambers/quiz/quiz_problem.gd` |
-| `SolveProblem` | `QuizProblem` | `src/chambers/quiz/solve_problem.gd` |
-| `VariableProblem` | `QuizProblem` | `src/chambers/quiz/variable_problem.gd` |
-| `WhileProblem` | `QuizProblem` | `src/chambers/quiz/while_problem.gd` |
+| `SelectProblem` | `SqlProblem` | `src/chambers/quiz/select_problem.gd` |
+| `SortProblem` | `SqlProblem` | `src/chambers/quiz/sort_problem.gd` |
+| `SqlProblem` | `QuizProblem` | `src/chambers/quiz/sql_problem.gd` |
+| `WhereProblem` | `SqlProblem` | `src/chambers/quiz/where_problem.gd` |
 | `RootsBuilder` | `ChamberBuilder` | `src/chambers/roots_builder.gd` |
-| `RootsCommand` | `RefCounted` | `src/chambers/roots_command.gd` |
 | `RootsLevel` | `ChamberLevel` | `src/chambers/roots_level.gd` |
-| `RootsTrial` | `RefCounted` | `src/chambers/roots_trial.gd` |
 | `RoundsLevel` | `ChamberLevel` | `src/chambers/rounds_level.gd` |
-| `RoundsMachine` | `CodeMachine` | `src/chambers/rounds_machine.gd` |
-| `ScaleMachine` | `RoundsMachine` | `src/chambers/scale_machine.gd` |
+| `ScaleMachine` | `SqlMachine` | `src/chambers/scale_machine.gd` |
 | `SceneBuilder` | `ChamberBuilder` | `src/chambers/scene_builder.gd` |
+| `SphereSorter` | `RefCounted` | `src/chambers/sphere_sorter.gd` |
+| `SqlMachine` | `CodeMachine` | `src/chambers/sql_machine.gd` |
+| `TableSign` | `RefCounted` | `src/chambers/table_sign.gd` |
 | `ThroneBuilder` | `ChamberBuilder` | `src/chambers/throne_builder.gd` |
 | `ThroneLevel` | `ChamberLevel` | `src/chambers/throne_level.gd` |
-| `TwinsMachine` | `FunctionRoundsMachine` | `src/chambers/twins_machine.gd` |
+| `TwinsMachine` | `SqlMachine` | `src/chambers/twins_machine.gd` |
 | `VortexBuilder` | `ChamberBuilder` | `src/chambers/vortex_builder.gd` |
 | `VortexLevel` | `ChamberLevel` | `src/chambers/vortex_level.gd` |
 
-## `src/script_lang/` — El lenguaje del Códice (Interpreter, Composite, Adapter, Facade)
+## `src/sql_lang/` — El SQL del Códice: lexer, parser, motor y comparador (Interpreter, Facade)
 
 ```mermaid
 classDiagram
-    class CallsAdapter {
-        <<Adapter>>
-        +type_name() String
-        +get_method(attr) ScriptCallable
-    }
-    class DoorAdapter {
-        <<Adapter>>
-        +type_name() String
-        +get_method(attr) ScriptCallable
-        +get_attribute(ctx, attr, line)
-    }
-    class FilterAdapter {
-        <<Adapter>>
-        +objects(rules, text) Dictionary$
-    }
-    class LightsAdapter {
-        <<Adapter>>
-        +type_name() String
-        +get_method(attr) ScriptCallable
-        +get_attribute(ctx, attr, line)
-    }
-    class LockAdapter {
-        <<Adapter>>
-        +type_name() String
-        +get_method(attr) ScriptCallable
-    }
-    class SensorAdapter {
-        <<Adapter>>
-        +type_name() String
-        +get_method(attr) ScriptCallable
-    }
-    class TorchAdapter {
-        <<Adapter>>
-        +type_name() String
-        +get_method(attr) ScriptCallable
-    }
-    class HostFunction {
-        +invoke(ctx, args, line)
-    }
-    class Lexer {
+    class SqlCheck {
         <<RefCounted>>
+        +compare(got, want, ordered) Dictionary$
+    }
+    class SqlEngine {
+        <<Facade>>
+        +run(source, tables) Result
+        +is_number(v) bool$
+        +show(v) String$
+        +count_lines(source) int$
+        +grid(columns, rows, max_rows) Array$
+        +result_lines(result) Array$
+    }
+    class SqlLexer {
+        <<Interpreter>>
         +tokenize(source) Array
     }
-    class Parser {
+    class SqlMessages {
         <<RefCounted>>
-        +parse(tokens) ScriptNode
+        +text(key, params) String$
     }
-    class ScriptCallable {
-        <<RefCounted>>
-        +invoke(_ctx, _args, _line) Variant
-    }
-    class ScriptContext {
-        <<RefCounted>>
-        +failed() bool
-        +fail(message, line)
-        +tick(line) bool
-        +push_frame(locals) bool
-        +pop_frame()
-        +has_name(name) bool
-        +lookup(name, line)
-        +assign(name, value)
-        +print_line(text)
-        +suggest(name) String
-        +truthy(v) bool$
-        +to_text(v) String$
-        +repr(v) String$
-        +type_name(v) String$
-        +is_number(v) bool$
-        +py_mod(a, b)$
-        +py_floordiv(a, b)$
-    }
-    class ScriptMessages {
-        <<RefCounted>>
-        +text(key) String$
-    }
-    class ScriptNode {
+    class SqlParser {
         <<Interpreter>>
-        +evaluate(_ctx) Variant
-        +execute(ctx)
+        +parse(tokens) SqlQuery
+        +distance(a, b) int$
     }
-    class ScriptNodes {
-        <<Interpreter y Composite>>
-        +apply_binary(op, a, b, ctx, line)$
-        +compare(op, a, b, ctx, line) bool$
+    class SqlQuery {
+        <<Interpreter>>
     }
-    class ScriptObject {
-        <<Adapter>>
-        +type_name() String
-        +describe() String
-        +get_attribute(ctx, attr, line) Variant
-        +set_attribute(ctx, attr, _value, line)
-        +get_method(_attr) ScriptCallable
-        +get_index(ctx, _index, line) Variant
-        +help() Array
+    class SqlTable {
+        <<RefCounted>>
+        +from_data(data) SqlTable$
+        +to_data() Dictionary
+        +column_index(column) int
+        +rows_with(column, values) Array
+        +lines(max_rows) Array
     }
-    class ScriptSandbox {
-        <<Facade>>
-        +run(source, api, max_steps) Result
-        +call_function(result, function_name, args) Array
-    }
-    ScriptObject <|-- CallsAdapter
-    ScriptObject <|-- DoorAdapter
-    ScriptObject <|-- LightsAdapter
-    ScriptObject <|-- LockAdapter
-    ScriptObject <|-- SensorAdapter
-    ScriptObject <|-- TorchAdapter
-    ScriptCallable <|-- HostFunction
 ```
 
 | Clase | Hereda de | Archivo |
 |---|---|---|
-| `CallsAdapter` | `ScriptObject` | `src/script_lang/adapters/calls_adapter.gd` |
-| `DoorAdapter` | `ScriptObject` | `src/script_lang/adapters/door_adapter.gd` |
-| `FilterAdapter` | `RefCounted` | `src/script_lang/adapters/filter_adapter.gd` |
-| `LightsAdapter` | `ScriptObject` | `src/script_lang/adapters/lights_adapter.gd` |
-| `LockAdapter` | `ScriptObject` | `src/script_lang/adapters/lock_adapter.gd` |
-| `SensorAdapter` | `ScriptObject` | `src/script_lang/adapters/sensor_adapter.gd` |
-| `TorchAdapter` | `ScriptObject` | `src/script_lang/adapters/torch_adapter.gd` |
-| `HostFunction` | `ScriptCallable` | `src/script_lang/host_function.gd` |
-| `Lexer` | `RefCounted` | `src/script_lang/lexer.gd` |
-| `Parser` | `RefCounted` | `src/script_lang/parser.gd` |
-| `ScriptCallable` | `RefCounted` | `src/script_lang/script_callable.gd` |
-| `ScriptContext` | `RefCounted` | `src/script_lang/script_context.gd` |
-| `ScriptMessages` | `RefCounted` | `src/script_lang/script_messages.gd` |
-| `ScriptNode` | `RefCounted` | `src/script_lang/script_node.gd` |
-| `ScriptNodes` | `RefCounted` | `src/script_lang/script_nodes.gd` |
-| `ScriptObject` | `RefCounted` | `src/script_lang/script_object.gd` |
-| `ScriptSandbox` | `RefCounted` | `src/script_lang/script_sandbox.gd` |
+| `SqlCheck` | `RefCounted` | `src/sql_lang/sql_check.gd` |
+| `SqlEngine` | `RefCounted` | `src/sql_lang/sql_engine.gd` |
+| `SqlLexer` | `RefCounted` | `src/sql_lang/sql_lexer.gd` |
+| `SqlMessages` | `RefCounted` | `src/sql_lang/sql_messages.gd` |
+| `SqlParser` | `RefCounted` | `src/sql_lang/sql_parser.gd` |
+| `SqlQuery` | `RefCounted` | `src/sql_lang/sql_query.gd` |
+| `SqlTable` | `RefCounted` | `src/sql_lang/sql_table.gd` |
 
 ## `src/states/` — Pantallas del juego (patrón State)
 
@@ -1530,7 +1405,6 @@ classDiagram
         +default_data() Dictionary
         +wire()
         +open_gate()
-        +close_gate()
     }
     class TriggerZone {
         <<Area2D>>
@@ -1652,18 +1526,18 @@ classDiagram
         <<RefCounted>>
         +run(arg)
     }
-    class ScriptLangTests {
-        <<RefCounted>>
-        +run_all(report) int
-    }
     class SelfTest {
         <<RefCounted>>
         +run()
+    }
+    class SqlLangTests {
+        <<RefCounted>>
+        +run_all(check)
     }
 ```
 
 | Clase | Hereda de | Archivo |
 |---|---|---|
 | `RouteTour` | `RefCounted` | `src/tests/route_tour.gd` |
-| `ScriptLangTests` | `RefCounted` | `src/tests/script_lang_tests.gd` |
 | `SelfTest` | `RefCounted` | `src/tests/self_test.gd` |
+| `SqlLangTests` | `RefCounted` | `src/tests/sql_lang_tests.gd` |

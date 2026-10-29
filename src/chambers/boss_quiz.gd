@@ -1,28 +1,33 @@
-## Problemas del jefe. Elige la estrategia (QuizProblem) según el nombre.
+## Problemas del jefe y de las misiones. Elige la estrategia (QuizProblem) según el nombre.
 class_name BossQuiz
 extends RefCounted
 
 var _problems: Dictionary = {}
 
 
-## settings: chambers.json, quiz.problems.
+## settings: chambers.json, quiz.problems (o quests.json, settings).
 func _init(text: Callable = Callable(), settings: Dictionary = {}) -> void:
 	_problems = {
-		"paridad": ParityProblem.new(text, settings.get("paridad", {})),
-		"multiplo": MultipleProblem.new(text, settings.get("multiplo", {})),
-		"despejar": SolveProblem.new(text, settings.get("despejar", {})),
-		"variable": VariableProblem.new(text, settings.get("variable", {})),
-		"orden": OrderProblem.new(text, settings.get("orden", {})),
-		"si": IfProblem.new(text, settings.get("si", {"with_else": 0})),
-		"si_sino": IfProblem.new(text, settings.get("si_sino", {"with_else": 1})),
-		"mientras": WhileProblem.new(text, settings.get("mientras", {})),
-		"mientras_veces": WhileProblem.new(text, settings.get("mientras_veces", {"times": 1})),
-		"funcion": FuncProblem.new(text, settings.get("funcion", {})),
-		"funcion_doble": FuncProblem.new(text, settings.get("funcion_doble", {"nested": 1})),
-		"lista": ListProblem.new(text, settings.get("lista", {})),
-		"para": ForProblem.new(text, settings.get("para", {})),
-		"para_lista": ForProblem.new(text, settings.get("para_lista", {"over_list": 1})),
+		"palabra": KeywordProblem.new(text, _with({}, settings.get("palabra", {}))),
+		"columnas": SelectProblem.new(text, _with({}, settings.get("columnas", {}))),
+		"cuantas_columnas": SelectProblem.new(text, _with({"count": 1}, settings.get("cuantas_columnas", {}))),
+		"orden": OrderProblem.new(text, _with({}, settings.get("orden", {}))),
+		"donde": WhereProblem.new(text, _with({}, settings.get("donde", {}))),
+		"donde_cuantas": WhereProblem.new(text, _with({"count": 1}, settings.get("donde_cuantas", {}))),
+		"y_o": WhereProblem.new(text, _with({"logic": 1}, settings.get("y_o", {}))),
+		"y_o_cuantas": WhereProblem.new(text, _with({"logic": 1, "count": 1}, settings.get("y_o_cuantas", {}))),
+		"ordenar": SortProblem.new(text, _with({}, settings.get("ordenar", {}))),
+		"limite": SortProblem.new(text, _with({"limit": 1}, settings.get("limite", {}))),
+		"unir": JoinProblem.new(text, _with({}, settings.get("unir", {}))),
+		"unir_cuantas": JoinProblem.new(text, _with({"count": 1}, settings.get("unir_cuantas", {}))),
 	}
+
+
+## Lo que trae settings, sobre lo que el tipo pide siempre (count, logic...).
+static func _with(base: Dictionary, settings: Dictionary) -> Dictionary:
+	var out := base.duplicate()
+	out.merge(settings, true)
+	return out
 
 
 func kinds() -> Array:

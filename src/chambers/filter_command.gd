@@ -7,17 +7,17 @@ func run(_machine: CribaMachine) -> void:
 	pass
 
 
-## Llena la tolva.
+## Llena la tolva. rows: [[numero, color], ...]
 class RoundStart extends FilterCommand:
 	var index: int
-	var values: Array
+	var rows: Array
 
-	func _init(p_index: int, p_values: Array) -> void:
+	func _init(p_index: int, p_rows: Array) -> void:
 		index = p_index
-		values = p_values
+		rows = p_rows
 
 	func run(machine: CribaMachine) -> void:
-		await machine.load_round(index, values)
+		await machine.load_round(index, rows)
 
 
 ## Baja la siguiente esfera.
@@ -46,7 +46,7 @@ class Send extends FilterCommand:
 		await machine.send_from_gate(to_chalice, right)
 
 
-## Quedaron esferas sin clasificar.
+## La consulta trajo otras columnas: la Criba se traba.
 class Jam extends FilterCommand:
 	func run(machine: CribaMachine) -> void:
 		await machine.jam()

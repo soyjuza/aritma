@@ -22,7 +22,7 @@ func _init() -> void:
 	_save(_pasos(), "practica_1_pasos")
 	_save(_pelea(), "practica_2_pelea")
 	_save(_bloques(), "practica_3_bloques")
-	_save(_funciones(), "practica_4_funciones")
+	_save(_ordenar(), "practica_4_ordenar")
 	_save(_buscaminas(), "practica_5_buscaminas")
 	sample.free()
 	quit()
@@ -86,11 +86,11 @@ func _bloques() -> Node2D:
 	return root
 
 
-func _funciones() -> Node2D:
+func _ordenar() -> Node2D:
 	var w := 15
 	var h := 13
-	var root := _room("Practica4Funciones", "res://src/practice/practice_code_level.gd", w, h)
-	_machine(root, "res://src/practice/function_machine.gd", Vector2(w * T / 2.0, 10 * T))
+	var root := _room("Practica4Ordenar", "res://src/practice/practice_code_level.gd", w, h)
+	_machine(root, "res://src/practice/query_machine.gd", Vector2(w * T / 2.0, 10 * T))
 	for y in [6, 10]:
 		_torches(root, w, y)
 	return root

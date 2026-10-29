@@ -1,7 +1,8 @@
 @tool
-## La Criba (Sala 1). Patrón Command: perform() ejecuta las órdenes (FilterCommand).
+## La Criba (capítulo 3, OR). Patrón Command: perform() ejecuta las órdenes (FilterCommand)
+## que arma SphereSorter: al cáliz caen las esferas que trajo la consulta; las demás, al crisol.
 class_name CribaMachine
-extends CodeMachine
+extends SqlMachine
 
 const CHANNEL_Y := -44.0
 const GATE := Vector2(30, -44)
@@ -11,25 +12,18 @@ const CHALICE := Vector2(-4, -6)
 const CRUCIBLE := Vector2(64, -6)
 const SPLIT := Vector2(30, -26)
 
-const OUTLINE := Color("14181c")
 const STONE_DARK := Color("27342e")
 const STONE := Color("3e5246")
 const STONE_LIGHT := Color("6a8070")
 const BRONZE := Color("b48a4e")
 const BRONZE_DARK := Color("6e5232")
 const GLASS := Color(0.62, 0.9, 1.0, 0.22)
-const CYAN := Color("3fe0ff")
-const GOLD := Color("ffc857")
 const RED := Color("ff5a4e")
 
-var rules: ParityFilter
+var kit: TileKit
 var round_count := 3
+var limit := 50
 
-var _kit: TileKit
-var _bus: EventBus
-var _data: Dictionary
-var _text: Callable
-var _rng := RandomNumberGenerator.new()
 var _spheres: Array[CribaSphere] = []
 var _on_gate: CribaSphere = null
 var _gate_open := 0.0    # -1 cáliz, 1 crisol
@@ -37,7 +31,6 @@ var _round_lit: Array = [false, false, false]
 var _round_shown := 0
 var _speed := 1.0
 var _filled := 0
-var _font: Font = load(UIKit.PIXEL_FONT)
 
 @onready var _hopper_label: Label = $Tolva
 @onready var _gate_number: Label = $NumeroCompuerta
@@ -45,50 +38,70 @@ var _font: Font = load(UIKit.PIXEL_FONT)
 @onready var _crucible_light: PointLight2D = $LuzCrisol
 
 
-func setup(kit: TileKit, bus: EventBus, data: Dictionary, text: Callable, open_codex: Callable) -> void:
-	_kit = kit
-	_bus = bus
-	_data = data
-	_text = text
-	var seed_value := int(data.get("seed", 0))
-	if seed_value != 0:
-		_rng.seed = seed_value
-	else:
-		_rng.randomize()
-	round_count = (data.get("rounds", []) as Array).size()
+func setup(bus: EventBus, data: Dictionary, text: Callable, open_codex: Callable) -> void:
+	limit = int(data.get("limit", 50))
+	round_count = int(data.get("rounds", 3))
 	_round_lit.resize(round_count)
 	_round_lit.fill(false)
+	super(bus, data, text, open_codex)
 	view_focus = Vector2(-6, -28)
-	session.title = String(data.get("name", ""))
-	session.file_name = String(data.get("file_name", "criba.py"))
-	session.code = String(data.get("starter_code", ""))
-	session.help = data.get("help", [])
-	session.set_blocks(data.get("blocks", []))
-	session.max_lines = int(data.get("max_lines", 0))
-	session.machine = self
-	$EtiquetaPar.text = String(data.get("chalice_label", "PAR"))
-	$EtiquetaImpar.text = String(data.get("crucible_label", "IMPAR"))
-	$Glifo.text = String(data.get("glyph", "n % 2"))
-	connect_console(open_codex)
-	new_rules()
+	$EtiquetaPar.text = String(data.get("chalice_label", "CÁLIZ"))
+	$EtiquetaImpar.text = String(data.get("crucible_label", "CRISOL"))
+	$Glifo.text = String(data.get("glyph", ""))
 
 
 func _draw() -> void:
 	CribaView.draw_board(self, _gate_open, _round_lit, _filled, _time)
+	var t := table("esferas")
+	if t:
+		var marks := {}
+		for r in t.rows_with("numero", got_values("numero")):
+			marks[r] = mark if mark.a > 0.0 else CYAN
+		var size := TableSign.measure(_font, t.columns, t.rows, 6, t.name)
+		TableSign.draw(self, _font, t.columns, t.rows, Vector2(-112 - size.x, -16 - size.y), 6, t.name, marks)
 
 
 # ------------------------------------------------------------------ esferas
 
-## Esferas nuevas para todas las rondas.
-func new_rules() -> void:
-	rules = ParityFilter.new(_data.get("rounds", []), _rng)
+## Esferas de la ronda: siempre hay doradas chicas, grises grandes y grises chicas.
+func make_tables(i: int) -> Array:
+	var count := _rng.randi_range(6, 8)
+	var numbers := _distinct(count, 1, 99)
+	var colors: Array = []
+	for k in count:
+		colors.append("oro" if _rng.randf() < 0.4 else "gris")
+	numbers[0] = _rng.randi_range(1, limit)
+	colors[0] = "oro"
+	numbers[1] = _rng.randi_range(limit + 1, 99)
+	colors[1] = "gris"
+	numbers[2] = _rng.randi_range(1, limit)
+	colors[2] = "gris"
+	var rows: Array = []
+	for k in count:
+		if numbers.count(numbers[k]) > 1:
+			numbers[k] = _free_number(numbers, numbers[k] > limit)
+		rows.append([numbers[k], colors[k]])
+	rows.shuffle()
+	return [SqlTable.new("esferas", ["numero", "color"], rows)]
+
+
+func _free_number(used: Array, big: bool) -> int:
+	var v := _rng.randi_range(limit + 1, 99) if big else _rng.randi_range(1, limit)
+	while v in used:
+		v = _rng.randi_range(limit + 1, 99) if big else _rng.randi_range(1, limit)
+	return v
+
+
+func new_rounds(keep_first := true) -> void:
+	super(keep_first)
 	_round_lit.fill(false)
 	_filled = 0
-	_show_round(0, rules.rounds[0])
+	if is_inside_tree():
+		_show_round(0, tables[0].rows if not tables.is_empty() else [])
 
 
-## Pone las esferas de la ronda en el canal.
-func _show_round(index: int, values: Array) -> void:
+## Pone las esferas de la ronda en el canal. rows: [[numero, color], ...]
+func _show_round(index: int, rows: Array) -> void:
 	for s in _spheres:
 		s.queue_free()
 	_spheres.clear()
@@ -96,9 +109,10 @@ func _show_round(index: int, values: Array) -> void:
 		_on_gate.queue_free()
 		_on_gate = null
 	_round_shown = index
-	for v in values:
+	for r in rows:
 		var s := CribaSphere.new()
-		s.value = int(v)
+		s.value = int(r[0])
+		s.gold = String(r[1]) == "oro"
 		s.font = _font
 		s.z_index = 2
 		add_child(s)
@@ -126,32 +140,26 @@ func _layout_spheres(animate: bool) -> void:
 
 # ------------------------------------------------------------------ evaluar (sin dibujar)
 
-func evaluate(source: String, sandbox: ScriptSandbox) -> CodeMachine.Report:
-	var report := CodeMachine.Report.new()
-	for i in rules.rounds.size():
-		rules.start_round(i)
-		var result := sandbox.run(source, FilterAdapter.objects(rules, _text), session.max_steps)
-		report.output += result.output
-		if not result.ok:
-			report.ok = false
-			report.error = result.error_text()
-			if i > 0:
-				report.error = _text.call("criba_round_error", {"round": i + 1, "error": report.error})
+## Corre la consulta como cualquier máquina y arma las órdenes de cada esfera.
+func evaluate(source: String, engine: SqlEngine) -> CodeMachine.Report:
+	var report := super(source, engine)
+	if not report.ok:
+		return report
+	var sorter := SphereSorter.new()
+	for c: Dictionary in report.commands:
+		var rows: Array = (_dbs[c.round][0] as SqlTable).rows
+		var chosen := _numbers(c.columns, c.rows)
+		var wanted := _numbers(c.want_columns, c.want)
+		if not sorter.add_round(c.round, rows, chosen, wanted, c.ok):
 			break
-		rules.end_round()
-		if rules.failed():
-			break
-	report.commands = rules.commands
-	report.success = report.ok and not rules.failed()
-	match rules.fault:
-		ParityFilter.Fault.WRONG_SIDE:
-			var key := "criba_wrong_even" if ParityFilter.is_even(rules.fault_value) else "criba_wrong_odd"
-			report.message = _text.call(key, {"n": rules.fault_value, "round": rules.round_index + 1})
-		ParityFilter.Fault.LEFT_OVER:
-			report.message = _text.call("criba_left_over", {"n": rules.fault_value, "round": rules.round_index + 1})
-		_:
-			report.message = _text.call("criba_solved", {}) if report.success else ""
+	report.commands = sorter.commands
 	return report
+
+
+## Los números de la columna numero de un resultado.
+static func _numbers(names: Array, rows: Array) -> Array:
+	var at := names.map(func(n): return String(n).to_lower()).find("numero")
+	return [] if at < 0 else rows.map(func(r): return SqlEngine.show(r[at]))
 
 
 func status_text() -> String:
@@ -168,14 +176,16 @@ func perform(report: CodeMachine.Report) -> void:
 		await _celebrate()
 		mark_solved()
 	else:
+		mark = BAD
 		await _wait(0.6)
-		new_rules()
+		new_rounds()
 
 
-func load_round(index: int, values: Array) -> void:
+func load_round(index: int, rows: Array) -> void:
 	_speed = float((_data.get("playback_speed", [1.0, 1.8, 2.6]) as Array)[mini(index, 2)])
-	if index != _round_shown or _spheres.size() != values.size():
-		_show_round(index, values)
+	show_round(index)
+	if index != _round_shown or _spheres.size() != rows.size():
+		_show_round(index, rows)
 		await _wait(0.45)
 	_round_shown = index
 	_bus.publish(GameEvents.MACHINE_STEP)
@@ -221,7 +231,7 @@ func send_from_gate(to_chalice: bool, right: bool) -> void:
 
 func jam() -> void:
 	_bus.publish(GameEvents.MACHINE_BAD)
-	var smoke := _kit.particles(self, SPLIT, "Smoke", 14, 1.2)
+	var smoke := kit.particles(self, SPLIT, "Smoke", 14, 1.2)
 	smoke.gravity = Vector2(0, -30)
 	smoke.initial_velocity_max = 30.0
 	smoke.emitting = true
@@ -255,7 +265,7 @@ func _absorb(sphere: CribaSphere, to_chalice: bool) -> void:
 	if to_chalice:
 		_filled += 1
 	else:
-		var sparks := _kit.particles(self, CRUCIBLE + Vector2(0, -14), "Fire", 6, 0.5)
+		var sparks := kit.particles(self, CRUCIBLE + Vector2(0, -14), "Fire", 6, 0.5)
 		sparks.gravity = Vector2(0, -40)
 		sparks.emitting = true
 		get_tree().create_timer(0.8).timeout.connect(sparks.queue_free)
@@ -266,9 +276,9 @@ func _wrong(sphere: CribaSphere, to_chalice: bool) -> void:
 	_bus.publish(GameEvents.MACHINE_BAD)
 	sphere.tint = RED
 	sphere.queue_redraw()
-	var sparks := _kit.particles(self, sphere.position, "Spark", 18, 0.7)
+	var sparks := kit.particles(self, sphere.position, "Spark", 18, 0.7)
 	sparks.emitting = true
-	var smoke := _kit.particles(self, (CHALICE if to_chalice else CRUCIBLE) + Vector2(0, -10), "Smoke", 10, 1.2)
+	var smoke := kit.particles(self, (CHALICE if to_chalice else CRUCIBLE) + Vector2(0, -10), "Smoke", 10, 1.2)
 	smoke.gravity = Vector2(0, -30)
 	smoke.emitting = true
 	var t := create_tween()
@@ -286,6 +296,3 @@ func _celebrate() -> void:
 	t.parallel().tween_property(_chalice_light, "texture_scale", _chalice_light.texture_scale * 2.0, 0.5)
 	await t.finished
 
-
-func _wait(seconds: float) -> void:
-	await get_tree().create_timer(seconds).timeout

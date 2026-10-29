@@ -1,4 +1,4 @@
-## El pueblo. La puerta del templo se abre con puerta.abrir().
+## El pueblo. La puerta del templo se abre con SELECT * FROM puerta.
 class_name TownLevel
 extends Level
 
@@ -11,7 +11,8 @@ func default_data() -> Dictionary:
 
 
 func wire() -> void:
-	gate.setup(data, func(key, args): return _game.data.message(key, args), open_gate, close_gate, func(): _game.open_codex(gate.session))
+	gate.on_open(open_gate)
+	gate.setup(_game.bus, data.get("gate", {}), func(key, args): return _game.data.message(key, args), func(): _game.open_codex(gate.session))
 	if _game.reached > 0:
 		# El templo ya se superó: la puerta queda abierta
 		seal.open()
@@ -24,7 +25,3 @@ func open_gate() -> void:
 	_game.bus.publish(GameEvents.DOOR_OPENED, {"door": "templo"})
 	seal.open()
 	await get_tree().create_timer(0.6).timeout
-
-
-func close_gate() -> void:
-	seal.close()

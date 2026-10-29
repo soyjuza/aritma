@@ -1,6 +1,6 @@
 @tool
 ## Base de las máquinas de las salas. Patrón Template Method:
-## evaluate() corre el código y perform() lo muestra; cada máquina los cambia.
+## evaluate() corre la consulta y perform() la muestra; cada máquina los cambia.
 class_name CodeMachine
 extends Node2D
 
@@ -16,7 +16,7 @@ var _screen: ColorRect
 var _time := 0.0
 
 
-## Resultado de correr el programa en la máquina.
+## Resultado de correr la consulta en la máquina.
 class Report extends RefCounted:
 	var ok := true
 	var output: Array = []
@@ -26,12 +26,12 @@ class Report extends RefCounted:
 	var commands: Array = []
 
 
-## Corre el programa con los casos de la sala. No toca nada visible.
-func evaluate(_source: String, _sandbox: ScriptSandbox) -> Report:
+## Corre la consulta con las tablas de la sala. No toca nada visible.
+func evaluate(_source: String, _engine: SqlEngine) -> Report:
 	return Report.new()
 
 
-## Muestra en la máquina lo que hizo el programa.
+## Muestra en la máquina lo que trajo la consulta.
 func perform(_report: Report) -> void:
 	pass
 

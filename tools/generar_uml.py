@@ -13,7 +13,7 @@ CARPETAS = {
     "player": "Tala y sus estados (patrón State)",
     "enemies": "Guardianes, jefe, sus estados (State) y ataques (Strategy)",
     "chambers": "Salas, máquinas, fábricas (Factory Method), órdenes (Command) y problemas del jefe (Strategy)",
-    "script_lang": "El lenguaje del Códice (Interpreter, Composite, Adapter, Facade)",
+    "sql_lang": "El SQL del Códice: lexer, parser, motor y comparador (Interpreter, Facade)",
     "states": "Pantallas del juego (patrón State)",
     "ui": "Interfaz",
     "world": "Piezas de los mapas",

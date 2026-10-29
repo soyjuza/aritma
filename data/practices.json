@@ -59,10 +59,10 @@
 	},
 	"bloques": {
 		"scene": "res://scenes/practicas/practica_3_bloques.tscn",
-		"title": "Armar programas",
+		"title": "Armar consultas",
 		"intro": [
-			"INSCRIPCIÓN: Los atriles se programan con el Códice. No hace falta escribir: se arma el programa con piezas.",
-			"Los errores aquí no despiertan a nadie. Prueba sin miedo."
+			"INSCRIPCIÓN: Los atriles se programan con el Códice. Las máquinas de Aritma guardan todo en TABLAS y se les habla con CONSULTAS en SQL.",
+			"No hace falta escribir: la consulta se arma con piezas. Los errores aquí no despiertan a nadie. Prueba sin miedo."
 		],
 		"steps": [
 			{
@@ -71,180 +71,106 @@
 			},
 			{
 				"id": "etapa1",
-				"text": "Arrastra la pieza antorchas.encender() a TU PROGRAMA y presiona EJECUTAR.",
-				"touch_text": "Arrastra la pieza antorchas.encender() a TU PROGRAMA y toca EJECUTAR."
+				"text": "Arrastra SELECT * y debajo FROM braseros a TU CONSULTA, y presiona EJECUTAR.",
+				"touch_text": "Arrastra SELECT * y debajo FROM braseros a TU CONSULTA, y toca EJECUTAR."
 			},
 			{
 				"id": "etapa2",
-				"text": "Ahora enciende 3 braseros. Vuelve al atril y pon antorchas.encender() tres veces, una debajo de otra: el programa corre de arriba abajo."
+				"text": "Ahora hay 3 braseros en la tabla. Vuelve al atril y pide solo la columna numero: SELECT numero, y debajo FROM braseros."
 			}
 		],
 		"stages": [
 			{
 				"title": "Un brasero",
-				"goal": 1,
-				"starter_code": "# Enciende un brasero.\n",
+				"file_name": "braseros.sql",
+				"tables": [
+					{
+						"name": "braseros",
+						"columns": [
+							"numero",
+							"lado"
+						],
+						"rows": [
+							[
+								1,
+								"izquierda"
+							]
+						]
+					}
+				],
+				"answer": "SELECT * FROM braseros",
+				"starter_code": "-- La tabla braseros tiene una fila: un brasero.\n-- Pídele todo con SELECT * y FROM braseros.\n",
 				"help": [
 					[
-						"antorchas.encender()",
-						"enciende un brasero"
+						"SELECT *",
+						"pide todas las columnas"
 					],
 					[
-						"antorchas.apagar()",
-						"apaga un brasero"
+						"SELECT numero",
+						"pide solo la columna numero"
 					],
 					[
-						"antorchas.quedan()",
-						"cuántos braseros faltan por encender"
+						"FROM braseros",
+						"de la tabla braseros"
 					]
 				],
 				"blocks": [
-					"antorchas.encender()",
-					"antorchas.apagar()"
+					"SELECT *",
+					"FROM braseros"
 				]
 			},
 			{
 				"title": "Tres braseros",
-				"goal": 3,
-				"starter_code": "# Enciende 3 braseros.\n# Cada línea es una orden: se cumplen de arriba abajo.\n",
+				"file_name": "braseros.sql",
+				"tables": [
+					{
+						"name": "braseros",
+						"columns": [
+							"numero",
+							"lado"
+						],
+						"rows": [
+							[
+								1,
+								"izquierda"
+							],
+							[
+								2,
+								"centro"
+							],
+							[
+								3,
+								"derecha"
+							]
+						]
+					}
+				],
+				"answer": "SELECT numero FROM braseros",
+				"starter_code": "-- Ahora la tabla tiene 3 braseros. Se enciende uno por cada fila.\n-- Pide solo la columna numero.\n-- Primero va SELECT y después FROM: la consulta se lee de arriba abajo.\n",
 				"help": [
 					[
-						"antorchas.encender()",
-						"enciende un brasero"
+						"SELECT *",
+						"pide todas las columnas"
 					],
 					[
-						"antorchas.apagar()",
-						"apaga un brasero"
+						"SELECT numero",
+						"pide solo la columna numero"
 					],
 					[
-						"antorchas.quedan()",
-						"cuántos braseros faltan por encender"
+						"FROM braseros",
+						"de la tabla braseros"
 					]
 				],
 				"blocks": [
-					"antorchas.encender()",
-					"antorchas.apagar()"
+					"SELECT numero",
+					"SELECT lado",
+					"FROM braseros",
+					"FROM antorchas"
 				]
 			}
 		],
 		"done": [
-			"¡Bien! Así se programan los atriles del templo: una orden por línea, de arriba abajo."
-		]
-	},
-	"funciones": {
-		"scene": "res://scenes/practicas/practica_4_funciones.tscn",
-		"title": "Funciones con return",
-		"intro": [
-			"INSCRIPCIÓN: Las máquinas de las ruinas piden funciones: un pedazo de programa que recibe números y DEVUELVE un resultado con return.",
-			"Practica aquí con funciones más fáciles."
-		],
-		"steps": [
-			{
-				"id": "atril",
-				"text": "Acércate al atril y presiona {interact}."
-			},
-			{
-				"id": "etapa1",
-				"text": "Arma doble(n): primero def, y el return DENTRO (más a la derecha). Debe devolver el doble de n."
-			},
-			{
-				"id": "etapa2",
-				"text": "Vuelve al atril. Ahora restar(a, b): debe devolver a menos b."
-			}
-		],
-		"stages": [
-			{
-				"title": "doble(n)",
-				"function": "doble",
-				"cases": [
-					[
-						[
-							3
-						],
-						6
-					],
-					[
-						[
-							5
-						],
-						10
-					],
-					[
-						[
-							12
-						],
-						24
-					]
-				],
-				"starter_code": "# El atril llama a doble(3), doble(5) y doble(12).\n# return devuelve el resultado.\n",
-				"help": [
-					[
-						"def doble(n):",
-						"crea la función; n es el número que le pasan"
-					],
-					[
-						"return n * 2",
-						"devuelve el doble de n"
-					],
-					[
-						"print(...)",
-						"solo escribe en la consola: no devuelve nada"
-					]
-				],
-				"blocks": [
-					"def doble(n):",
-					"return n * 2",
-					"return n + 2",
-					"print(n * 2)"
-				]
-			},
-			{
-				"title": "restar(a, b)",
-				"function": "restar",
-				"cases": [
-					[
-						[
-							9,
-							4
-						],
-						5
-					],
-					[
-						[
-							20,
-							8
-						],
-						12
-					],
-					[
-						[
-							7,
-							7
-						],
-						0
-					]
-				],
-				"starter_code": "# El atril llama a restar(9, 4), restar(20, 8) y restar(7, 7).\n",
-				"help": [
-					[
-						"def restar(a, b):",
-						"crea la función con dos números"
-					],
-					[
-						"return a - b",
-						"devuelve a menos b"
-					]
-				],
-				"blocks": [
-					"def restar(a, b):",
-					"return a - b",
-					"return b - a",
-					"return a + b"
-				]
-			}
-		],
-		"done": [
-			"¡Bien! El Molino llama a moler(sacos) igual que este atril llamó a tus funciones."
+			"¡Bien! Así se programan los atriles del templo: SELECT dice qué columnas, FROM dice de qué tabla."
 		]
 	},
 	"buscaminas": {
@@ -592,6 +518,141 @@
 		],
 		"done": [
 			"¡Bien! Así se resuelve el Vórtice: un número a la vez, sin adivinar."
+		]
+	},
+	"ordenar": {
+		"scene": "res://scenes/practicas/practica_4_ordenar.tscn",
+		"title": "Ordenar con ORDER BY",
+		"intro": [
+			"INSCRIPCIÓN: Las máquinas de las ruinas quieren sus filas en orden. Para eso se usa ORDER BY, al final de la consulta.",
+			"Practica aquí con una tabla de frutas."
+		],
+		"steps": [
+			{
+				"id": "atril",
+				"text": "Acércate al atril y presiona {interact}."
+			},
+			{
+				"id": "etapa1",
+				"text": "Ordena las frutas por precio, de la más barata a la más cara: ORDER BY precio."
+			},
+			{
+				"id": "etapa2",
+				"text": "Vuelve al atril. Ahora de la más cara a la más barata: ORDER BY precio DESC."
+			}
+		],
+		"stages": [
+			{
+				"title": "De barata a cara",
+				"file_name": "frutas.sql",
+				"tables": [
+					{
+						"name": "frutas",
+						"columns": [
+							"nombre",
+							"precio"
+						],
+						"rows": [
+							[
+								"uva",
+								4
+							],
+							[
+								"pera",
+								2
+							],
+							[
+								"mango",
+								7
+							],
+							[
+								"kiwi",
+								5
+							]
+						]
+					}
+				],
+				"ordered": true,
+				"answer": "SELECT nombre FROM frutas ORDER BY precio",
+				"starter_code": "-- Pide los nombres de las frutas, de la más barata a la más cara.\n",
+				"help": [
+					[
+						"SELECT nombre FROM frutas",
+						"los nombres de la tabla frutas"
+					],
+					[
+						"ORDER BY precio",
+						"de menor a mayor"
+					],
+					[
+						"ORDER BY precio DESC",
+						"de mayor a menor (DESC = descendente)"
+					]
+				],
+				"blocks": [
+					"SELECT nombre",
+					"FROM frutas",
+					"ORDER BY precio",
+					"ORDER BY nombre"
+				]
+			},
+			{
+				"title": "De cara a barata",
+				"file_name": "frutas.sql",
+				"tables": [
+					{
+						"name": "frutas",
+						"columns": [
+							"nombre",
+							"precio"
+						],
+						"rows": [
+							[
+								"uva",
+								4
+							],
+							[
+								"pera",
+								2
+							],
+							[
+								"mango",
+								7
+							],
+							[
+								"kiwi",
+								5
+							]
+						]
+					}
+				],
+				"ordered": true,
+				"answer": "SELECT nombre FROM frutas ORDER BY precio DESC",
+				"starter_code": "-- Ahora al revés: de la más cara a la más barata.\n",
+				"help": [
+					[
+						"SELECT nombre FROM frutas",
+						"los nombres de la tabla frutas"
+					],
+					[
+						"ORDER BY precio",
+						"de menor a mayor"
+					],
+					[
+						"ORDER BY precio DESC",
+						"de mayor a menor (DESC = descendente)"
+					]
+				],
+				"blocks": [
+					"SELECT nombre",
+					"FROM frutas",
+					"ORDER BY precio DESC",
+					"ORDER BY precio"
+				]
+			}
+		],
+		"done": [
+			"¡Bien! El Molino ordena sus sacos igual que este atril ordenó las frutas."
 		]
 	}
 }

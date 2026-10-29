@@ -1,10 +1,10 @@
 ## Patrón State: el Códice abierto.
-## Si la máquina rechaza el código se publica MACHINE_FAILED.
+## Si la máquina rechaza la consulta se publica MACHINE_FAILED.
 class_name CodexState
 extends GameState
 
 var _session: CodexSession
-var _sandbox := ScriptSandbox.new()
+var _engine := SqlEngine.new()
 var _watching := false    # la máquina está mostrando el programa
 
 
@@ -41,7 +41,7 @@ func handle_input(actions: Array) -> void:
 		run()
 
 
-## Ejecuta el código del editor.
+## Corre la consulta del editor en la máquina.
 func run() -> void:
 	if _watching:
 		return
@@ -57,28 +57,12 @@ func run() -> void:
 	game.codex.log_line(game.data.message("codex_run_log", {"file": _session.file_name}), "8d97a8")
 	if _session.machine:
 		_run_on_machine(source)
-		return
-	var api: Dictionary = _session.api_factory.call() if _session.api_factory.is_valid() else {}
-	var result := _sandbox.run(source, api, _session.max_steps)
-	for line in result.output:
-		game.codex.log_line(line)
-	if not result.ok:
-		game.codex.log_line(result.error_text(), "ff5a4e")
-		game.bus.publish(GameEvents.CODE_FAILED, {"error": result.error})
-	else:
-		game.bus.publish(GameEvents.CODE_RAN)
-	if _session.on_result.is_valid():
-		var message: String = _session.on_result.call(result)
-		if message != "":
-			game.codex.log_line(message, "6be38b" if result.ok else "ff9a6b")
-	if result.ok and _session.close_after_run:
-		game.machine.change("play")
 
 
-## La máquina corre el código y luego lo muestra.
+## La máquina corre la consulta y luego la muestra.
 func _run_on_machine(source: String) -> void:
 	var machine := _session.machine
-	var report := machine.evaluate(source, _sandbox)
+	var report := machine.evaluate(source, _engine)
 	for line in report.output:
 		game.codex.log_line(line)
 	if not report.ok:

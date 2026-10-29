@@ -6,41 +6,38 @@
 	"quests": [
 		{
 			"id": "cuentas",
-			"title": "Las cuentas de Mila",
-			"goal": "Ayuda a Mila con 3 cuentas de variables",
+			"title": "Las tablas de Mila",
+			"goal": "Ayuda a Mila a leer 3 consultas",
 			"kind": "quiz",
-			"problem": "variable",
+			"problem": "columnas",
 			"count": 3,
 			"seconds": 60,
 			"settings": {
-				"min_lines": 2,
-				"max_lines": 3,
-				"max_start": 9,
 				"options": 4
 			},
 			"points": 1,
 			"offer": [
-				"MILA: ¡Hola! Orun me dejó tareas de variables y me enredo con tantos cambios.",
-				"MILA: Si n vale 4 y después escribo n = n + 3... ¿n sigue valiendo 4? ¡Ayúdame con tres cuentas!"
+				"MILA: ¡Hola! Orun me enseñó a guardar mis cosas en TABLAS, con columnas y filas. Pero no sé leer las consultas.",
+				"MILA: Si escribo SELECT nombre FROM gatos... ¿qué sale? ¡Ayúdame con tres!"
 			],
 			"again": [
-				"MILA: ¿Probamos otra vez? Lee las líneas de arriba abajo, una por una."
+				"MILA: ¿Probamos otra vez? SELECT dice qué columna se ve; mira esa columna en la tabla."
 			],
 			"fail": [
-				"MILA: Mmm, creo que esa no era. Cada línea cambia la variable, y la siguiente usa el valor nuevo.",
+				"MILA: Mmm, creo que esa no era. Busca la columna que dice SELECT y lee sus filas de arriba abajo.",
 				"MILA: Háblame otra vez cuando quieras."
 			],
 			"done": [
 				"MILA: ¡Las tres bien! Toma el amuleto de mi abuela: te da un punto de habilidad."
 			],
 			"thanks": [
-				"MILA: Ya entendí: la variable guarda el último valor que le diste."
+				"MILA: Ya entendí: SELECT elige las columnas y FROM dice de qué tabla."
 			]
 		},
 		{
 			"id": "tuerca",
 			"title": "Las órdenes de Tuerca",
-			"goal": "Ordena 2 programas desordenados de Tuerca",
+			"goal": "Ordena 2 consultas desordenadas de Tuerca",
 			"kind": "quiz",
 			"problem": "orden",
 			"count": 2,
@@ -49,44 +46,44 @@
 				"options": 4,
 				"programs": [
 					[
-						"pasos = 2",
-						"pasos = pasos + 1",
-						"tuerca.avanzar(pasos)"
+						"SELECT nombre",
+						"FROM robots",
+						"WHERE pilas > 2"
 					],
 					[
-						"carga = 5",
-						"carga = carga * 2",
-						"tuerca.levantar(carga)"
+						"SELECT color",
+						"FROM tuercas",
+						"WHERE tamano < 5"
 					],
 					[
-						"giro = 1",
-						"giro = giro + 2",
-						"tuerca.girar(giro)"
+						"SELECT *",
+						"FROM engranajes",
+						"WHERE dientes = 8"
 					],
 					[
-						"luz = 3",
-						"luz = luz - 1",
-						"tuerca.brillar(luz)"
+						"SELECT nombre, pilas",
+						"FROM robots",
+						"ORDER BY pilas"
 					]
 				]
 			},
 			"points": 1,
 			"offer": [
-				"TUERCA: BZZT. UNIDAD TUERCA. MIS ÓRDENES ESTÁN... DESORDENADAS.",
-				"TUERCA: UN PROGRAMA CORRE DE ARRIBA ABAJO. SI LAS LÍNEAS VAN EN DESORDEN, NO FUNCIONO. ¿ME AYUDAS A ORDENAR DOS?"
+				"TUERCA: BZZT. UNIDAD TUERCA. MIS CONSULTAS ESTÁN... DESORDENADAS.",
+				"TUERCA: UNA CONSULTA TIENE SUS PARTES EN ORDEN: PRIMERO SELECT, LUEGO FROM Y AL FINAL LO DEMÁS. ¿ME AYUDAS A ORDENAR DOS?"
 			],
 			"again": [
-				"TUERCA: REINTENTANDO. PRIMERO SE CREA LA VARIABLE, LUEGO SE CAMBIA Y AL FINAL SE USA."
+				"TUERCA: REINTENTANDO. SELECT ARRIBA. FROM DEBAJO. WHERE U ORDER BY AL FINAL."
 			],
 			"fail": [
-				"TUERCA: ERROR. ESE ORDEN USA UNA VARIABLE ANTES DE CREARLA.",
+				"TUERCA: ERROR. ESE ORDEN NO LO ENTIENDE NINGUNA MÁQUINA: SELECT SIEMPRE VA PRIMERO.",
 				"TUERCA: HÁBLAME OTRA VEZ PARA REINTENTAR."
 			],
 			"done": [
 				"TUERCA: ÓRDENES CORRECTAS. GRACIAS. TE INSTALO UNA MEJORA: UN PUNTO DE HABILIDAD."
 			],
 			"thanks": [
-				"TUERCA: FUNCIONANDO AL CIEN POR CIENTO. BIP."
+				"TUERCA: SELECT, FROM, WHERE. FUNCIONANDO AL CIEN POR CIENTO. BIP."
 			]
 		},
 		{
@@ -114,32 +111,31 @@
 		{
 			"id": "ramas",
 			"title": "Las preguntas de Ramas",
-			"goal": "Responde 3 preguntas de if que Ramas no entiende",
+			"goal": "Responde 3 preguntas de WHERE que Ramas no entiende",
 			"kind": "quiz",
-			"problem": "si_sino",
+			"problem": "donde",
 			"count": 3,
 			"seconds": 60,
 			"settings": {
-				"with_else": 1,
 				"options": 4
 			},
 			"points": 1,
 			"offer": [
 				"RAMAS: Cuido este bosque desde niño, pero los letreros de las ruinas me marean.",
-				"RAMAS: Dicen «if» por aquí, «else» por allá... ¿Me dices qué imprimen tres de ellos?"
+				"RAMAS: Dicen «WHERE» por aquí, «WHERE» por allá... ¿Me dices qué filas deja pasar cada uno?"
 			],
 			"again": [
-				"RAMAS: Otra vez, despacio: primero mira si la pregunta del if da sí o no."
+				"RAMAS: Otra vez, despacio: mira la condición fila por fila y quédate con las que dicen que sí."
 			],
 			"fail": [
-				"RAMAS: Hmm, el letrero decía otra cosa. Fíjate: si la pregunta da no, se salta lo del if y pasa lo del else.",
+				"RAMAS: Hmm, el letrero decía otra cosa. Fíjate bien en el signo: > es mayor que y < es menor que.",
 				"RAMAS: Vuelve cuando quieras."
 			],
 			"done": [
 				"RAMAS: ¡Ahora sí lo entiendo! Toma estas botas de corredor: valen un punto de habilidad."
 			],
 			"thanks": [
-				"RAMAS: if pregunta, else responde cuando es que no. ¡Qué fácil era!"
+				"RAMAS: WHERE es como un colador: solo pasan las filas que cumplen. ¡Qué fácil era!"
 			]
 		},
 		{
@@ -167,9 +163,9 @@
 		{
 			"id": "mientras",
 			"title": "Las vueltas de Grava",
-			"goal": "Responde 3 preguntas de while que confunden a Grava",
+			"goal": "Responde 3 preguntas de AND y OR que confunden a Grava",
 			"kind": "quiz",
-			"problem": "mientras",
+			"problem": "y_o",
 			"count": 3,
 			"seconds": 60,
 			"settings": {
@@ -178,20 +174,20 @@
 			"points": 1,
 			"offer": [
 				"GRAVA: Pico y pico toda la vida, y los letreros de esta cueva me tienen mareado.",
-				"GRAVA: Dicen «while» y repiten cosas... ¿hasta cuándo? ¿Me dices qué imprimen tres de ellos?"
+				"GRAVA: Dicen «AND», dicen «OR»... ¿cuál es cuál? ¿Me dices qué filas salen en tres de ellos?"
 			],
 			"again": [
-				"GRAVA: Otra vez. Ve vuelta por vuelta: cambia el número y vuelve a preguntar."
+				"GRAVA: Otra vez. Con AND tienen que cumplirse las dos cosas; con OR basta una."
 			],
 			"fail": [
-				"GRAVA: Mmm, ese no era. El while para justo cuando la pregunta da que no; mira el número en ese momento.",
+				"GRAVA: Mmm, ese no era. Revisa las dos condiciones en cada fila y después mira si es AND u OR.",
 				"GRAVA: Háblame cuando quieras."
 			],
 			"done": [
 				"GRAVA: ¡Por fin lo veo! Toma mi casco de minero: vale un punto de habilidad."
 			],
 			"thanks": [
-				"GRAVA: Mientras haya roca, se pica. ¡Igual que el while!"
+				"GRAVA: AND es exigente, OR es generoso. ¡Como los mineros!"
 			]
 		},
 		{
@@ -218,10 +214,10 @@
 		},
 		{
 			"id": "funciones",
-			"title": "Las recetas de Pluma",
-			"goal": "Dile a Pluma qué devuelven 3 funciones",
+			"title": "Las listas de Pluma",
+			"goal": "Dile a Pluma en qué orden salen 3 consultas",
 			"kind": "quiz",
-			"problem": "funcion",
+			"problem": "ordenar",
 			"count": 3,
 			"seconds": 60,
 			"settings": {
@@ -229,21 +225,21 @@
 			},
 			"points": 1,
 			"offer": [
-				"PLUMA: Copio las recetas de las ruinas, pero no entiendo qué devuelven.",
-				"PLUMA: «def», «return»... Dime qué imprime cada una de estas tres, ¿sí?"
+				"PLUMA: Copio las listas de las ruinas, pero siempre me salen desordenadas.",
+				"PLUMA: «ORDER BY», «DESC»... Dime en qué orden salen las filas de estas tres consultas, ¿sí?"
 			],
 			"again": [
-				"PLUMA: Otra vez: pon el número en lugar de n y haz la cuenta del return."
+				"PLUMA: Otra vez: ORDER BY va de menor a mayor; si dice DESC, de mayor a menor."
 			],
 			"fail": [
-				"PLUMA: Esa no era. La función recibe el número, hace la cuenta y devuelve el resultado con return.",
+				"PLUMA: Esa no era. Mira la columna de ORDER BY y ordena por ella, no por el nombre.",
 				"PLUMA: Vuelve cuando quieras."
 			],
 			"done": [
 				"PLUMA: ¡Ahora mis copias tienen sentido! Toma esta pluma de cóndor: vale un punto de habilidad."
 			],
 			"thanks": [
-				"PLUMA: Recibe, calcula, devuelve. ¡Qué elegante!"
+				"PLUMA: Primero el menor, al final el mayor... o al revés con DESC. ¡Qué elegante!"
 			]
 		},
 		{
@@ -270,33 +266,32 @@
 		},
 		{
 			"id": "listas",
-			"title": "Las cuentas de Eco",
-			"goal": "Responde 3 preguntas de listas y for que Eco no recuerda",
+			"title": "La memoria de Eco",
+			"goal": "Responde 3 preguntas de JOIN que Eco no recuerda",
 			"kind": "quiz",
-			"problem": "para_lista",
+			"problem": "unir",
 			"count": 3,
 			"seconds": 60,
 			"settings": {
-				"over_list": 1,
 				"options": 4
 			},
 			"points": 1,
 			"offer": [
 				"ECO: ...ECO... ECO. SOY ECO, EL ÚLTIMO AUTÓMATA DE LA CIMA.",
-				"ECO: EL FRÍO BORRÓ MI MEMORIA DE LISTAS. ¿ME DICES QUÉ IMPRIMEN TRES PROGRAMAS?"
+				"ECO: EL FRÍO PARTIÓ MI MEMORIA EN DOS TABLAS. ¿ME AYUDAS A UNIRLAS CON JOIN EN TRES CONSULTAS?"
 			],
 			"again": [
-				"ECO: REPITE CONMIGO: UNA VUELTA POR CADA NÚMERO DE LA LISTA."
+				"ECO: REPITE CONMIGO: BUSCA LA FILA DE LA OTRA TABLA CON EL MISMO ID."
 			],
 			"fail": [
-				"ECO: ERROR. SUMA LOS NÚMEROS UNO POR UNO, EN CADA VUELTA DEL FOR.",
+				"ECO: ERROR. SIGUE EL ON: mascota_id DE UNA TABLA ES EL id DE LA OTRA.",
 				"ECO: HÁBLAME OTRA VEZ."
 			],
 			"done": [
 				"ECO: MEMORIA RESTAURADA. TE DOY MI ÚLTIMA CHISPA: UN PUNTO DE HABILIDAD."
 			],
 			"thanks": [
-				"ECO: ...LISTA... FOR... LISTA... FOR. GRACIAS, TALA."
+				"ECO: ...TABLA... JOIN... TABLA... JOIN. GRACIAS, TALA."
 			]
 		}
 	]

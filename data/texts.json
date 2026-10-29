@@ -2,7 +2,7 @@
 	"lore_intro": [
 		{
 			"title": "Aritma",
-			"text": "Hace siglos existió una civilización que no conocía la magia. Los aritmanos construían máquinas que obedecían a los números y a programas escritos: puertas que se abrían con una cuenta exacta, luces que hablaban en binario y autómatas que seguían órdenes."
+			"text": "Hace siglos existió una civilización que no conocía la magia. Los aritmanos construían máquinas que guardaban todo en tablas y obedecían a quien sabía preguntarles: puertas que se abrían con una palabra guardada, luces que leían su color de una tabla y autómatas que seguían consultas."
 		},
 		{
 			"title": "El Sol Negro",
@@ -111,15 +111,15 @@
 	"talk": {
 		"sauce": [
 			"SAUCE: Bienvenida al Bosque de Aritma. Yo cuido el sendero desde antes del Sol Negro.",
-			"SAUCE: En el templo las máquinas obedecían en orden. Aquí, además, deciden: si pasa una cosa hacen esto; si no, hacen lo otro.",
+			"SAUCE: En el templo las máquinas leían tablas enteras. Aquí son más exigentes: solo quieren algunas filas. Para eso está WHERE.",
 			"SAUCE: Lee el letrero del camino antes de entrar a las ruinas. Y habla con Ramas y con Lía: necesitan ayuda."
 		],
 		"orun": [
 			"ORUN: Así que tú eres la que encontró el Códice. Lo veo brillar en tu brazo.",
-			"ORUN: Detrás de esa fachada está el templo de Aritma. Sus salas son máquinas que solo obedecen a programas.",
+			"ORUN: Los aritmanos guardaban todo en TABLAS: columnas arriba, filas abajo. Sus máquinas solo obedecen a quien sabe preguntarles: eso es una CONSULTA en SQL.",
 			"ORUN: Cuando entres, el núcleo despertará. No hay prisa: piensa cada sala con calma.",
-			"ORUN: La puerta no tiene cerradura. Obedece a quien le hable en su idioma: usa el atril que está a su derecha.",
-			"ORUN: Cada máquina prueba tu programa con casos que no ves. No sirve hacer la cuenta a mano: tiene que funcionar siempre.",
+			"ORUN: La puerta no tiene cerradura. Guarda su palabra secreta en la tabla puerta: usa el atril que está a su derecha y pídesela con SELECT * FROM puerta.",
+			"ORUN: Cada máquina prueba tu consulta con tablas que no ves. No sirve copiar los nombres a mano: tiene que funcionar siempre.",
 			"ORUN: Y aprende a moverte: corre con SHIFT y salta con ESPACIO. Los aritmanos no construían pasillos para los lentos."
 		]
 	},
@@ -161,21 +161,16 @@
 		"quest_item": "{item} ({n} de {of})",
 		"objective_forest": "Sigue el sendero hasta las ruinas del Bosque (al norte)",
 		"objective_rounds_tunnel": "Cruza el pasillo: los fosos solo se saltan corriendo (SHIFT + ESPACIO)",
-		"objective_bridge": "Programa el puente: si la carreta pesa más de 10, refuérzalo",
-		"objective_garden": "Programa el jardín: riega si hay menos de 5 de agua; si no, sol",
-		"objective_rounds_done": "La máquina aceptó tu programa: cruza el sello de la salida",
+		"objective_bridge": "Consulta el puente: el nombre de las carretas que pesan más de 10",
+		"objective_garden": "Consulta el jardín: el nombre de las macetas con tierra 'seca'",
+		"objective_rounds_done": "La máquina aceptó tu consulta: cruza el sello de la salida",
 		"rounds_already": "Esta máquina ya está en paz: el sello de la salida está abierto.",
-		"rounds_status": "La máquina prueba tu programa · ronda {round} de {of}",
-		"rounds_wrong": "Ronda {round}: el número era {n}. Tu programa hizo «{did}», pero debía hacer «{want}».",
-		"rounds_nothing": "nada",
-		"quiz_if_title": "if y else",
-		"quiz_if_question": "¿Qué imprime este programa?",
-		"quiz_if_nothing": "nada",
+		"rounds_status": "La máquina prueba tu consulta · ronda {round} de {of}",
 		"ending_chapter2_title": "Capítulo 2 superado",
 		"ending_chapter2": [
 			"El Guardián del Bosque se hunde entre las raíces y el claro se llena de luciérnagas.",
-			"Más allá de los árboles, la montaña se abre en una cueva oscura: allí las máquinas repiten y repiten sin parar.",
-			"Siguiente: Capítulo 3, La Cueva (while). Próximamente."
+			"Más allá de los árboles, la montaña se abre en una cueva oscura: allí una condición no alcanza.",
+			"Siguiente: Capítulo 3, La Cueva. Aprenderás AND y OR."
 		],
 		"quest_quiz_header": "{title} · {n} de {of}",
 		"quest_quiz_right": "¡Correcto!",
@@ -190,16 +185,11 @@
 			"Raíz, al atardecer. Al norte, la fachada del templo de Aritma, sellada desde el Sol Negro.",
 			"Orun te espera junto al camino. Párate frente a él y presiona E para hablar."
 		],
-		"codex_keys": "F5 o EJECUTAR: correr el programa   ·   ESC: cerrar el Códice   ·   Tu código se guarda al cerrar",
-		"codex_too_long": "El programa tiene {n} líneas y esta sala admite {max}. Usa un bucle.",
+		"codex_keys": "F5 o EJECUTAR: correr la consulta   ·   ESC: cerrar el Códice   ·   Tu consulta se guarda al cerrar",
+		"codex_too_long": "La consulta tiene {n} líneas y esta sala admite {max}.",
 		"prompt_codex": "Usar el Códice en la terminal",
 		"gate_sealed": "La puerta de la montaña está sellada. Junto a ella hay una terminal aritmana.",
 		"gate_terminal_title": "PUERTA DE LA MONTAÑA",
-		"gate_opened_log": "La puerta de la montaña se abrió.",
-		"gate_not_opened_log": "El programa terminó, pero la puerta sigue cerrada.",
-		"help_door_open": "abre la puerta",
-		"help_door_close": "cierra la puerta",
-		"help_door_state": "True si está abierta",
 		"objective_town_open": "La puerta está abierta: entra al templo",
 		"chamber_banner": "SALA {n} · {name}",
 		"player_reset": "La Cámara te devuelve al último punto seguro.",
@@ -218,60 +208,41 @@
 		"book_town": [
 			"Muévete con {move_up} {move_left} {move_down} {move_right}. Corre con {run} (gasta aliento) y salta con {jump}: corriendo, el salto llega más lejos.",
 			"{interact} usa lo que tienes delante: personas, inscripciones y los atriles de las máquinas.",
-			"En el atril de una máquina se abre el Códice: escribe el programa en Python y pulsa {run_code} para verla trabajar. {cancel} cierra el Códice.",
+			"En el atril de una máquina se abre el Códice: arma o escribe tu consulta en SQL y pulsa {run_code} para verla trabajar. La consola muestra la tabla que trajo. {cancel} cierra el Códice.",
 			"{book} abre este libro y {pause} pausa el juego. La pausa detiene a los guardianes; en el libro los guardianes también se detienen.",
-			"Golpea con {attack} (el garrote). Cada vez que una máquina rechaza tu código, despiertan guardianes: te quitan medio corazón por golpe y no puedes usar la máquina hasta vencerlos.",
+			"Golpea con {attack} (el garrote). Cada vez que una máquina rechaza tu consulta, despiertan guardianes: te quitan medio corazón por golpe y no puedes usar la máquina hasta vencerlos.",
 			"Los guardianes se distinguen por el aro de color bajo sus pies: DORADO, el caballero (golpea de cerca); MORADO, el hechicero (lanza orbes de lejos: elimínalo primero, el garrote también deshace sus orbes); ROJO, el rúnico (explota).",
 			"El guardián rúnico (la calavera con aura roja) no golpea: se carga y explota. Aléjate del círculo rojo o véncelo antes (2 golpes). Si te alcanza, aparecen teclas al azar: pulsa solo esas, en orden, antes de que se vacíe la barra (de 5 a 8 segundos), o perderás 2 corazones.",
 			"Tienes 5 corazones y no se recuperan al resolver las salas (solo al enfrentar al jefe final). Si caes a un foso pierdes medio corazón y vuelves al borde; si te quedas sin corazones vuelves a la entrada de la sala con la vida llena."
 		],
 		"book_hint": "[{ui_left}] [{ui_right}] cambiar de página      [{book}] cerrar",
-		"prompt_machine": "Programar la máquina",
+		"prompt_machine": "Consultar la máquina",
 		"objective_lock_tunnel": "Cruza el pasillo: los fosos solo se saltan corriendo (SHIFT + ESPACIO)",
-		"objective_lock_machine": "Programa la Compuerta: el número del sensor MÁS 3",
-		"objective_lock_done": "La Compuerta aceptó tu programa: cruza el sello de la salida",
+		"objective_lock_machine": "Consulta la Compuerta: SELECT nivel FROM sensor",
+		"objective_lock_done": "La Compuerta aceptó tu consulta: cruza el sello de la salida",
 		"lock_already": "La Compuerta ya está abierta: el sello de la salida también.",
-		"lock_status": "La Compuerta prueba tu programa · ronda {round} de {of}",
-		"lock_still": "Ronda {round}: el sensor marcó {sensor}, pero la compuerta no se movió. ¿Te faltó compuerta.subir(nivel)?",
-		"lock_wrong": "Ronda {round}: el sensor marcó {sensor} y la compuerta subió a {raised}, pero debía subir a {want} ({sensor} + 3).",
-		"lock_solved": "¡La Compuerta sube a la altura justa en las tres rondas! El sello de la salida se abre.",
+		"lock_status": "La Compuerta prueba tu consulta · ronda {round} de {of}",
 		"objective_filter_tunnel": "Cruza el pasillo: los fosos solo se saltan corriendo (SHIFT + ESPACIO)",
-		"objective_filter_machine": "Programa la Criba: solo las esferas PARES al cáliz",
-		"objective_filter_done": "La Criba aceptó tu programa: cruza el sello de la salida",
+		"objective_filter_machine": "Consulta la Criba: las esferas de oro OR mayores que 50",
+		"objective_filter_done": "La Criba aceptó tu consulta: cruza el sello de la salida",
 		"filter_already": "La Criba ya está en paz: el sello de la salida está abierto.",
-		"criba_status": "La Criba ejecuta tu programa · ronda {round} de {of}",
-		"criba_release_busy": "Ya hay una esfera ({n}) en la compuerta: decide con caliz.recibir() o crisol.desintegrar() antes de soltar otra.",
-		"criba_release_empty": "La tolva está vacía: no quedan esferas por soltar. Revisa tolva.quedan().",
-		"criba_send_empty": "No hay ninguna esfera en la compuerta: primero usa tolva.soltar().",
-		"criba_wrong_even": "Ronda {round}: la esfera {n} es PAR y cayó en el crisol. La Criba se trabó y mezcló esferas nuevas.",
-		"criba_wrong_odd": "Ronda {round}: la esfera {n} es IMPAR y cayó en el cáliz. La Criba se trabó y mezcló esferas nuevas.",
-		"criba_left_over": "Ronda {round}: tu programa terminó y quedaron {n} esferas sin clasificar. La Criba se trabó.",
-		"criba_solved": "¡Las tres rondas, perfectas! El cáliz desborda de luz y la energía corre hacia el sello.",
+		"criba_status": "La Criba prueba tu consulta · ronda {round} de {of}",
 		"ending_trial_title": "Sala 1 superada",
 		"ending_trial": [
-			"La Criba aceptó tu programa y el sello de la salida se abrió.",
+			"La Criba aceptó tu consulta y el sello de la salida se abrió.",
 			"(Versión de prueba: aquí termina por ahora. La Sala 2, Las Raíces Gemelas, llega en la siguiente fase.)"
 		],
-		"criba_round_error": "Ronda {round} (oculta, con otras esferas): {error}",
 		"temple_start": [
 			"El núcleo del templo despertó. Tómate el tiempo que necesites."
 		],
 		"player_fell": "¡Caíste al foso! El templo te devuelve al último punto seguro.",
 		"gate_title": "La Puerta del Templo",
 		"objective_roots_corridor": "Cruza las prensas: espera su ritmo",
-		"objective_roots_machine": "Programa el Mural: escribe despejar(a, b, c)",
-		"objective_roots_done": "El Mural aceptó tu función: sal por la reja del este",
+		"objective_roots_machine": "Consulta el Mural: los 3 con más puntos (ORDER BY y LIMIT)",
+		"objective_roots_done": "El Mural aceptó tu consulta: sal por la reja del este",
 		"roots_already": "El Mural ya está en paz: la reja del este está abierta.",
 		"player_crushed": "¡La prensa te atrapó! El templo te devuelve al último punto seguro.",
-		"mural_status": "El Mural prueba tu función · ecuación {row} de {of}",
-		"mural_no_function": "No encontré la función despejar(a, b, c). Defínela con def despejar(a, b, c): y que devuelva el valor de x.",
-		"mural_row_slow": "recalentado",
-		"mural_row_error": "error",
-		"mural_too_slow": "despejar({a}, {b}, {c}) se pasó de {max} pasos. No hace falta repetir nada: basta con una cuenta.",
-		"mural_error": "despejar({a}, {b}, {c}) falló: {error}. El Mural cambió sus ecuaciones.",
-		"mural_bad_shape": "despejar({a}, {b}, {c}) devolvió {got}, pero debe devolver un número (el valor de x). ¿Te faltó el return? El Mural cambió sus ecuaciones.",
-		"mural_wrong": "despejar({a}, {b}, {c}) devolvió {got}, pero en {eq} la x vale {want}. Primero resta b a c y después divide entre a. El Mural cambió sus ecuaciones.",
-		"mural_solved": "¡Las tres ecuaciones quedan despejadas! Los engranajes giran juntos y la reja del este se levanta.",
+		"mural_status": "El Mural prueba tu consulta · placa {row} de {of}",
 		"alarm_wake": "¡ERROR! Los guardianes de la tumba despiertan: véncelos para volver a usar la máquina.",
 		"alarm_machine_locked": "La máquina está bloqueada: primero vence a los guardianes.",
 		"alarm_cleared": "Los guardianes cayeron. La máquina vuelve a aceptar código.",
@@ -282,11 +253,10 @@
 		"keys_lost": "La runa te alcanzó: −{n} corazones",
 		"keys_ready": "¡Prepárate! Lee las teclas...",
 		"objective_vortex_tunnel": "Llega a la sala del Vórtice",
-		"objective_vortex_machine": "Enciende el Faro: luces.encender()",
+		"objective_vortex_machine": "Enciende el Faro: SELECT color, brillo FROM faro",
 		"objective_vortex_board": "Destapa todas las baldosas que no son mina (E destapa, Q bandera)",
 		"objective_vortex_done": "El tablero está limpio: cruza el sello del norte",
-		"beacon_status": "El Faro recibe tu orden",
-		"beacon_solved": "¡El Faro se enciende y el tablero se ilumina! Párate sobre una baldosa: E la destapa y Q le pone una bandera.",
+		"beacon_status": "El Faro lee tu consulta",
 		"beacon_already": "El Faro ya está encendido. El peligro está en el tablero.",
 		"prompt_board": "Destapar     [{flag}] Bandera",
 		"hud_board": "Minas: {mines}  ·  Banderas: {flags}  ·  Faltan: {left}",
@@ -300,7 +270,6 @@
 		"objective_throne_boss": "Vence al Guardián del Cero",
 		"objective_throne_done": "El Guardián cayó: el templo es tuyo",
 		"boss_shield_down": "¡Los guardianes cayeron! El escudo del Guardián se rompe: ahora, golpéalo.",
-		"beacon_still_dark": "El programa corrió, pero las luces siguen apagadas. Ordénales que se enciendan: luces.encender()",
 		"objective_core_path": "Cruza el abismo pisando solo las losas que cumplen la regla",
 		"hud_path_rule": "Regla: solo los {regla} te sostienen",
 		"path_wrong_stone": "La losa {n} se rompió: {n} no es de los {regla}.",
@@ -335,31 +304,20 @@
 		"codex_run_button": "EJECUTAR  (F5)",
 		"codex_title": "EL CÓDICE  ·  {title}  ·  {file}",
 		"codex_title_side": "{title}  ·  {file}",
-		"codex_welcome": "Escribe tu programa y presiona EJECUTAR.",
-		"codex_help_title": "FUNCIONES DE ESTA SALA",
-		"codex_language": "Python simplificado: variables, if / elif / else, while, for ... in range(...), def, return, listas, print().",
+		"codex_welcome": "Escribe tu consulta y presiona EJECUTAR. Aquí abajo verás lo que trae.",
+		"codex_help_title": "PIEZAS DE SQL DE ESTA SALA",
+		"codex_language": "SQL: SELECT columnas FROM tabla [INNER] JOIN otra ON condición WHERE condición ORDER BY columna [DESC] LIMIT n. Textos entre 'comillas simples'. Comentarios con --.",
 		"codex_lines_max": "LÍNEAS {used} / {max}",
 		"codex_lines": "LÍNEAS {used}",
-		"codex_run_log": "> ejecutar {file}",
-		"quiz_parity_title": "variables y pares",
-		"quiz_parity_question": "¿El número {n} es PAR o IMPAR?",
-		"quiz_parity_even": "PAR",
-		"quiz_parity_odd": "IMPAR",
-		"quiz_multiple_title": "El Sendero",
-		"quiz_multiple_question": "¿Qué losa te sostiene? Solo los múltiplos de {m}.",
-		"quiz_solve_title": "El Mural",
-		"quiz_solve_question": "{equation}      x = ?",
-		"quiz_variable_title": "las variables",
-		"quiz_variable_question": "¿Cuánto vale {name} al final?",
-		"quiz_order_title": "el orden de las instrucciones",
-		"quiz_order_question": "¿En qué orden van las líneas para que funcione?",
-		"quiz_parity_code_question": "Al final, ¿{name} es PAR o IMPAR?",
-		"codex_welcome_blocks": "Arrastra las piezas al programa, ordénalas y presiona EJECUTAR.",
-		"blocks_program": "TU PROGRAMA",
+		"codex_run_log": "> consultar {file}",
+		"quiz_order_title": "el orden de las partes",
+		"quiz_order_question": "¿En qué orden van las partes de la consulta?",
+		"codex_welcome_blocks": "Arrastra las piezas a TU CONSULTA, ordénalas y presiona EJECUTAR.",
+		"blocks_program": "TU CONSULTA",
 		"blocks_tray": "PIEZAS  (sobran algunas)",
 		"blocks_empty": "Arrastra aquí una pieza (o haz clic en ella)",
 		"blocks_tray_empty": "Usaste todas las piezas.",
-		"blocks_keys": "Suelta más a la derecha para meter la línea (sangría). Clic derecho la devuelve.",
+		"blocks_keys": "Primero SELECT, luego FROM y después lo demás. Clic derecho devuelve una pieza.",
 		"blocks_to_text": "ESCRIBIR A MANO",
 		"blocks_to_blocks": "USAR BLOQUES",
 		"objective_practice": "Sigue los pasos del cuadro de práctica",
@@ -376,13 +334,7 @@
 		"pause_skip_practice": "SALTAR PRÁCTICA",
 		"pause_skip_help": "Pasa directo a la sala sin terminar las prácticas.",
 		"torch_done": "¡Hay {lit} braseros encendidos!",
-		"torch_missing": "Hay {lit} braseros encendidos y se necesitan {goal}.",
 		"torch_status": "Braseros: {lit} de {total}",
-		"function_missing": "No encontré la función {name}. Empieza con def {name}(...):",
-		"function_wrong": "{call} devolvió {got} y debía dar {want}.",
-		"function_error": "{call} falló: {error}",
-		"function_right": "¡La función {name} da los resultados correctos!",
-		"function_status": "El atril prueba {name}...",
 		"practice_flag_pick": "Esa no es la mina. Mira otra vez el número que brilla.",
 		"prompt_look": "Mirar",
 		"dungeon_done": "Ya venciste al guardián de estas ruinas. El camino sigue por otro lado.",
@@ -405,11 +357,11 @@
 		"objective_lookout": "Entra a las Ruinas del Mural (al norte) o asómate al balcón",
 		"objective_go_peak": "Sube por el camino del este hacia la Cima",
 		"objective_peak": "Entra al templo de la Cima (al norte)",
-		"objective_pump": "Programa la Bomba: mientras el tanque tenga menos de 10, bombea",
-		"objective_mill": "Programa el Molino: moler(sacos) devuelve sacos × 3",
-		"objective_bells": "Programa las Campanas: toca cada nota de la partitura con un for",
-		"objective_scale": "Programa la Balanza: suma todas las pesas con un for",
-		"objective_twins": "Programa las Raíces: factorizar(b, c) devuelve [p, q]",
+		"objective_pump": "Consulta la Bomba: tanques con nivel menor que 5 AND válvula abierta",
+		"objective_mill": "Consulta el Molino: los sacos ordenados por peso, de mayor a menor",
+		"objective_bells": "Consulta las Campanas: une partitura y campanas con JOIN",
+		"objective_scale": "Consulta la Balanza: une cajas y pesas con INNER JOIN",
+		"objective_twins": "Consulta los Árboles: INNER JOIN y WHERE para los manzanos",
 		"objective_cave_tunnel": "Sigue hasta el claro del Guardián de la Cueva",
 		"objective_cave_boss": "Vence al Guardián de la Cueva",
 		"objective_cave_done": "El Guardián de la Cueva cayó",
@@ -422,27 +374,63 @@
 		"objective_peak_boss": "Vence a la Sombra del Sol Negro",
 		"objective_peak_done": "La Sombra del Sol Negro desapareció",
 		"boss_peak_beaten": "¡La Sombra del Sol Negro se deshace en luz! Aritma despierta.",
-		"pump_times": "bombear {n} veces",
-		"pump_wrong": "Ronda {round}: el tanque empezó en {n}. Tu programa hizo «{did}», pero debía «{want}».",
-		"mill_wrong": "Ronda {round}: el Molino llamó moler({n}). Tu función devolvió «{did}», pero debía devolver {want}.",
-		"bells_wrong": "Ronda {round}: la partitura era {n}. Tus campanas sonaron «{did}», pero debían sonar «{want}».",
-		"scale_wrong": "Ronda {round}: las pesas eran {n}. Tu programa puso «{did}», pero el total era {want}.",
-		"twins_wrong": "Ronda {round}: el polinomio era {n}. Tu función devolvió «{did}», pero los números eran {want}.",
-		"quiz_while_title": "while",
-		"quiz_while_value": "¿Qué imprime este programa?",
-		"quiz_while_times": "¿Cuántas veces se repite lo de adentro del while?",
-		"quiz_func_title": "Funciones con return",
-		"quiz_func_question": "¿Qué imprime este programa?",
-		"quiz_list_title": "Listas",
-		"quiz_list_question": "¿Qué imprime? (la primera posición de una lista es la 0)",
-		"quiz_for_title": "for",
-		"quiz_for_question": "¿Qué imprime este programa?",
 		"ending_final_title": "¡Aritma despierta!",
 		"ending_final": [
 			"La Sombra del Sol Negro se deshace en luz y, por primera vez en siglos, las máquinas de Aritma vuelven a zumbar.",
 			"Desde la Cima, Tala ve encenderse una por una las ruinas del valle: la Cueva, el Mirador, el Bosque y el templo de Raíz.",
 			"El Códice brilla en su brazo. Ya no es solo un objeto: es todo lo que aprendió en el camino.",
 			"FIN. Gracias por jugar Paredes Vivas."
+		],
+		"rounds_prefix": "Ronda {round}: ",
+		"gate_status": "La puerta lee tu consulta",
+		"codex_tables_title": "TABLAS (ronda 1)",
+		"codex_tables_note": "En las otras rondas las tablas traen otras filas: tu consulta tiene que servir siempre.",
+		"query_right": "¡La consulta trae justo lo que pedía el atril!",
+		"query_status": "El atril corre tu consulta...",
+		"sql_check_columns": "Tu consulta trajo las columnas «{got_columns}», pero la máquina pide «{want_columns}». Revisa lo que va después de SELECT.",
+		"sql_check_extra": "Sobra la fila «{row}»: no debía salir. Trajiste {got} filas y debían ser {want}. Revisa la condición.",
+		"sql_check_missing": "Falta la fila «{row}». Trajiste {got} filas y debían ser {want}. Revisa la condición.",
+		"sql_check_order": "Las filas están bien, pero en otro orden. Salieron «{got_order}» y debían salir «{want_order}».",
+		"quiz_sql_none": "(ninguna)",
+		"quiz_keyword_title": "SELECT y FROM",
+		"quiz_keyword_question": "¿Qué palabra falta en el hueco?",
+		"quiz_select_title": "SELECT",
+		"quiz_select_question": "¿Qué muestra esta consulta?",
+		"quiz_columns_question": "¿Cuántas columnas trae esta consulta?",
+		"quiz_where_title": "WHERE",
+		"quiz_where_question": "¿Qué nombres trae esta consulta?",
+		"quiz_rows_question": "¿Cuántas filas trae esta consulta?",
+		"quiz_order_by_title": "ORDER BY",
+		"quiz_order_by_question": "¿Qué trae esta consulta, y en qué orden?",
+		"quiz_join_title": "JOIN",
+		"quiz_join_question": "¿Qué animal tiene {name}?",
+		"book_sql_title": "Guía de SQL",
+		"book_sql": [
+			[
+				"TABLA: datos en COLUMNAS (arriba) y FILAS (una por cosa). CONSULTA: una pregunta a una tabla.",
+				"SELECT columnas FROM tabla — SELECT dice qué columnas ver; FROM, de qué tabla. SELECT * trae todas. Varias columnas van con coma: SELECT color, brillo.",
+				"Los errores no son castigos: el Códice te dice en qué línea está y qué falta. Lee el mensaje y corrige."
+			],
+			[
+				"WHERE condición — deja pasar solo las filas que cumplen. Va después de FROM.",
+				"Signos: =  igual, <>  distinto, >  mayor, <  menor, >=  mayor o igual, <=  menor o igual.",
+				"Los textos van entre comillas simples: WHERE tierra = 'seca'. Los números, sin comillas: WHERE peso > 10."
+			],
+			[
+				"AND — las dos condiciones a la vez: WHERE nivel < 5 AND valvula = 'abierta'.",
+				"OR — basta con una: WHERE color = 'oro' OR numero > 50.",
+				"Si mezclas AND y OR, usa paréntesis para decir qué va junto: WHERE (a = 1 OR b = 2) AND c = 3."
+			],
+			[
+				"ORDER BY columna — ordena de menor a mayor (o de la A a la Z). Con DESC, al revés: ORDER BY peso DESC.",
+				"LIMIT n — se queda con las n primeras filas. Siempre va al final.",
+				"Orden de las partes: SELECT … FROM … WHERE … ORDER BY … LIMIT …"
+			],
+			[
+				"JOIN — une dos tablas: FROM partitura JOIN campanas ON partitura.campana = campanas.nombre.",
+				"ON dice cómo se emparejan las filas. INNER JOIN es lo mismo que JOIN: solo salen las filas que encontraron pareja.",
+				"Con dos tablas escribe tabla.columna (campanas.numero). Orden completo: SELECT … FROM … JOIN … ON … WHERE … ORDER BY … LIMIT …"
+			]
 		]
 	},
 	"credits": [
@@ -474,77 +462,6 @@
 			"rúnicos"
 		]
 	},
-	"script_errors": {
-		"compuerta_numero": "compuerta.subir() necesita un número, por ejemplo compuerta.subir(nivel)",
-		"no_tiene": "«%s» no tiene «%s».",
-		"no_puede_cambiar": "«%s» de %s no se puede cambiar.",
-		"no_puede_usar": "«%s» no se puede usar con [ ].",
-		"sangria_no_coincide_ningun_bloque": "La sangría no coincide con ningún bloque anterior.",
-		"falta_cerrar_texto": "Falta cerrar el texto con %s.",
-		"no_entiendo_simbolo": "No entiendo el símbolo '%s'.",
-		"programa_tardo_demasiado_hay_while": "El programa tardó demasiado. ¿Hay un while que nunca termina?",
-		"no_conozco": "No conozco «%s».%s",
-		"quisiste_decir": " ¿Quisiste decir «%s»?",
-		"no_puede_usar_2": "No se puede usar «%s» con %s.",
-		"solo_funciona_numeros_enteros": "«~» solo funciona con números enteros.",
-		"no_es_funcion_no_puede": "«%s» no es una función: no se puede llamar con ( ).",
-		"las_listas_no_tienen_prueba": "Las listas no tienen «%s». Prueba append, pop o len(lista).",
-		"no_tiene_2": "%s no tiene «%s».",
-		"no_puede_cambiar_2": "No se puede cambiar «%s» de %s.",
-		"indice_debe_ser_numero_entero": "El índice debe ser un número entero.",
-		"indice_fuera_rango_hay_elementos": "Índice %d fuera de rango (hay %d elementos).",
-		"no_puede_usar_3": "%s no se puede usar con [ ].",
-		"solo_puede_asignar_posicion_lista": "Solo se puede asignar a una posición de una lista.",
-		"no_puede_asignar_eso": "No se puede asignar a eso.",
-		"for_necesita_lista_o_range": "for necesita una lista o range(...), no %s.",
-		"recibe_argumento_y_le_diste": "%s() recibe %d argumento(s) y le diste %d.",
-		"demasiadas_llamadas_anidadas_llama_si": "Demasiadas llamadas anidadas. ¿%s() se llama a sí misma sin parar?",
-		"append_recibe_argumento": "append() recibe 1 argumento.",
-		"pop_lista_vacia": "pop() en una lista vacía.",
-		"no_esta_lista": "%s no está en la lista.",
-		"solo_funciona_numeros_enteros_2": "«%s» solo funciona con números enteros.",
-		"no_puede_usar_entre": "No se puede usar «%s» entre %s %s %s.",
-		"conj_e": "e",
-		"conj_y": "y",
-		"division_entre_cero": "División entre cero.",
-		"operador_desconocido": "Operador desconocido «%s».",
-		"in_necesita_lista_o_texto": "«in» necesita una lista o un texto.",
-		"no_puede_comparar": "No se puede comparar %s con %s.",
-		"range_necesita_numeros_enteros": "range() necesita números enteros.",
-		"range_no_puede_avanzar": "range() no puede avanzar de a 0.",
-		"range_demasiado_grande": "range() demasiado grande.",
-		"len_necesita_lista_o_texto": "len() necesita una lista o un texto.",
-		"abs_necesita_numero": "abs() necesita un número.",
-		"min_max_lista_vacia": "min()/max() de una lista vacía.",
-		"min_max_necesitan_numeros": "min()/max() necesitan números.",
-		"no_es_numero_entero": "«%s» no es un número entero.",
-		"int_no_entiende": "int() no entiende %s.",
-		"bin_necesita_numero_entero": "bin() necesita un número entero.",
-		"sum_necesita_lista": "sum() necesita una lista.",
-		"sum_necesita_lista_numeros": "sum() necesita una lista de números.",
-		"sorted_necesita_lista": "sorted() necesita una lista.",
-		"sangria_inesperada_esta_linea_no": "Sangría inesperada: esta línea no está dentro de ningún bloque.",
-		"sin_if_antes": "«%s» sin un if antes.",
-		"izquierda_debe_ir_nombre_variable": "A la izquierda de «%s» debe ir un nombre de variable.",
-		"despues_for_va_nombre_variable": "Después de for va el nombre de una variable: for i in range(5):",
-		"falta_in_for_in_range": "Falta «in»: for %s in range(5):",
-		"despues_def_va_nombre_funcion": "Después de def va el nombre de la función: def clave(n):",
-		"faltan_los_parentesis_def_n": "Faltan los paréntesis: def %s(n):",
-		"los_parametros_deben_ser_nombres": "Los parámetros deben ser nombres.",
-		"falta_cerrar_parentesis_def": "Falta cerrar el paréntesis en def.",
-		"falta_final_linea": "Falta «:» al final de la línea del %s.",
-		"las_instrucciones_van_las_lineas": "Las instrucciones del %s van en las líneas siguientes, con sangría (4 espacios).",
-		"no_esperaba_aqui": "No esperaba «%s» aquí.",
-		"falta_cerrar_parentesis_llamada": "Falta cerrar el paréntesis de la llamada.",
-		"despues_punto_va_nombre_puerta": "Después del punto va un nombre: puerta.abrir()",
-		"falta_cerrar_corchete": "Falta cerrar el corchete ].",
-		"falta_cerrar_parentesis": "Falta cerrar el paréntesis.",
-		"falta_cerrar_lista": "Falta cerrar la lista con ].",
-		"linea_esta_incompleta": "La línea está incompleta.",
-		"recibe_argumento_y_le_diste_2": "%s() recibe %s argumento(s) y le diste %d.",
-		"solo_dentro_for_while": "«%s» solo puede usarse dentro de un for o un while.",
-		"no_encontre_funcion": "No encontré la función %s()."
-	},
 	"mouse_names": {
 		"left": "Clic izq.",
 		"right": "Clic der.",
@@ -573,15 +490,15 @@
 		"hud_keys": "",
 		"pause_keys": "Toca una opción",
 		"settings_keys": "Toca el valor: a la izquierda baja, a la derecha sube",
-		"codex_keys": "EJECUTAR: correr el programa   ·   CERRAR: salir   ·   Tu código se guarda al cerrar",
+		"codex_keys": "EJECUTAR: correr la consulta   ·   CERRAR: salir   ·   Tu consulta se guarda al cerrar",
 		"ending_continue": "Toca la pantalla para volver al título",
 		"book_hint": "< > cambiar de página      CERRAR: salir",
 		"book_town": [
 			"Muévete con la palanca de la izquierda. Toca CORRER para correr (gasta aliento) y otra vez para caminar. Salta con SALTO: corriendo, el salto llega más lejos.",
 			"{interact} usa lo que tienes delante: personas, inscripciones y los atriles de las máquinas.",
-			"En el atril de una máquina se abre el Códice: arma el programa con las piezas y toca EJECUTAR para verla trabajar. CERRAR cierra el Códice.",
+			"En el atril de una máquina se abre el Códice: arma la consulta con las piezas y toca EJECUTAR para verla trabajar. La consola muestra la tabla que trajo. CERRAR cierra el Códice.",
 			"{book} abre este libro y {pause} pausa el juego. La pausa detiene a los guardianes; en el libro los guardianes también se detienen.",
-			"Golpea con {attack} (el garrote). Cada vez que una máquina rechaza tu código, despiertan guardianes: te quitan medio corazón por golpe y no puedes usar la máquina hasta vencerlos.",
+			"Golpea con {attack} (el garrote). Cada vez que una máquina rechaza tu consulta, despiertan guardianes: te quitan medio corazón por golpe y no puedes usar la máquina hasta vencerlos.",
 			"Los guardianes se distinguen por el aro de color bajo sus pies: DORADO, el caballero (golpea de cerca); MORADO, el hechicero (lanza orbes de lejos: elimínalo primero, el garrote también deshace sus orbes); ROJO, el rúnico (explota).",
 			"El guardián rúnico (la calavera con aura roja) no golpea: se carga y explota. Aléjate del círculo rojo o véncelo antes (2 golpes). Si te alcanza, aparecen teclas al azar: toca solo esas, en orden, antes de que se vacíe la barra (de 5 a 8 segundos), o perderás 2 corazones.",
 			"Tienes 5 corazones y no se recuperan al resolver las salas (solo al enfrentar al jefe final). Si caes a un foso pierdes medio corazón y vuelves al borde; si te quedas sin corazones vuelves a la entrada de la sala con la vida llena."
@@ -591,7 +508,7 @@
 		"figures_rotate": "o toca la pieza:  la gira",
 		"quiz_hint": "Toca la respuesta · quedan {s} s",
 		"blocks_empty": "Arrastra aquí una pieza (o tócala)",
-		"blocks_keys": "Suelta más a la derecha para meter la línea. Sácala para devolverla.",
+		"blocks_keys": "Primero SELECT, luego FROM y después lo demás. Saca una pieza para devolverla.",
 		"practice_run_hint": "Ibas caminando: toca CORRER para correr.",
 		"objective_filter_tunnel": "Cruza el pasillo: los fosos solo se saltan corriendo (CORRER + SALTO)",
 		"objective_lock_tunnel": "Cruza el pasillo: los fosos solo se saltan corriendo (CORRER + SALTO)",
@@ -600,32 +517,10 @@
 		"objective_rounds_tunnel": "Cruza el pasillo: los fosos solo se saltan con CORRER + SALTO"
 	},
 	"touch_chambers": {
-		"bridge": {
-			"intro": {
-				"1": "Usa el atril (USAR). Aquí aparece el if: «if peso > 10:» pregunta algo, y las líneas de abajo, más a la derecha, solo se cumplen si la respuesta es sí.",
-				"3": "INSCRIPCIÓN: Dos guardianes de piedra vigilan el puente. Cada código rechazado despierta a más. Golpéalos con el garrote (GOLPE)."
-			},
-			"tunnel_intro": {
-				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
-			}
-		},
-		"garden": {
-			"intro": {
-				"1": "Usa el atril (USAR). Ahora el if tiene compañero: else. Si la pregunta del if dice que no, se cumple lo que está debajo del else. Siempre pasa una de las dos."
-			},
-			"tunnel_intro": {
-				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
-			}
-		},
-		"throne_forest": {
-			"intro": {
-				"2": "Pelea igual que el anterior: golpéalo con GOLPE y esquiva su pisotón. Cuando se cubra con su escudo te preguntará qué imprime un if: toca la respuesta. Tienes 20 segundos."
-			}
-		},
 		"lock": {
 			"intro": {
-				"1": "Usa el atril (USAR). Un programa se lee de arriba abajo, una línea tras otra: primero guarda el número en una variable, después cámbiala y al final úsala.",
-				"3": "INSCRIPCIÓN: Dos guardianes de piedra vigilan la Compuerta. Cada vez que rechace tu código despertarán más. Golpéalos con el garrote (GOLPE)."
+				"2": "Usa el atril (USAR) y arma: SELECT nivel, y debajo FROM sensor. La compuerta probará tu consulta con tres números distintos.",
+				"3": "INSCRIPCIÓN: Dos guardianes de piedra vigilan la Compuerta. Cada vez que rechace tu consulta —aunque sea por un error de escritura— despertarán más. Golpéalos con el garrote (GOLPE)."
 			},
 			"tunnel_intro": {
 				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
@@ -633,17 +528,21 @@
 		},
 		"filter": {
 			"intro": {
-				"1": "Usa el atril (USAR) y programa la Criba. Ella pondrá a prueba tu programa con tres rondas de esferas: solo la primera se ve en el tubo.",
-				"3": "INSCRIPCIÓN: Dos guardianes de piedra vigilan la Criba. Cada vez que la Criba rechace tu código despertarán más. Golpéalos con el garrote (GOLPE)."
+				"1": "Usa el atril (USAR). Aquí aparece OR: «WHERE color = 'oro' OR numero > 50» deja pasar una fila si cumple UNA de las condiciones (o las dos).",
+				"3": "INSCRIPCIÓN: Dos guardianes de piedra vigilan la Criba. Cada vez que rechace tu consulta —aunque sea por un error de escritura— despertarán más. Golpéalos con el garrote (GOLPE)."
 			},
 			"tunnel_intro": {
 				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
 			}
 		},
+		"roots": {
+			"intro": {
+				"1": "Usa el atril (USAR). Ordena la tabla aritmanos por puntos, de mayor a menor, y corta la lista con LIMIT 3: así solo quedan los tres primeros."
+			}
+		},
 		"vortex": {
 			"intro": {
-				"1": "Primero enciende el Faro: usa su atril (USAR) y ordénale a las luces que se enciendan con luces.encender(), como abriste la puerta del pueblo.",
-				"2": "Encendido el tablero, párate sobre una baldosa: USAR la destapa y BANDERA le pone o quita una bandera. Cada número dice cuántas minas la rodean. Destapa todas las que no son mina."
+				"1": "Primero enciende el Faro: usa su atril (USAR) y pídele a la tabla faro dos columnas, color y brillo: SELECT color, brillo FROM faro. Con una coma se piden varias columnas."
 			}
 		},
 		"figures": {
@@ -654,50 +553,37 @@
 		},
 		"throne": {
 			"intro": {
-				"2": "Golpéalo con GOLPE. Cuando el círculo rojo marque su pisotón, sal corriendo o toca SALTO. Los orbes se esquivan o se deshacen con el garrote.",
-				"3": "Cada vez que pierda una cuarta parte de su vida se cubrirá con un escudo y te pondrá a prueba con un problema: tienes 20 segundos (toca la respuesta). Si aciertas, el escudo cae; si fallas, llamará a sus guardianes."
+				"2": "Golpéalo con GOLPE. Cuando el círculo rojo marque su pisotón, sal corriendo o salta con ESPACIO. Los orbes se esquivan o se deshacen con el garrote.",
+				"3": "Cada vez que pierda una cuarta parte de su vida se cubrirá con un escudo y te pondrá a prueba con una consulta: tienes 30 segundos (toca la respuesta). Si aciertas, el escudo cae; si fallas, llamará a sus guardianes."
+			}
+		},
+		"bridge": {
+			"intro": {
+				"1": "Usa el atril (USAR). Aquí aparece WHERE: va después de FROM y deja pasar SOLO las filas que cumplen la condición. «WHERE peso > 10» se queda con las pesadas.",
+				"3": "INSCRIPCIÓN: Dos guardianes de piedra vigilan el puente. Cada vez que rechace tu consulta —aunque sea por un error de escritura— despertarán más. Golpéalos con el garrote (GOLPE)."
+			},
+			"tunnel_intro": {
+				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
+			}
+		},
+		"garden": {
+			"intro": {
+				"1": "Usa el atril (USAR). Esta vez la condición compara con un TEXTO: «WHERE tierra = 'seca'». Los textos van entre comillas simples; sin comillas, el Códice cree que seca es el nombre de una columna."
+			},
+			"tunnel_intro": {
+				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
+			}
+		},
+		"throne_forest": {
+			"intro": {
+				"2": "Pelea igual que el anterior: golpéalo con GOLPE y esquiva su pisotón. Cuando se cubra con su escudo te preguntará qué filas deja pasar un WHERE. Tienes 30 segundos."
 			}
 		},
 		"pump": {
 			"intro": {
-				"1": "Usa el atril (USAR). Aquí aparece while: «while tanque.nivel() < 10:» repite lo de abajo, una y otra vez, MIENTRAS la respuesta sea sí. Cuando el tanque llega a 10, para solo.",
-				"3": "INSCRIPCIÓN: Guardianes de piedra vigilan la Bomba. Cada código rechazado despierta a más. Golpéalos con el garrote (GOLPE)."
-			},
-			"tunnel_intro": {
-				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
-			}
-		},
-		"mill": {
-			"intro": {
-				"1": "Usa el atril (USAR). El Molino no lee órdenes sueltas: llama a tu función moler(sacos) y espera que le DEVUELVAS el número de bolsas con return.",
-				"3": "INSCRIPCIÓN: Guardianes de piedra vigilan el Molino. Cada código rechazado despierta a más. Golpéalos con el garrote (GOLPE)."
-			},
-			"tunnel_intro": {
-				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
-			}
-		},
-		"bells": {
-			"intro": {
-				"1": "Usa el atril (USAR). partitura.leer() te da una LISTA, como [3, 1, 4]. Con «for n in notas:» lo de abajo se repite una vez por cada nota, y n vale esa nota.",
-				"3": "INSCRIPCIÓN: Guardianes de piedra vigilan las Campanas. Cada código rechazado despierta a más. Golpéalos con el garrote (GOLPE)."
-			},
-			"tunnel_intro": {
-				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
-			}
-		},
-		"scale": {
-			"intro": {
-				"1": "Usa el atril (USAR). Empieza con total = 0 y, con un for, súmale cada pesa. Al final, fuera del for, pon el total en la balanza.",
-				"3": "INSCRIPCIÓN: Guardianes de piedra vigilan la Balanza. Cada código rechazado despierta a más. Golpéalos con el garrote (GOLPE)."
-			},
-			"tunnel_intro": {
-				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
-			}
-		},
-		"twins": {
-			"intro": {
-				"1": "Ejemplo: x² + 5x + 6 → 2 + 3 = 5 y 2 · 3 = 6, así que factorizar(5, 6) devuelve [2, 3].",
-				"3": "INSCRIPCIÓN: Guardianes de piedra vigilan los árboles. Cada código rechazado despierta a más. Golpéalos con el garrote (GOLPE)."
+				"1": "Usa el atril (USAR). Aquí aparece AND: «WHERE nivel < 5 AND valvula = 'abierta'» deja pasar una fila solo si cumple LAS DOS condiciones.",
+				"2": "Desde aquí el Códice se abre para ESCRIBIR A MANO, como los programadores de verdad. Si prefieres las piezas, toca USAR BLOQUES (en el celular ya abre con piezas).",
+				"3": "INSCRIPCIÓN: Guardianes de piedra vigilan la Bomba. Cada consulta rechazada despierta a más. Golpéalos con el garrote (GOLPE)."
 			},
 			"tunnel_intro": {
 				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
@@ -705,17 +591,52 @@
 		},
 		"throne_cave": {
 			"intro": {
-				"2": "Pelea igual que antes: golpéalo con GOLPE y esquiva su pisotón. Cuando se cubra con su escudo te preguntará por un while. Toca la respuesta. Tienes 20 segundos."
+				"2": "Pelea igual que antes: golpéalo con GOLPE y esquiva su pisotón. Cuando se cubra con su escudo te preguntará por AND y OR. Tienes 30 segundos."
+			}
+		},
+		"mill": {
+			"intro": {
+				"1": "Usa el atril (USAR). Aquí aparece ORDER BY: va al final de la consulta y ordena las filas. «ORDER BY peso» las deja de menor a mayor; «ORDER BY peso DESC», de mayor a menor.",
+				"3": "INSCRIPCIÓN: Guardianes de piedra vigilan el Molino. Cada consulta rechazada despierta a más. Golpéalos con el garrote (GOLPE)."
+			},
+			"tunnel_intro": {
+				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
 			}
 		},
 		"throne_ruins": {
 			"intro": {
-				"2": "Golpéalo con GOLPE y esquiva su pisotón. Cuando se cubra con su escudo te preguntará qué imprime una función. Toca la respuesta. Tienes 20 segundos."
+				"2": "Golpéalo con GOLPE y esquiva su pisotón. Cuando se cubra con su escudo te preguntará en qué orden salen las filas. Tienes 30 segundos."
+			}
+		},
+		"bells": {
+			"intro": {
+				"1": "Usa el atril (USAR). Aquí aparece JOIN: une dos tablas, fila con fila. ON dice cómo se emparejan: «ON partitura.campana = campanas.nombre».",
+				"3": "INSCRIPCIÓN: Guardianes de piedra vigilan las Campanas. Cada consulta rechazada despierta a más. Golpéalos con el garrote (GOLPE)."
+			},
+			"tunnel_intro": {
+				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
+			}
+		},
+		"scale": {
+			"intro": {
+				"1": "Usa el atril (USAR). INNER JOIN es lo mismo que JOIN: une las filas que tienen pareja. Las cajas vacías (pesa_id 0) no encuentran ninguna pesa, así que se quedan afuera.",
+				"3": "INSCRIPCIÓN: Guardianes de piedra vigilan la Balanza. Cada consulta rechazada despierta a más. Golpéalos con el garrote (GOLPE)."
+			},
+			"tunnel_intro": {
+				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
+			}
+		},
+		"twins": {
+			"intro": {
+				"3": "INSCRIPCIÓN: Guardianes de piedra vigilan los árboles. Cada consulta rechazada despierta a más. Golpéalos con el garrote (GOLPE)."
+			},
+			"tunnel_intro": {
+				"0": "INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Prende CORRER y toca SALTO antes del borde."
 			}
 		},
 		"throne_peak": {
 			"intro": {
-				"2": "Golpéala con GOLPE y esquiva su pisotón. Cuando se cubra con su escudo te preguntará por listas y por for. Toca la respuesta. Tienes 20 segundos."
+				"2": "Golpéala con GOLPE y esquiva su pisotón. Cuando se cubra con su escudo te preguntará por JOIN e INNER JOIN. Tienes 30 segundos."
 			}
 		}
 	},
@@ -723,5 +644,72 @@
 		"orun": {
 			"5": "ORUN: Y aprende a moverte: toca CORRER para correr y SALTO para saltar. Los aritmanos no construían pasillos para los lentos."
 		}
+	},
+	"sql_errors": {
+		"en_linea": "Línea {n}: {error}",
+		"comentario_numeral": "En SQL los comentarios empiezan con -- (dos guiones), no con #.",
+		"numero_pegado": "«{texto}»: un nombre no puede empezar con un número.",
+		"falta_cerrar_texto": "Falta cerrar el texto '{texto}' con otra comilla simple: '",
+		"comillas_dobles": "Los textos van entre comillas simples: '{texto}' (no \"{texto}\").",
+		"simbolo_raro": "No conozco el símbolo «{simbolo}».",
+		"consulta_vacia": "Todavía no hay consulta. Empieza con SELECT.",
+		"solo_leer": "Las máquinas de Aritma solo LEEN tablas: aquí no se usa {palabra}. Empieza con SELECT.",
+		"quisiste_decir": "No conozco «{escrito}». ¿Quisiste decir {palabra}?",
+		"empieza_select": "Toda consulta empieza con SELECT (y no con «{escrito}»).",
+		"faltan_columnas": "Después de SELECT van las columnas que quieres ver, o * para verlas todas.",
+		"estrella_sola": "El * ya trae todas las columnas: no hace falta poner más después.",
+		"as_sin_nombre": "Después de AS va el nombre nuevo de la columna.",
+		"coma_de_mas": "Sobra la coma antes de FROM: la última columna va sin coma.",
+		"falta_from": "Falta FROM: después de las columnas va FROM y el nombre de la tabla.",
+		"falta_coma": "¿Falta una coma entre «{antes}» y «{escrito}»? Las columnas se separan con comas. Si ya terminaste las columnas, falta FROM.",
+		"falta_tabla": "Después de {parte} va el nombre de una tabla.",
+		"falta_where": "¿Falta WHERE antes de «{escrito}»? Las condiciones van después de WHERE.",
+		"inner_sin_join": "Después de INNER va JOIN: INNER JOIN tabla.",
+		"join_sin_on": "Después de JOIN {tabla} va ON y cómo se emparejan las filas, por ejemplo: ON a.id = b.id",
+		"on_sin_condicion": "Después de ON va la condición que une las tablas, por ejemplo: ON a.id = b.id",
+		"where_sin_condicion": "Después de WHERE va una condición, por ejemplo: peso > 10",
+		"no_es_pregunta": "Después de {parte} va una pregunta que se responde sí o no (como peso > 10), y «{escrito}» no lo es.",
+		"order_sin_by": "Después de ORDER va BY: ORDER BY columna.",
+		"order_sin_columna": "Después de ORDER BY va la columna por la que se ordena.",
+		"limit_numero": "Después de LIMIT va un número entero: LIMIT 3.",
+		"una_consulta": "Escribe una sola consulta. Si quieres probar otra, borra la anterior.",
+		"orden_partes": "«{palabra}» está fuera de lugar. El orden es: SELECT … FROM … JOIN … ON … WHERE … ORDER BY … LIMIT …",
+		"solo_inner": "Aquí solo se usa JOIN o INNER JOIN ({palabra} JOIN no).",
+		"no_se_usa": "{palabra} existe en SQL, pero estas máquinas no lo usan. Mira las piezas de la sala.",
+		"and_sin_where": "{palabra} une dos condiciones, y va después de WHERE: WHERE a > 1 {palabra} b < 5.",
+		"no_esperaba": "No esperaba «{escrito}» aquí.",
+		"falta_condicion_despues": "Después de {palabra} falta otra condición.",
+		"doble_igual": "En SQL se compara con un solo =: peso = 10.",
+		"signo_al_reves": "Se escribe {bien} (primero el signo y después el =), no {escrito}.",
+		"falta_valor_despues": "Después de «{signo}» falta con qué comparar: un número, un 'texto' o una columna.",
+		"consulta_incompleta": "La consulta quedó a medias: falta algo al final.",
+		"falta_parentesis": "Falta cerrar el paréntesis ).",
+		"esperaba_valor": "Esperaba una columna, un número o un 'texto' en lugar de «{escrito}».",
+		"estrella_solo_count": "{funcion}(*) no existe: el * solo va con COUNT(*).",
+		"punto_sin_columna": "Después de «{tabla}.» va el nombre de una columna: {tabla}.nombre",
+		"no_tabla": "No existe la tabla «{tabla}». Las tablas de esta sala son: {tablas}.",
+		"no_tabla_parecida": "No existe la tabla «{tabla}». ¿Quisiste decir «{parecida}»?",
+		"tabla_repetida": "La tabla «{tabla}» ya está en la consulta.",
+		"tabla_no_esta": "«{tabla}.{columna}»: la tabla «{tabla}» no está en la consulta. Las de esta consulta son: {tablas}.",
+		"columna_ambigua": "La columna «{columna}» está en las dos tablas: escribe de cuál, por ejemplo {ejemplo}.",
+		"no_columna": "La tabla «{tabla}» no tiene la columna «{columna}». Sus columnas son: {columnas}. Si «{columna}» es un texto, va entre comillas: '{columna}'.",
+		"no_columna_parecida": "No hay ninguna columna «{columna}». ¿Quisiste decir «{parecida}»?",
+		"no_columna_en_tablas": "Ninguna tabla tiene la columna «{columna}». Las tablas son: {tablas}. Si «{columna}» es un texto, va entre comillas: '{columna}'.",
+		"demasiadas_filas": "El JOIN dio demasiadas filas. ¿Está bien el ON?",
+		"cuenta_en_where": "COUNT, SUM, MIN y MAX no van en WHERE.",
+		"cuenta_en_order": "COUNT, SUM, MIN y MAX no van en ORDER BY.",
+		"mezcla_cuenta": "COUNT, SUM, MIN y MAX juntan todas las filas en una: no se pueden mezclar con «{columna}».",
+		"cuenta_suelta": "«{escrito}» solo va después de SELECT.",
+		"cuenta_dentro_cuenta": "No se puede poner una cuenta dentro de otra.",
+		"suma_texto": "{funcion} necesita números, y «{escrito}» tiene textos.",
+		"menos_texto": "No se le puede poner signo menos a un texto: «{escrito}».",
+		"cuenta_con_texto": "No se puede hacer la cuenta «{escrito}» con textos.",
+		"division_cero": "No se puede dividir entre cero.",
+		"resto_enteros": "El resto (%) solo funciona con números enteros.",
+		"numero_con_comillas": "'{texto}' está entre comillas, así que es un texto. Los números van sin comillas: {texto}.",
+		"compara_texto_numero": "En «{escrito}» se compara el texto '{texto}' con el número {numero}. ¿Es la columna correcta?",
+		"filas_ninguna": "(no trajo ninguna fila)",
+		"filas_una": "(1 fila)",
+		"filas_varias": "({n} filas)"
 	}
 }
