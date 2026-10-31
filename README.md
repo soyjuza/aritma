@@ -91,9 +91,21 @@ npm install
 npm start          # escucha en el puerto 8080 (o en PORT)
 npm test           # 20 pruebas del servidor
 ```
-La dirección del servidor está en `data/config.json` (`server_url`) y se puede cambiar en la
-pantalla EN LÍNEA (por ejemplo `wss://mi-servidor.up.railway.app`). Para jugar por Internet, el
-servidor se publica en un servicio como Railway, con `server/` como carpeta raíz y `npm start`.
+El servidor está publicado en Railway: **`wss://servidor-salas-production.up.railway.app`**. Esa
+es la dirección que trae el juego por defecto (`server_url` en `data/config.json`). Se puede
+cambiar en la pantalla EN LÍNEA (por ejemplo, a `ws://localhost:8080` para probar en un solo PC).
+
+El proyecto de Railway no está conectado a GitHub: los cambios del servidor no se publican solos
+con cada push. Para publicarlos:
+```
+npm i -g @railway/cli        # una sola vez
+railway login                # con la cuenta dueña del proyecto aritma-servidor
+cd server
+railway link                 # elegir aritma-servidor / production / servidor-salas (una sola vez)
+railway up --ci              # sube server/ y lo despliega
+```
+En Railway, el servicio `servidor-salas` tiene la carpeta raíz `/` (porque solo se sube
+`server/`), `PORT=8080` y revisión de salud en `/`, y no se suspende.
 
 ## Guardianes, corazones y castigos de tiempo
 - Cada vez que una máquina rechaza el código (también por un error de escritura) sube la
