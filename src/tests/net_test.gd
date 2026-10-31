@@ -21,9 +21,12 @@ func run(arg: String) -> void:
 	if _shots != "":
 		DirAccess.make_dir_recursive_absolute(_shots)
 	game.fixed_challenges = true
+	# Al unirse se guardan la dirección y el nombre: al final se dejan los del usuario
+	var prefs: Variant = _read_prefs()
 	await _wait_frames(5)
 	await _as_player(url)
 	await _as_admin(url)
+	_restore_prefs(prefs)
 	print("NETTEST ", "OK" if _failures == 0 else "FALLO (%d)" % _failures)
 	game.get_tree().quit(0 if _failures == 0 else 1)
 
@@ -57,6 +60,22 @@ func _shot(shot_name: String) -> void:
 	await _until(func(): return false, 0.4)
 	await RenderingServer.frame_post_draw
 	game.get_viewport().get_texture().get_image().save_png(_shots.path_join(shot_name + ".png"))
+
+
+## Contenido de las preferencias en línea (null si no existían).
+func _read_prefs() -> Variant:
+	if not FileAccess.file_exists(OnlineSession.PREFS):
+		return null
+	return FileAccess.get_file_as_bytes(OnlineSession.PREFS)
+
+
+func _restore_prefs(saved: Variant) -> void:
+	if saved == null:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(OnlineSession.PREFS))
+		return
+	var file := FileAccess.open(OnlineSession.PREFS, FileAccess.WRITE)
+	if file:
+		file.store_buffer(saved)
 
 
 func _press(action: String) -> void:

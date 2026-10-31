@@ -79,7 +79,9 @@ func handle_input(actions: Array) -> void:
 			game.bus.publish(GameEvents.MENU_CONFIRM)
 			_do(String(row.id))
 		elif "cancel" in actions and game.online.phase != "running":
-			_do("close")
+			# Solo lleva el cursor a CERRAR SALA (la última fila): hay que confirmar con aceptar
+			_row = menu.size() - 1
+			game.bus.publish(GameEvents.MENU_MOVE)
 		return
 	var delta := -1 if "ui_left" in actions else (1 if ("ui_right" in actions or "accept" in actions) else 0)
 	if delta == 0:

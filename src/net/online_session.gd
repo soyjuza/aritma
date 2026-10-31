@@ -34,6 +34,8 @@ var reconnecting := false
 var _net := NetClient.new()
 var _token := ""
 var _pending: Dictionary = {}  # se manda al abrir la conexión
+var _done: Dictionary = {}     # resultado: se vuelve a mandar al reconectar
+var _started := false          # ya arrancó esta partida (el servidor repite "start" al reconectar)
 var _send_wait := 0.0
 var _retry_wait := 0.0
 
@@ -146,7 +148,9 @@ func report(delta: float, state: Dictionary) -> void:
 
 
 func report_done(won: bool, used: float) -> void:
-	_net.send({"t": "done", "won": won, "used": used})
+	# Si la red está caída se pierde: por eso se guarda y se repite al reconectar
+	_done = {"t": "done", "won": won, "used": used}
+	_net.send(_done)
 
 
 ## Sale de la sala y cierra la conexión.
@@ -210,6 +214,8 @@ func _reset() -> void:
 	paused = false
 	reconnecting = false
 	_pending = {}
+	_done = {}
+	_started = false
 
 
 func _on_message(msg: Dictionary) -> void:
@@ -237,7 +243,11 @@ func _on_message(msg: Dictionary) -> void:
 			if first:
 				phase = "lobby"
 				room_ready.emit()
-			elif watching != "":
+				return
+			# Reconectado: el servidor ignora el resultado si ya lo tenía
+			if not _done.is_empty():
+				_net.send(_done)
+			if watching != "":
 				watch(watching)
 		"lobby":
 			phase = String(msg.get("phase", phase))
@@ -249,6 +259,9 @@ func _on_message(msg: Dictionary) -> void:
 			paused = bool(msg.get("paused", false))
 			players = msg.get("players", players)
 		"start":
+			if _started:
+				return
+			_started = true
 			phase = "running"
 			config = msg.get("config", config)
 			paused = false
@@ -269,6 +282,8 @@ func _on_message(msg: Dictionary) -> void:
 			phase = "lobby"
 			snaps = {}
 			watching = ""
+			_done = {}
+			_started = false
 			room_reset.emit()
 		"kicked":
 			_net.close()

@@ -172,6 +172,11 @@ const handlers = {
     if (p.status === "left") p.status = room.phase === "lobby" ? "lobby" : "playing";
     ws.meta = { code: room.code, role: "player", id: p.id };
     send(ws, { t: "joined", code: room.code, id: p.id, name: p.name, token: p.token, config: room.config, resumed: true });
+    // Si estaba caído cuando el admin inició, nunca recibió el "start": se repite
+    // (el juego lo ignora si ya estaba jugando)
+    if (p.status === "playing" && room.phase === "running" && p.seed) {
+      send(ws, { t: "start", seed: p.seed, config: room.config, resumed: true });
+    }
     pushLobby(room);
   },
 

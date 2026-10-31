@@ -51,7 +51,7 @@ async function main() {
   check(/^[A-Z2-9]{5}$/.test(created.code), "Sala: el admin recibe un código de 5 letras");
   check(created.config.time_min === 60 && created.config.hearts === 3, "Config: los valores fuera de rango se recortan (99 min -> 60)");
 
-  const ana = await client();
+  let ana = await client();
   ana.say({ t: "join", code: created.code.toLowerCase(), name: "Ana" });
   const joined = await ana.next("joined");
   check(joined.name === "Ana" && joined.id, "Unirse: el código sirve en minúsculas y el jugador recibe su id");
@@ -111,6 +111,14 @@ async function main() {
   check((await ana.next("pause")).on === true, "Admin: la pausa llega a los jugadores");
   admin.say({ t: "add_time", sec: 60 });
   check((await ana.next("add_time")).sec === 60, "Admin: +1 minuto llega a quien está jugando");
+
+  ana.close();
+  await wait(50);
+  ana = await client();
+  ana.say({ t: "resume", code: created.code, token: joined.token });
+  await ana.next("joined");
+  const again1 = await ana.next("start");
+  check(again1.resumed === true && again1.seed === startA.seed, "Reconectar: quien estaba jugando recibe otra vez su «start» con la misma semilla");
 
   ana.say({ t: "done", won: true, used: 420 });
   await wait(50);
