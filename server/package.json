@@ -1,0 +1,16 @@
+{
+  "name": "aritma-server",
+  "version": "1.0.0",
+  "description": "Servidor de salas en línea de Paredes Vivas 2D (admin, jugadores y espectadores).",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ws": "8.18.0"
+  }
+}

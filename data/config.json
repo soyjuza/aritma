@@ -6,6 +6,7 @@
 	"time_limit_sec": 900,
 	"time_warning_sec": 60,
 	"secret_code": "PROFE",
+	"server_url": "ws://localhost:8080",
 	"text_speeds": [
 		30,
 		60,

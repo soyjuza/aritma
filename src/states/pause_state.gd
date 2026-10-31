@@ -8,7 +8,8 @@ var _help: Array
 
 func _init(context) -> void:
 	super(context)
-	_menu = MenuList.new(game.data.texts.get("pause_options", []))
+	# En línea no se guarda
+	_menu = MenuList.new(game.data.texts.get("pause_options", []), func(i): return i != 3 or not game.in_online_match)
 	_help = game.data.texts.get("pause_help", [])
 
 
@@ -17,8 +18,9 @@ func enter(params: Dictionary = {}) -> void:
 		_menu.index = 0
 
 
+## En línea el reloj sigue: si no, pausar sería hacer trampa.
 func timer_runs() -> bool:
-	return false
+	return game.in_online_match
 
 
 func freezes_world() -> bool:
@@ -44,6 +46,8 @@ func handle_input(actions: Array) -> void:
 				game.machine.change("play")
 				game.dialog.say([game.data.message("saved")])
 			4:
+				if game.in_online_match:
+					game.leave_online_match()
 				game.machine.change("title")
 
 
@@ -74,7 +78,7 @@ func draw(ui: UIKit) -> void:
 	ui.diamond(center, 18, UIKit.CYAN if game.timer.active else UIKit.MUTED)
 	ui.text(game.data.message("pause_energy"), energy.position + Vector2(160, 24), 14, UIKit.MUTED, "bold")
 	ui.text(CountdownTimer.format(game.timer.remaining), energy.position + Vector2(158, 44), 54, UIKit.TEXT, "title")
-	var note: String = game.data.message("pause_time_note" if game.timer.active else "pause_dormant")
+	var note: String = game.data.message(("pause_time_online" if game.in_online_match else "pause_time_note") if game.timer.active else "pause_dormant")
 	ui.text(note, energy.position + Vector2(160, 112), 16, Color("ff9a6b") if game.timer.active else UIKit.MUTED)
 	var progress := Rect2(x, 234, 560, 190)
 	ui.panel(progress)

@@ -20,7 +20,8 @@ construía por código al ejecutar el juego.
 | `scenes/personajes/` | Tala (jugadora, con su garrote) y Orun. |
 | `scenes/enemigos/` | Los guardianes de la tumba: `centinela.tscn` (caballero dorado, golpea de cerca), `hechicero.tscn` (lanza orbes de lejos, `orbe.tscn`) y `runico.tscn` (explota). `scenes/objetos/estatua_guardian.tscn` es el mismo guardián dormido sobre su pedestal. |
 | `assets/tiles/` | TileSets: `suelo.tres` (se pisa) y `muros.tres` (todo lo que se pinta ahí es sólido y hace sombra). |
-| `src/` | Scripts: reglas, patrones de diseño, intérprete del Códice. |
+| `src/` | Scripts: reglas, patrones de diseño, intérprete del Códice. `src/net/` es el modo en línea. |
+| `server/` | Servidor de salas en línea (Node.js). Ver **Modo en línea**. |
 | `data/` | Textos, salas y configuración (JSON): nada de esto está escrito a mano en el código. |
 | `docs/ARQUITECTURA.md` | Patrones de diseño, SOLID y el diagrama UML de las clases principales. |
 | `docs/UML_COMPLETO.md` | El UML de **todas** las clases, generado desde el código con `python3 tools/generar_uml.py`. |
@@ -52,6 +53,48 @@ puntos seguros, fosos, máquinas).
 | 5. La Singularidad del Cero | — | Sin código: cruzar el abismo por losas numeradas pisando solo las que cumplen la regla (múltiplos de 3 o de 4, al azar) | Una losa mala se rompe y Tala cae (−7 s); la losa queda rota. Tomar el núcleo lleva a la Sala 6. |
 | 6. El Trono del Cero | — | Nada: es el **jefe final**, el Guardián del Cero (tengu rojo) | 16 de vida en 4 fases. Ráfaga de orbes (3, 5, 6, 7), pisotón con círculo rojo (salir o saltar con ESPACIO; −1 corazón). Al perder cada cuarta parte se cubre con un escudo y pone un **problema** de repaso (par/impar, múltiplo, despejar x; 15 s): si aciertas cae el escudo; si fallas llama 4, 5 o 6 guardianes. Al caer el escudo deja una **poción**. Al entrar se recuperan 2 corazones. Si Tala cae, el jefe vuelve a vida llena. Vencerlo gana. |
 
+## Ejercicios al azar
+Cada partida sortea una **variante** por sala (`"variants"` en `data/chambers.json`, `src/core/challenge_deck.gd`),
+así el código de una partida no sirve en la siguiente:
+
+| Sala | Variantes |
+|---|---|
+| 1. La Criba | pares/impares · múltiplos de 3, 4 o 5 · mayores que 15, 20, 25 o 30 |
+| 2. El Mural | `ax + b = c` → `(c - b) / a` · `x/a + b = c` → `(c - b) * a` · `a(x + b) = c` → `c / a - b` |
+| 3. El Vórtice | las minas cambian siempre de lugar |
+| 4. La Mesa | Rectángulo + Casa · Escalera + Barco · Torre + Rombo |
+| 5. El Sendero | múltiplos de 3, 4, 5 o 6, con otro camino cada vez |
+| 6. El Trono | los problemas del jefe salen al azar |
+
+La semilla de la partida decide todo: con la misma semilla salen los mismos ejercicios (se guarda
+con la partida y la usa el espectador en línea para ver la misma sala).
+
+## Modo en línea
+Menú principal → **EN LÍNEA**.
+
+- **El admin** elige **CREAR SALA (ADMIN)** y recibe un código de 5 letras. En el panel elige el
+  tiempo, los corazones, los castigos, el máximo de jugadores, si todos reciben los mismos
+  ejercicios, si quien termina puede mirar a los demás y si se empieza directo en el templo.
+  Después: **INICIAR PARTIDA**, **PAUSAR A TODOS**, **+1 MINUTO A TODOS**, **TERMINAR PARTIDA**,
+  **OTRA PARTIDA** y **CERRAR SALA**. Con **TAB** pasa a la lista de jugadores: **ENTER** mira a uno
+  en vivo y **SUPR** lo saca de la sala. El admin no juega.
+- **Los jugadores** escriben su nombre y el código y eligen **UNIRSE A LA SALA**. Cuando el admin
+  inicia, todos empiezan a la vez. En línea la pausa no detiene el reloj y no se puede guardar.
+- **Al terminar** (ganar o perder) se puede mirar en vivo a los que siguen jugando y ver la
+  clasificación: primero los que ganaron (menos tiempo) y después los que llegaron más lejos.
+- Si se cae la red, el juego se vuelve a conectar solo y sigue en la misma sala.
+
+### El servidor (`server/`)
+```
+cd server
+npm install
+npm start          # escucha en el puerto 8080 (o en PORT)
+npm test           # 20 pruebas del servidor
+```
+La dirección del servidor está en `data/config.json` (`server_url`) y se puede cambiar en la
+pantalla EN LÍNEA (por ejemplo `wss://mi-servidor.up.railway.app`). Para jugar por Internet, el
+servidor se publica en un servicio como Railway, con `server/` como carpeta raíz y `npm start`.
+
 ## Guardianes, corazones y castigos de tiempo
 - Cada vez que una máquina rechaza el código (también por un error de escritura) sube la
   **alarma** de la sala: la primera vez despiertan las estatuas; después caen guardianes del
@@ -75,6 +118,7 @@ puntos seguros, fosos, máquinas).
 
 ## Pruebas automáticas
 ```
-godot --path . -- --selftest                       # 151 pruebas de reglas y del recorrido completo
+godot --path . -- --selftest                       # 160 pruebas de reglas y del recorrido completo
+godot --path . -- --nettest=ws://127.0.0.1:8080    # 28 pruebas en línea (con el servidor encendido)
 godot --path . -- --recorrido=/carpeta[:sala2|:sala3|:sala4|:sala5|:jefe]  # capturas del camino del jugador
 ```

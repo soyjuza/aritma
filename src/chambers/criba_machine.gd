@@ -80,7 +80,7 @@ func _draw() -> void:
 
 ## Esferas nuevas para todas las rondas.
 func new_rules() -> void:
-	rules = ParityFilter.new(_data.get("rounds", []), _rng)
+	rules = ParityFilter.new(_data.get("rounds", []), _rng, _data.get("rule", {}))
 	_round_lit.fill(false)
 	_filled = 0
 	_show_round(0, rules.rounds[0])
@@ -144,8 +144,8 @@ func evaluate(source: String, sandbox: ScriptSandbox) -> CodeMachine.Report:
 	report.success = report.ok and not rules.failed()
 	match rules.fault:
 		ParityFilter.Fault.WRONG_SIDE:
-			var key := "criba_wrong_even" if ParityFilter.is_even(rules.fault_value) else "criba_wrong_odd"
-			report.message = _text.call(key, {"n": rules.fault_value, "round": rules.round_index + 1})
+			var key := "wrong_out" if rules.accepts(rules.fault_value) else "wrong_in"
+			report.message = String(_data.get(key, "")).format({"n": rules.fault_value, "round": rules.round_index + 1})
 		ParityFilter.Fault.LEFT_OVER:
 			report.message = _text.call("criba_left_over", {"n": rules.fault_value, "round": rules.round_index + 1})
 		_:

@@ -59,11 +59,11 @@ func setup(kit: TileKit, bus: EventBus, data: Dictionary, text: Callable, open_c
 
 ## Ecuaciones nuevas.
 func new_trial() -> void:
-	trial = RootsTrial.new(_data.get("cases", []), _rng)
+	trial = RootsTrial.new(_data.get("cases", []), _rng, String(_data.get("form", "lineal")))
 	_rows.clear()
 	for i in trial.cases.size():
 		var c: Dictionary = trial.cases[i]
-		_rows.append({"poly": RootsTrial.equation(c.a, c.b, c.c), "result": "", "color": Color("8d97a8"), "lamp": Color("2a3036"), "angle": 0.0, "revealed": i == 0})
+		_rows.append({"poly": RootsTrial.equation(c.a, c.b, c.c, trial.form), "result": "", "color": Color("8d97a8"), "lamp": Color("2a3036"), "angle": 0.0, "revealed": i == 0})
 	_active = -1
 
 
@@ -109,7 +109,7 @@ func evaluate(source: String, sandbox: ScriptSandbox) -> CodeMachine.Report:
 					report.message = _text.call("mural_bad_shape", {"a": c.a, "b": c.b, "c": c.c, "got": shown})
 				_:
 					shown = RootsTrial.answer(answer[1])
-					report.message = _text.call("mural_wrong", {"a": c.a, "b": c.b, "c": c.c, "got": ScriptContext.to_text(answer[1]), "eq": RootsTrial.equation(c.a, c.b, c.c), "want": c.x})
+					report.message = _text.call("mural_wrong", {"a": c.a, "b": c.b, "c": c.c, "got": ScriptContext.to_text(answer[1]), "eq": RootsTrial.equation(c.a, c.b, c.c, trial.form), "want": c.x, "hint": _data.get("wrong_hint", "")})
 		report.commands.append(RootsCommand.new(i, verdict, shown, steps))
 		if verdict != RootsTrial.Verdict.RIGHT:
 			report.success = false

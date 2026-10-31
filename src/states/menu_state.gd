@@ -31,10 +31,12 @@ func handle_input(actions: Array) -> void:
 			1:
 				game.machine.change("intro")
 			2:
-				game.machine.change("settings", {"return_to": "menu"})
+				game.machine.change("online")
 			3:
-				game.machine.change("credits")
+				game.machine.change("settings", {"return_to": "menu"})
 			4:
+				game.machine.change("credits")
+			5:
 				game.get_tree().quit()
 
 

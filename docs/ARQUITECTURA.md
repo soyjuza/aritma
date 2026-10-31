@@ -5,14 +5,25 @@
 |---|---|---|---|
 | Creacional | **Factory Method** | `ChamberBuilder` → `FilterBuilder`, `RootsBuilder`, `VortexBuilder`, `FigureBuilder`, `CoreBuilder`, `ThroneBuilder`; `ChamberRegistry` | Cada creador instancia la escena de su sala según el `kind` de `chambers.json`. Para agregar una sala se crea una escena y un creador nuevos, sin tocar los demás. |
 | Creacional | **Factory** | `AlarmDirector` (instancia `centinela.tscn`, `hechicero.tscn`, `runico.tscn`); `OrbShot` (instancia `orbe.tscn`) | Crea los guardianes de cada ola y los orbes del hechicero. |
-| Estructural | **Facade** | `TileKit`, `AudioService` | Ocultan cómo se arman las partículas y el sonido con el pack de arte. |
+| Estructural | **Facade** | `TileKit`, `AudioService`; `OnlineSession` (sobre `NetClient`) | Ocultan cómo se arman las partículas y el sonido con el pack de arte. El juego pide «crear sala», «unirse» o «pausar a todos» sin saber del WebSocket ni del formato de los mensajes. |
 | Estructural | **Adapter** | `DoorAdapter`, `FilterAdapter`, `LightsAdapter` | Pasan los objetos del juego al lenguaje del Códice (`puerta.abrir()`, `tolva.soltar()`, `luces.encender()`). |
-| Comportamiento | **State** | `StateMachine` + `GameState` (título, juego, pausa, Códice, reto de teclas, rompecabezas de figuras…); `MoveState` (quieta, caminar, correr, saltar, golpear, caer); `GuardianState` (dormido, despertando, cayendo, persiguiendo, preparando, golpeando, aturdido, vencido); `BossState` (escondido, aparece, espera, persigue, ráfaga, pisotón, cansado, escudo, vencido) | Fases del juego, movimiento de Tala y comportamiento de los guardianes y del jefe. |
-| Comportamiento | **Observer** | `EventBus` + `SoundObserver`, `CameraShakeObserver`, `AlarmDirector` (escucha `MACHINE_FAILED`); `PlayerHealth` publica golpes y caídas; señales de los nodos (`used`, `crossed`, `fell`, `solved`, `defeated`) | El sonido, la cámara y la alarma reaccionan a los eventos sin que quien los emite sepa de ellos. |
+| Comportamiento | **State** | `StateMachine` + `GameState` (título, juego, pausa, Códice, reto de teclas, rompecabezas de figuras, en línea, sala de espera, panel del admin, espectador…); `MoveState` (quieta, caminar, correr, saltar, golpear, caer); `GuardianState` (dormido, despertando, cayendo, persiguiendo, preparando, golpeando, aturdido, vencido); `BossState` (escondido, aparece, espera, persigue, ráfaga, pisotón, cansado, escudo, vencido) | Fases del juego, movimiento de Tala y comportamiento de los guardianes y del jefe. |
+| Comportamiento | **Observer** | `EventBus` + `SoundObserver`, `CameraShakeObserver`, `AlarmDirector` (escucha `MACHINE_FAILED`); `PlayerHealth` publica golpes y caídas; señales de los nodos (`used`, `crossed`, `fell`, `solved`, `defeated`); señales de `OnlineSession` (`match_started`, `paused_changed`, `time_added`, `kicked`…) que escucha `Game` | El sonido, la cámara y la alarma reaccionan a los eventos sin que quien los emite sepa de ellos. Lo mismo con lo que manda el servidor. |
 | Comportamiento | **Strategy** | `QualityProfile` → `HighQuality`, `LowQuality`; `GuardianAttack` → `MeleeStrike` (caballero), `OrbShot` (hechicero), `RuneBlast` (rúnico); `QuizProblem` → `ParityProblem`, `MultipleProblem`, `SolveProblem` (con `BossQuiz` como contexto) | Calidad de efectos; cómo ataca cada tipo de guardián; qué problema pone el jefe en cada fase. |
 | Comportamiento | **Command** | `FilterCommand`, `RootsCommand` | El programa del jugador deja órdenes que la máquina ejecuta y anima una por una. |
 | Comportamiento | **Template Method** | `CodeMachine` → `GateMachine`, `CribaMachine`, `MuralMachine`, `BeaconMachine` | Pasos fijos para correr el código. Cada máquina redefine `evaluate()` y `perform()`. |
+| Comportamiento | **Strategy** (datos) | `ChallengeDeck` + `"variants"` de `chambers.json`; `ParityFilter.rule`, `RootsTrial.form` | Cada partida sortea la regla de la Criba, la forma de la ecuación del Mural, las figuras de la Mesa y la regla del Sendero. |
 | Comportamiento | **Interpreter** | `src/script_lang/` (Lexer, Parser, nodos, ScriptSandbox) | Ejecuta el código estilo Python que escribe el jugador. |
+
+## Modo en línea
+```
+Jugador (Godot) ──estado 10/s──►  server/server.js  ──tablero 2/s──► todos
+                                   (salas, reglas,   ──posiciones──► quien mira a ese jugador
+Admin (Godot)   ──config/inicio──►  clasificación)   ──inicio/pausa/+tiempo──► jugadores
+```
+Cada jugador juega su partida completa en su computador; el servidor solo reparte la semilla de
+los ejercicios, junta el tablero y reenvía posiciones. El espectador (`WatchView`) carga la misma
+sala con la misma semilla (`ChallengeDeck`) y mueve un `SpectatorGhost` con lo que llega.
 
 ## SOLID y bajo acoplamiento
 - **S**: cada clase hace una sola cosa. `Grate` abre y cierra una reja, `TriggerZone` avisa

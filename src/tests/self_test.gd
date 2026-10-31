@@ -15,8 +15,11 @@ func _init(context: Game) -> void:
 
 
 func run() -> void:
+	game.fixed_challenges = true
+	game.data.roll_challenges(1, true)
 	ScriptLangTests.new().run_all(_check)
 	_test_quality()
+	_test_challenge_variants()
 	_test_health_and_alarm_rules()
 	await _test_movement()
 	await _test_town_and_gate()
@@ -204,6 +207,63 @@ func _run_filter(rules: ParityFilter, code: String) -> Array:
 		if rules.failed():
 			break
 	return errors
+
+
+## Banco de variantes: cada partida sortea el ejercicio de cada sala.
+func _test_challenge_variants() -> void:
+	var seen := {}
+	for i in 60:
+		var picks := ChallengeDeck.roll(game.data.chambers, i + 1)
+		for room in [0, 1, 3]:
+			seen["%d:%s" % [room, picks[room].get("id", "")]] = true
+	_check(seen.size() == 9, "Variantes: en 60 partidas salen las 3 variantes de la Criba, del Mural y de la Mesa")
+	var a := ChallengeDeck.roll(game.data.chambers, 777)
+	var b := ChallengeDeck.roll(game.data.chambers, 777)
+	_check(JSON.stringify(a) == JSON.stringify(b), "Variantes: la misma semilla da los mismos ejercicios (el espectador ve lo mismo)")
+	_check(int(a[0].get("seed", 0)) != 0 and a[0].get("seed") != a[1].get("seed"), "Variantes: cada sala tiene su propia semilla")
+	var rng := RandomNumberGenerator.new()
+	var sorts_ok := true
+	var old_fails := true
+	for i in 40:
+		var room: Dictionary = ChallengeDeck.roll(game.data.chambers, i + 1)[0]
+		var rule: Dictionary = room.get("rule", {})
+		var test := "n > %d" % int(rule.get("t", 0)) if rule.get("kind") == "greater" else "n %% %d == 0" % int(rule.get("k", 2))
+		var code := CRIBA_OK.replace("n % 2 == 0", test)
+		rng.seed = i
+		var rules := ParityFilter.new(room.get("rounds", []), rng, rule)
+		sorts_ok = sorts_ok and _run_filter(rules, code).is_empty() and not rules.failed()
+		if test != "n % 2 == 0":
+			rules = ParityFilter.new(room.get("rounds", []), rng, rule)
+			_run_filter(rules, CRIBA_OK)
+			old_fails = old_fails and rules.failed()
+	_check(sorts_ok, "Criba: en cada variante (pares, múltiplos de k, mayores que t) el programa correcto pasa")
+	_check(old_fails, "Criba: el programa de pares no sirve para las otras variantes")
+	var formulas := {"lineal": "(c - b) / a", "fraccion": "(c - b) * a", "parentesis": "c / a - b"}
+	var sandbox := ScriptSandbox.new()
+	var forms_ok := true
+	var copy_fails := true
+	for form in formulas:
+		var program := sandbox.run("def despejar(a, b, c):\n    return %s\n" % formulas[form], {}, 2000)
+		var old := sandbox.run(ROOTS_OK, {}, 2000)
+		var old_right := 0
+		for i in 60:
+			var c := RootsTrial.make_case(["plus", "minus", "negative"][i % 3], rng, form)
+			var answer := sandbox.call_function(program, "despejar", [c.a, c.b, c.c])
+			forms_ok = forms_ok and answer[0] and RootsTrial.judge(c, answer[1]) == RootsTrial.Verdict.RIGHT
+			var copied := sandbox.call_function(old, "despejar", [c.a, c.b, c.c])
+			old_right += 1 if copied[0] and RootsTrial.judge(c, copied[1]) == RootsTrial.Verdict.RIGHT else 0
+		if form != "lineal":
+			copy_fails = copy_fails and old_right < 30
+	_check(forms_ok, "Mural: cada forma (ax + b = c, x/a + b = c, a(x + b) = c) se despeja con su fórmula")
+	_check(copy_fails, "Mural: la fórmula de ax + b = c no sirve para las otras formas")
+	_check(RootsTrial.equation(4, 3, 5, "fraccion") == "x/4 + 3 = 5" and RootsTrial.equation(3, -2, 15, "parentesis") == "3(x − 2) = 15", "Mural: las otras formas se escriben bien")
+	var figures_ok := true
+	for v in game.data.chambers[3].get("variants", []):
+		for p in v.get("puzzles", game.data.chambers[3].get("puzzles", [])):
+			for i in 10:
+				rng.seed = i
+				figures_ok = figures_ok and _solve_figure(FigurePuzzle.from_layout(p.rows, p.title, true, rng))
+	_check(figures_ok, "Figuras: las figuras de todas las variantes se pueden llenar")
 
 
 func _test_parity_filter() -> void:

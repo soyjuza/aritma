@@ -93,7 +93,115 @@
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Los fosos del pasillo no se cruzan caminando. Corre (SHIFT) y salta (ESPACIO) antes del borde."
 			],
-			"max_lines": 0
+			"max_lines": 0,
+			"rule": {
+				"kind": "multiple",
+				"k": 2
+			},
+			"wrong_in": "Ronda {round}: la esfera {n} es IMPAR y cayó en el cáliz. La Criba se trabó y mezcló esferas nuevas.",
+			"wrong_out": "Ronda {round}: la esfera {n} es PAR y cayó en el crisol. La Criba se trabó y mezcló esferas nuevas.",
+			"variants": [
+				{
+					"id": "paridad"
+				},
+				{
+					"id": "multiplo",
+					"params": {
+						"k": [
+							3,
+							4,
+							5
+						]
+					},
+					"rule": {
+						"kind": "multiple",
+						"k": "{k}"
+					},
+					"glyph": "n % {k}",
+					"chalice_label": "×{k}",
+					"crucible_label": "OTRAS",
+					"wrong_in": "Ronda {round}: la esfera {n} no es múltiplo de {k} y cayó en el cáliz. La Criba se trabó y mezcló esferas nuevas.",
+					"wrong_out": "Ronda {round}: la esfera {n} es múltiplo de {k} y cayó en el crisol. La Criba se trabó y mezcló esferas nuevas.",
+					"starter_code": "# Las esferas MÚLTIPLOS DE {k} van al cáliz (izquierda).\n# Todas las demás, al crisol (derecha).\n# La Criba prueba tu programa con 3 rondas: solo ves la primera.\n\n",
+					"help": [
+						[
+							"tolva.quedan()",
+							"cuántas esferas faltan en la tolva"
+						],
+						[
+							"tolva.soltar()",
+							"deja caer la siguiente a la compuerta y devuelve su número"
+						],
+						[
+							"caliz.recibir()",
+							"la esfera de la compuerta va al cáliz (×{k})"
+						],
+						[
+							"crisol.desintegrar()",
+							"la esfera de la compuerta va al crisol (las demás)"
+						],
+						[
+							"n % {k}",
+							"el resto de dividir n entre {k}: si da 0, n es múltiplo de {k}"
+						]
+					],
+					"intro": [
+						"INSCRIPCIÓN: La Criba separa la materia. Solo los MÚLTIPLOS DE {k} pueden llegar al Cáliz; todo lo demás se deshace en el Crisol.",
+						"Usa el atril (E) y programa la Criba. Ella pondrá a prueba tu programa con tres rondas de esferas: solo la primera se ve en el tubo.",
+						"Si una sola esfera cae del lado equivocado, la Criba se traba y mezcla esferas nuevas.",
+						"INSCRIPCIÓN: Dos guardianes de piedra vigilan la Criba. Cada vez que la Criba rechace tu código —aunque sea por un «;» mal puesto— despertarán más. Golpéalos con el garrote (J o clic)."
+					]
+				},
+				{
+					"id": "mayor",
+					"params": {
+						"t": [
+							15,
+							20,
+							25,
+							30
+						]
+					},
+					"rule": {
+						"kind": "greater",
+						"t": "{t}"
+					},
+					"glyph": "n > {t}",
+					"chalice_label": "> {t}",
+					"crucible_label": "HASTA {t}",
+					"wrong_in": "Ronda {round}: la esfera {n} no es mayor que {t} y cayó en el cáliz. La Criba se trabó y mezcló esferas nuevas.",
+					"wrong_out": "Ronda {round}: la esfera {n} es mayor que {t} y cayó en el crisol. La Criba se trabó y mezcló esferas nuevas.",
+					"starter_code": "# Las esferas MAYORES QUE {t} van al cáliz (izquierda).\n# Las demás ({t} o menos), al crisol (derecha).\n# La Criba prueba tu programa con 3 rondas: solo ves la primera.\n\n",
+					"help": [
+						[
+							"tolva.quedan()",
+							"cuántas esferas faltan en la tolva"
+						],
+						[
+							"tolva.soltar()",
+							"deja caer la siguiente a la compuerta y devuelve su número"
+						],
+						[
+							"caliz.recibir()",
+							"la esfera de la compuerta va al cáliz (> {t})"
+						],
+						[
+							"crisol.desintegrar()",
+							"la esfera de la compuerta va al crisol ({t} o menos)"
+						],
+						[
+							"n > {t}",
+							"True si n es mayor que {t}"
+						]
+					],
+					"intro": [
+						"INSCRIPCIÓN: La Criba separa la materia. Solo lo MAYOR QUE {t} puede llegar al Cáliz; lo que valga {t} o menos se deshace en el Crisol.",
+						"Usa el atril (E) y programa la Criba. Ella pondrá a prueba tu programa con tres rondas de esferas: solo la primera se ve en el tubo.",
+						"Si una sola esfera cae del lado equivocado, la Criba se traba y mezcla esferas nuevas.",
+						"INSCRIPCIÓN: Dos guardianes de piedra vigilan la Criba. Cada vez que la Criba rechace tu código —aunque sea por un «;» mal puesto— despertarán más. Golpéalos con el garrote (J o clic)."
+					]
+				}
+			]
 		},
 		{
 			"name": "El Mural de la Incógnita",
@@ -144,6 +252,83 @@
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Las prensas del pasillo se cierran con su propio ritmo. La lámpara roja avisa justo antes de cerrar."
+			],
+			"form": "lineal",
+			"wrong_hint": "Primero resta b a c y después divide entre a.",
+			"variants": [
+				{
+					"id": "lineal"
+				},
+				{
+					"id": "fraccion",
+					"form": "fraccion",
+					"mural_title": "x / a + b = c   →   x = ?",
+					"wrong_hint": "Primero resta b a c y después multiplica por a.",
+					"starter_code": "# El Mural llama a despejar(a, b, c) con tres ecuaciones x / a + b = c.\n# Devuelve el valor de x.\n# Ejemplo: x / 4 + 3 = 5  ->  x / 4 = 5 - 3 = 2  ->  x = 2 * 4 = 8\n\ndef despejar(a, b, c):\n    \n",
+					"help": [
+						[
+							"def despejar(a, b, c):",
+							"el Mural la llama con a, b y c"
+						],
+						[
+							"return ...",
+							"devuelve el valor de x"
+						],
+						[
+							"c - b",
+							"pasa b al otro lado (restando)"
+						],
+						[
+							"(c - b) * a",
+							"lo que divide pasa multiplicando"
+						],
+						[
+							"x/4 + 3 = 5",
+							"a = 4, b = 3, c = 5  ->  x = 8"
+						]
+					],
+					"intro": [
+						"INSCRIPCIÓN: El Mural de la Incógnita guarda ecuaciones de la forma x / a + b = c. Quien despeje la x abrirá la reja.",
+						"Escribe la función despejar(a, b, c) y haz que devuelva el valor de x. El Mural la probará con tres ecuaciones: solo ves la primera.",
+						"Recuerda cómo se despeja: lo que suma pasa restando y lo que divide pasa multiplicando. Ejemplo: x / 4 + 3 = 5 → x / 4 = 2 → x = 8, así que despejar(4, 3, 5) devuelve 8.",
+						"INSCRIPCIÓN: Dos caballeros de piedra vigilan el Mural. Cada vez que el Mural rechace tu código —aunque sea por un error de escritura— despertarán más guardianes."
+					]
+				},
+				{
+					"id": "parentesis",
+					"form": "parentesis",
+					"mural_title": "a(x + b) = c   →   x = ?",
+					"wrong_hint": "Primero divide c entre a y después resta b.",
+					"starter_code": "# El Mural llama a despejar(a, b, c) con tres ecuaciones a(x + b) = c.\n# Devuelve el valor de x.\n# Ejemplo: 3(x + 2) = 15  ->  x + 2 = 15 / 3 = 5  ->  x = 5 - 2 = 3\n\ndef despejar(a, b, c):\n    \n",
+					"help": [
+						[
+							"def despejar(a, b, c):",
+							"el Mural la llama con a, b y c"
+						],
+						[
+							"return ...",
+							"devuelve el valor de x"
+						],
+						[
+							"c / a",
+							"lo que multiplica al paréntesis pasa dividiendo"
+						],
+						[
+							"c / a - b",
+							"y luego b pasa restando"
+						],
+						[
+							"3(x + 2) = 15",
+							"a = 3, b = 2, c = 15  ->  x = 3"
+						]
+					],
+					"intro": [
+						"INSCRIPCIÓN: El Mural de la Incógnita guarda ecuaciones de la forma a(x + b) = c. Quien despeje la x abrirá la reja.",
+						"Escribe la función despejar(a, b, c) y haz que devuelva el valor de x. El Mural la probará con tres ecuaciones: solo ves la primera.",
+						"Recuerda cómo se despeja: lo que multiplica pasa dividiendo y lo que suma pasa restando. Ejemplo: 3(x + 2) = 15 → x + 2 = 5 → x = 3, así que despejar(3, 2, 15) devuelve 3.",
+						"INSCRIPCIÓN: Dos caballeros de piedra vigilan el Mural. Cada vez que el Mural rechace tu código —aunque sea por un error de escritura— despertarán más guardianes."
+					]
+				}
 			]
 		},
 		{
@@ -223,6 +408,63 @@
 			],
 			"tunnel_intro": [
 				"INSCRIPCIÓN: Las prensas de este pasillo son más rápidas. Mira la lámpara roja y corre en el momento justo."
+			],
+			"variants": [
+				{
+					"id": "casa"
+				},
+				{
+					"id": "barco",
+					"puzzles": [
+						{
+							"title": "La Escalera",
+							"rows": [
+								"A...",
+								"AA..",
+								"BBC.",
+								"BCCC"
+							],
+							"turned": false
+						},
+						{
+							"title": "El Barco",
+							"rows": [
+								"..A..",
+								".AAB.",
+								"CCDBB",
+								".CDD."
+							],
+							"turned": true
+						}
+					]
+				},
+				{
+					"id": "rombo",
+					"puzzles": [
+						{
+							"title": "La Torre",
+							"rows": [
+								"A.B",
+								"AAB",
+								"CCB",
+								"CDD",
+								"CDD"
+							],
+							"turned": false
+						},
+						{
+							"title": "El Rombo",
+							"rows": [
+								"..A..",
+								".BAA.",
+								"BBCDD",
+								".CCD.",
+								"..C.."
+							],
+							"turned": true
+						}
+					]
+				}
 			]
 		},
 		{
@@ -237,6 +479,14 @@
 				{
 					"multiple": 4,
 					"text": "múltiplos de 4"
+				},
+				{
+					"multiple": 5,
+					"text": "múltiplos de 5"
+				},
+				{
+					"multiple": 6,
+					"text": "múltiplos de 6"
 				}
 			],
 			"path": {

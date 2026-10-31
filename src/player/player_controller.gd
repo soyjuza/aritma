@@ -250,6 +250,11 @@ func die() -> void:
 		change("idle")
 
 
+## Cómo se ve ahora (lo copia el espectador en línea).
+func pose() -> Dictionary:
+	return {"a": String(_sprite.animation), "hop": hop_height}
+
+
 func set_lamp(on: bool) -> void:
 	_lamp.visible = on
 

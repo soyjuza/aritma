@@ -9,10 +9,19 @@ var _focused: Interactable = null
 func enter(params: Dictionary = {}) -> void:
 	match params.get("mode", "resume"):
 		"new":
+			game.apply_match_rules({})
 			game.start_new_game()
 			game.dialog.say(game.data.messages("town_arrival"))
 		"load":
+			game.apply_match_rules({})
 			game.load_game()
+		"online":
+			# Las reglas ya las puso el admin (Game.apply_match_rules)
+			game.start_new_game(int(params.get("seed", 0)))
+			if params.get("skip_town", false):
+				game.enter_temple()
+			else:
+				game.dialog.say(game.data.messages("town_arrival"))
 	game.follow_player()
 
 

@@ -1,6 +1,6 @@
 # UML completo (generado)
 
-Generado por `tools/generar_uml.py` a partir del código: **148 clases**, un diagrama
+Generado por `tools/generar_uml.py` a partir del código: **160 clases**, un diagrama
 por carpeta de `src/`. Las flechas `<|--` son herencia. Las relaciones entre paquetes
 (composición, uso, eventos) están en el diagrama principal de `docs/ARQUITECTURA.md`.
 Para actualizarlo: `python3 tools/generar_uml.py`.
@@ -15,6 +15,8 @@ classDiagram
         +enter_chamber(index)
         +enter_temple()
         +load_chamber(index)
+        +show_town()
+        +load_watch_level(index, seed_value)
         +show_title_shot()
         +follow_player()
         +place_title() String
@@ -25,13 +27,17 @@ classDiagram
         +fade_out()
         +talk(key)
         +notify(lines, seconds, good)
-        +start_new_game()
+        +start_new_game(seed_value)
         +open_codex(session)
         +save_game()
         +load_game()
         +finish(won, ending)
         +combat(key, fallback)
         +penalize(seconds)
+        +apply_match_rules(config)
+        +admin_paused() bool
+        +net_state() Dictionary
+        +leave_online_match()
     }
 ```
 
@@ -49,6 +55,12 @@ classDiagram
         +play_music(track)
         +set_volume(bus_name, level)
     }
+    class ChallengeDeck {
+        <<RefCounted>>
+        +roll(chambers, seed_value, fixed) Dictionary$
+        +resolve(base, rng, fixed) Dictionary$
+        +fill(value, params)$
+    }
     class CountdownTimer {
         <<RefCounted>>
         +reset()
@@ -64,6 +76,7 @@ classDiagram
         +setting(key, fallback)
         +chamber_count() int
         +chamber_data(index) Dictionary
+        +roll_challenges(seed_value, fixed)
         +talk(key) Array
         +message(key, params) String
         +messages(key) Array
@@ -118,6 +131,7 @@ classDiagram
 | Clase | Hereda de | Archivo |
 |---|---|---|
 | `AudioService` | `RefCounted` | `src/core/audio_service.gd` |
+| `ChallengeDeck` | `RefCounted` | `src/core/challenge_deck.gd` |
 | `CountdownTimer` | `RefCounted` | `src/core/countdown_timer.gd` |
 | `DataRepository` | `RefCounted` | `src/core/data_repository.gd` |
 | `EventBus` | `RefCounted` | `src/core/event_bus.gd` |
@@ -154,6 +168,7 @@ classDiagram
         +strike()
         +hurt(amount, from, force)
         +die()
+        +pose() Dictionary
         +set_lamp(on)
         +place(at, face)
         +focused_interactable() Interactable
@@ -673,8 +688,8 @@ classDiagram
     }
     class ParityFilter {
         <<RefCounted>>
-        +make_round(rule, rng) Array$
-        +is_even(value) bool$
+        +make_round(spec, rng) Array
+        +accepts(value) bool
         +start_round(index)
         +failed() bool
         +remaining() int
@@ -713,8 +728,8 @@ classDiagram
     }
     class RootsTrial {
         <<RefCounted>>
-        +make_case(kind, rng) Dictionary$
-        +equation(a, b, c) String$
+        +make_case(kind, rng, p_form) Dictionary$
+        +equation(a, b, c, p_form) String$
         +answer(value) String$
         +judge(case, value) Verdict$
     }
@@ -911,6 +926,16 @@ classDiagram
 
 ```mermaid
 classDiagram
+    class AdminState {
+        <<State>>
+        +enter(_params)
+        +exit()
+        +freezes_world() bool
+        +handle_key(event) bool
+        +handle_input(actions)
+        +update(delta)
+        +draw(ui)
+    }
     class BookState {
         <<State>>
         +enter(params)
@@ -971,9 +996,23 @@ classDiagram
         +update(_delta)
         +draw(ui)
     }
+    class LobbyState {
+        <<State>>
+        +enter(_params)
+        +handle_input(actions)
+        +draw(ui)
+        +config_lines(data, config) Array$
+    }
     class MenuState {
         <<State>>
         +enter(_params)
+        +handle_input(actions)
+        +draw(ui)
+    }
+    class OnlineState {
+        <<State>>
+        +enter(_params)
+        +handle_key(event) bool
         +handle_input(actions)
         +draw(ui)
     }
@@ -1039,23 +1078,37 @@ classDiagram
         +handle_input(actions)
         +draw(ui)
     }
+    class WatchState {
+        <<State>>
+        +enter(_params)
+        +exit()
+        +freezes_world() bool
+        +handle_input(actions)
+        +update(delta)
+        +draw(ui)
+    }
+    GameState <|-- AdminState
     GameState <|-- BookState
     GameState <|-- CodexState
     GameState <|-- CreditsState
     GameState <|-- EndState
     GameState <|-- IntroState
     GameState <|-- KeyChallengeState
+    GameState <|-- LobbyState
     GameState <|-- MenuState
+    GameState <|-- OnlineState
     GameState <|-- PauseState
     GameState <|-- PlayState
     GameState <|-- PuzzleState
     GameState <|-- QuizState
     GameState <|-- SettingsState
     GameState <|-- TitleState
+    GameState <|-- WatchState
 ```
 
 | Clase | Hereda de | Archivo |
 |---|---|---|
+| `AdminState` | `GameState` | `src/states/admin_state.gd` |
 | `BookState` | `GameState` | `src/states/book_state.gd` |
 | `CodexState` | `GameState` | `src/states/codex_state.gd` |
 | `CreditsState` | `GameState` | `src/states/credits_state.gd` |
@@ -1063,7 +1116,9 @@ classDiagram
 | `GameState` | `RefCounted` | `src/states/game_state.gd` |
 | `IntroState` | `GameState` | `src/states/intro_state.gd` |
 | `KeyChallengeState` | `GameState` | `src/states/key_challenge_state.gd` |
+| `LobbyState` | `GameState` | `src/states/lobby_state.gd` |
 | `MenuState` | `GameState` | `src/states/menu_state.gd` |
+| `OnlineState` | `GameState` | `src/states/online_state.gd` |
 | `PauseState` | `GameState` | `src/states/pause_state.gd` |
 | `PlayState` | `GameState` | `src/states/play_state.gd` |
 | `PuzzleState` | `GameState` | `src/states/puzzle_state.gd` |
@@ -1071,6 +1126,7 @@ classDiagram
 | `SettingsState` | `GameState` | `src/states/settings_state.gd` |
 | `StateMachine` | `RefCounted` | `src/states/state_machine.gd` |
 | `TitleState` | `GameState` | `src/states/title_state.gd` |
+| `WatchState` | `GameState` | `src/states/watch_state.gd` |
 
 ## `src/ui/` — Interfaz
 
@@ -1114,6 +1170,11 @@ classDiagram
         +height() float
         +draw(ui, at, width)
     }
+    class NetBoard {
+        <<RefCounted>>
+        +draw(ui, r, players, data, selected, show_live)$
+        +room_name(data, chamber) String$
+    }
     class NoticeBoard {
         <<RefCounted>>
         +notify(lines, seconds, is_good)
@@ -1128,6 +1189,11 @@ classDiagram
         +fade_in()
         +fade_out()
         +tick(delta)
+    }
+    class TextField {
+        <<RefCounted>>
+        +feed(event) bool
+        +draw(ui, r, focused, placeholder)
     }
     class UIKit {
         <<RefCounted>>
@@ -1164,9 +1230,11 @@ classDiagram
 | `DialogBox` | `RefCounted` | `src/ui/dialog_box.gd` |
 | `Hud` | `RefCounted` | `src/ui/hud.gd` |
 | `MenuList` | `RefCounted` | `src/ui/menu_list.gd` |
+| `NetBoard` | `RefCounted` | `src/ui/net_board.gd` |
 | `NoticeBoard` | `RefCounted` | `src/ui/notice_board.gd` |
 | `OverlayCanvas` | `Control` | `src/ui/overlay_canvas.gd` |
 | `ScreenFade` | `RefCounted` | `src/ui/screen_fade.gd` |
+| `TextField` | `RefCounted` | `src/ui/text_field.gd` |
 | `UIKit` | `RefCounted` | `src/ui/ui_kit.gd` |
 
 ## `src/world/` — Piezas de los mapas
@@ -1347,6 +1415,10 @@ classDiagram
 
 ```mermaid
 classDiagram
+    class NetTest {
+        <<RefCounted>>
+        +run(arg)
+    }
     class RouteTour {
         <<RefCounted>>
         +run(arg)
@@ -1363,6 +1435,7 @@ classDiagram
 
 | Clase | Hereda de | Archivo |
 |---|---|---|
+| `NetTest` | `RefCounted` | `src/tests/net_test.gd` |
 | `RouteTour` | `RefCounted` | `src/tests/route_tour.gd` |
 | `ScriptLangTests` | `RefCounted` | `src/tests/script_lang_tests.gd` |
 | `SelfTest` | `RefCounted` | `src/tests/self_test.gd` |

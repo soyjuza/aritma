@@ -6,6 +6,7 @@ var config: Dictionary
 var chambers: Array
 var town: Dictionary
 var texts: Dictionary
+var picks: Dictionary = {}    # índice de sala -> datos con su variante (ChallengeDeck)
 
 
 func _init(base_path: String = "res://data") -> void:
@@ -25,7 +26,12 @@ func chamber_count() -> int:
 
 
 func chamber_data(index: int) -> Dictionary:
-	return chambers[index]
+	return picks.get(index, chambers[index])
+
+
+## Sortea los ejercicios de una partida.
+func roll_challenges(seed_value: int, fixed := false) -> void:
+	picks = ChallengeDeck.roll(chambers, seed_value, fixed)
 
 
 func talk(key: String) -> Array:
