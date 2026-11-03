@@ -1,6 +1,6 @@
 ## Enemigos, jefe y orbes de la sala del jugador, para que el espectador los vea.
 ## El jugador los resume en su estado (capture) y la copia del espectador los
-## dibuja como títeres (apply): sin IA propia, solo lo que mandó el jugador.
+## dibuja como títeres (apply): no piensan solos, solo lo que mandó el jugador.
 class_name WorldSync
 extends RefCounted
 

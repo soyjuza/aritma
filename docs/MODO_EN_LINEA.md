@@ -1,7 +1,7 @@
 # Modo en línea, panel del admin y ejercicios al azar
 
 Este documento resume los cambios de la rama `desarrollo` (commit `bfdc168`) y explica cómo funciona
-todo. Sirve para retomar el trabajo o para pasárselo a otra persona (o a otra sesión de Claude).
+todo. Sirve para retomar el trabajo o para pasárselo a otra persona.
 
 ## 1. Qué pidió el instructor y qué se decidió
 
