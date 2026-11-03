@@ -63,6 +63,8 @@ var lift := 0.0
 var wave_ring := -1.0    # -1: no hay onda
 var bar: Control
 var title := ""               # el nombre sobre la barra de vida (texts.json → "boss_name")
+## En la copia del espectador: no piensa, solo se dibuja como dice el jugador.
+var puppet := false
 
 var _states: Dictionary = {}
 var _state: BossState
@@ -121,6 +123,8 @@ func setup(p_bus: EventBus, p_alarm: AlarmDirector, tuning: Dictionary = {}) -> 
 
 
 func change(next: String) -> void:
+	if puppet and _state != null:
+		return
 	if _state:
 		_state.exit()
 	_state = _states[next]
@@ -132,6 +136,11 @@ func _physics_process(delta: float) -> void:
 	_clock += delta
 	_flash = maxf(0.0, _flash - delta)
 	_shield = move_toward(_shield, 1.0 if state == "shield" else 0.0, delta * 3.0)
+	if puppet:
+		_state.t += delta
+		_animate(delta)
+		queue_redraw()
+		return
 	if wave_ring >= 0.0:
 		wave_ring += delta * ring_speed
 		if wave_ring > slam_radius * 1.4:
@@ -192,16 +201,84 @@ func take_hit(amount: int, direction: Vector2) -> void:
 	_flash = 0.15
 	velocity = direction * 50.0
 	publish(GameEvents.GUARDIAN_HIT)
-	var burst := NumberBurst.new()
-	burst.count = 4
-	burst.tint = RED
-	burst.position = position + Vector2(0, -20)
-	get_parent().add_child(burst)
+	_hit_fx()
 	if hp <= 0:
 		change("dying")
 	elif hp <= max_hp - (phase + 1) * phase_hp():
 		phase += 1
 		change("shield")
+
+
+func _hit_fx() -> void:
+	var burst := NumberBurst.new()
+	burst.count = 4
+	burst.tint = RED
+	burst.position = position + Vector2(0, -20)
+	get_parent().add_child(burst)
+
+
+# ------------------------------------------------------------------ espectador (ver WorldSync)
+
+## Lo que el espectador necesita para dibujarlo igual.
+func net_pack() -> Dictionary:
+	var d := {
+		"x": roundi(global_position.x),
+		"y": roundi(global_position.y),
+		"s": state,
+		"an": _anim,
+		"hp": hp,
+		"ph": phase,
+		"l": snappedf(lift, 0.1),
+		"r": snappedf(wave_ring, 0.1),
+		"f": _flash > 0.0,
+		"a": snappedf(modulate.a, 0.01),
+	}
+	if _state is BossSlamState:
+		var target: Vector2 = (_state as BossSlamState).target
+		d["tx"] = roundi(target.x)
+		d["ty"] = roundi(target.y)
+	return d
+
+
+## Títere: entre los estados a y b del jugador (w: cuánto de b).
+func net_apply(a: Dictionary, b: Dictionary, w: float) -> void:
+	var s := a if w < 0.5 else b
+	var pa := Vector2(float(a.get("x", 0)), float(a.get("y", 0)))
+	var pb := Vector2(float(b.get("x", 0)), float(b.get("y", 0)))
+	global_position = pa.lerp(pb, w) if pa.distance_to(pb) < 80.0 else (pa if w < 0.5 else pb)
+	var next := String(s.get("s", state))
+	if next != state and _states.has(next):
+		_state = _states[next]
+		_state.t = 0.0
+		state = next
+	visible = state != "hidden"
+	bar.visible = visible
+	if s.has("tx"):
+		(_states.slam as BossSlamState).target = Vector2(float(s.tx), float(s.ty))
+	var new_hp := int(s.get("hp", hp))
+	if new_hp < hp:
+		_hit_fx()
+	hp = new_hp
+	phase = int(s.get("ph", phase))
+	lift = lerpf(float(a.get("l", 0)), float(b.get("l", 0)), w)
+	wave_ring = float(s.get("r", -1))
+	if bool(s.get("f", false)):
+		_flash = 0.15
+	modulate.a = float(s.get("a", 1))
+	var anim := String(s.get("an", _anim))
+	if SHEETS.has(anim):
+		_play(anim)
+
+
+## Títere: el jugador todavía no lo ve (o ya lo venció).
+func net_hide() -> void:
+	if state == "hidden":
+		return
+	_state = _states.hidden
+	state = "hidden"
+	visible = false
+	bar.visible = false
+	modulate.a = 1.0
 
 
 # ------------------------------------------------------------------ ayudas para los estados

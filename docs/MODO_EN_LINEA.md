@@ -116,8 +116,42 @@ Admin (Godot)   ──config/inicio──►  clasificación)   ──inicio/pau
   su lugar pone un `SpectatorGhost` que copia el dibujo de Tala y se mueve con las posiciones que
   llegan. El nivel queda congelado, así no dispara eventos.
 - Si el otro ya resolvió la sala, el espectador la ve resuelta.
-- **Limitación:** no se ve el Códice ni los guardianes del otro jugador. Solo la sala, su
-  personaje, su estado y si la resolvió.
+- Ahora también se ve el Códice del otro jugador mientras escribe y los
+  enemigos y el jefe (sección 4.1).
+
+### 4.1 Arreglo: el espectador no veía a los enemigos ni al jefe
+
+**El problema:** cuando uno miraba a otro jugador, si le salían guardianes se veía al
+personaje dando garrotazos al aire, como si peleara solo. En la Sala 6 pasaba lo mismo
+con el jefe: no aparecía.
+
+**Por qué pasaba:** el espectador carga su propia copia de la sala, pero a esa copia
+solo le llegaba la posición de Tala. Los guardianes salen cuando el jugador se equivoca
+en una máquina y el jefe sale cuando Tala cruza la entrada de la sala. Eso pasa en el
+computador del jugador, no en el del espectador, entonces en la copia nunca salían.
+
+**Cómo lo arreglé:**
+
+1. El jugador ahora manda, junto con su posición, una lista de lo que hay vivo en la
+   sala: los guardianes (dónde están, en qué estado van, para dónde miran...), los orbes
+   que vuelan y el jefe (vida, fase, si está saltando...). Eso lo arma `WorldSync.capture()`
+   en `src/net/world_sync.gd`.
+2. En el espectador, los enemigos son "títeres" (`puppet = true`): no piensan, no
+   persiguen y no hacen daño. Solo se ponen como dice el último mensaje del jugador.
+   Así no se descuadran.
+3. Los títeres usan el mismo pequeño retraso que el fantasma de Tala (`SpectatorGhost`),
+   para que se muevan juntos y suave y no a saltos.
+4. Las estatuas que están dormidas no se mandan porque ya están en la copia de la sala.
+   Así el mensaje pesa menos.
+
+Archivos que toqué: `world_sync.gd` (nuevo), `guardian.gd`, `zero_boss.gd`, `rune_orb.gd`,
+`spectator_ghost.gd`, `watch_view.gd`, `game.gd`, `online_session.gd` y `self_test.gd`
+(5 pruebas nuevas que empiezan con "Espectador:").
+
+**Ojo:** el mensaje con los enemigos es más grande. El servidor nuevo acepta hasta 16 KB
+(`MAX_MESSAGE`), pero el que está en Railway todavía tiene el límite viejo de 4 KB.
+Hay que volver a desplegarlo (`railway up --ci` desde `server/`) o puede cortar la
+conexión en peleas con muchos enemigos.
 
 ### Archivos nuevos y cambiados
 
@@ -136,7 +170,8 @@ Admin (Godot)   ──config/inicio──►  clasificación)   ──inicio/pau
 | `src/ui/text_field.gd` | Campo de texto para la interfaz dibujada (admite CTRL+V). |
 | `src/ui/net_board.gd` | Tabla de jugadores (puesto, nombre, estado, sala, tiempo, corazones). |
 | `src/core/challenge_deck.gd` | Sorteo de variantes. |
-| `src/tests/net_test.gd` | 28 pruebas en línea contra un servidor real. |
+| `src/tests/net_test.gd` | 38 pruebas en línea contra un servidor real. |
+| `src/net/world_sync.gd` | Manda los enemigos, orbes y el jefe al espectador y los dibuja como títeres. |
 | `src/game.gd` | Crea `OnlineSession` y conecta sus señales. Además: `apply_match_rules`, `net_state`, `admin_paused`, `load_watch_level`, `show_town` y la semilla de los ejercicios. |
 | `src/states/{menu,play,pause,end}_state.gd` | Opción EN LÍNEA, modo `"online"`, pausa sin guardar y con reloj corriendo, Enter → espectador. |
 | `src/player/player_controller.gd` | `pose()`: animación y salto, para el espectador. |
@@ -188,8 +223,8 @@ npm test                       # 20 pruebas
 
 # Juego (desde la raíz)
 godot --headless --path . --import                    # después de crear clases nuevas (class_name)
-godot --headless --path . -- --selftest               # 160 pruebas
-godot --headless --path . -- --nettest=ws://127.0.0.1:8080          # 28 pruebas en línea
+godot --headless --path . -- --selftest               # 173 pruebas
+godot --headless --path . -- --nettest=ws://127.0.0.1:8080          # 38 pruebas en línea
 godot --path . -- "--nettest=ws://127.0.0.1:8080,C:/carpeta"         # además guarda capturas
 ```
 
@@ -203,6 +238,7 @@ crea la sala (admin) y la otra se une con el código.
   `server_url` de `data/config.json`. Se despliega con `railway up --ci` desde `server/` (no hay
   GitHub conectado; ver README). Las 28 pruebas en línea pasan contra Railway:
   `godot --headless --path . -- --nettest=wss://servidor-salas-production.up.railway.app`.
-- Opcional: mostrar en la vista en vivo el Códice o los guardianes del otro jugador.
+- ~~Mostrar en la vista en vivo el Códice o los guardianes del otro jugador~~ **Hecho.**
+- Volver a desplegar el servidor en Railway (tiene el límite viejo de 4 KB por mensaje).
 - Los `.import`, `.tres`, `main.tscn` y `project.godot` que aparecen modificados en git son solo
   cambios de fin de línea del editor. No se subieron.

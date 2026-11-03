@@ -76,6 +76,8 @@ func run() -> void:
 ## La máquina corre el código y luego lo muestra.
 func _run_on_machine(source: String) -> void:
 	var machine := _session.machine
+	if game.in_online_match:
+		game.online.report_event({"k": "run", "m": String(game.level.get_path_to(machine)), "src": source})
 	var report := machine.evaluate(source, _sandbox)
 	for line in report.output:
 		game.codex.log_line(line)

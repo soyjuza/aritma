@@ -18,7 +18,10 @@ func enter(params: Dictionary = {}) -> void:
 		"online":
 			# Las reglas ya las puso el admin (Game.apply_match_rules)
 			game.start_new_game(int(params.get("seed", 0)))
-			if params.get("skip_town", false):
+			var resume: Dictionary = params.get("resume", {})
+			if int(resume.get("c", -1)) >= 0:
+				game.resume_online_match(resume)
+			elif params.get("skip_town", false):
 				game.enter_temple()
 			else:
 				game.dialog.say(game.data.messages("town_arrival"))
@@ -48,6 +51,11 @@ func handle_input(actions: Array) -> void:
 	elif "interact" in actions and _focused:
 		game.bus.publish(GameEvents.INTERACT)
 		_focused.interact()
+
+
+## ¿Hay algo que usar (persona, máquina, tablero, diálogo)? Si no, ACCIÓN golpea en el celular.
+func can_interact() -> bool:
+	return game.dialog.is_open() or _focused != null or not game.level.action_prompt().is_empty()
 
 
 func update(delta: float) -> void:

@@ -27,6 +27,12 @@ func feed(event: InputEventKey) -> bool:
 	return true
 
 
+## Cambia todo el texto (lo escrito con el teclado del celular).
+func set_text(value: String) -> void:
+	text = ""
+	_add(value.strip_edges())
+
+
 func _add(more: String) -> void:
 	if upper:
 		more = more.to_upper()

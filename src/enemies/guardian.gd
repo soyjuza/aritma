@@ -44,6 +44,8 @@ var shadow_size := -1.0
 var charge := 0.0
 var _hit_flash := 0.0
 var home := Vector2.ZERO
+## En la copia del espectador: no piensa, solo se dibuja como dice el jugador.
+var puppet := false
 
 var _states: Dictionary = {}
 var _state: GuardianState
@@ -98,6 +100,8 @@ func setup(p_bus: EventBus, p_kit: TileKit, p_settings: Dictionary) -> void:
 
 
 func change(next: String) -> void:
+	if puppet and _state != null:
+		return
 	if _state:
 		_state.exit()
 	_state = _states[next]
@@ -110,6 +114,10 @@ func _physics_process(delta: float) -> void:
 		return
 	cooldown = maxf(0.0, cooldown - delta)
 	_hit_flash = maxf(0.0, _hit_flash - delta)
+	if puppet:
+		_state.t += delta
+		_update_visual()
+		return
 	var next := _state.physics(delta)
 	if next != "":
 		change(next)
@@ -165,6 +173,106 @@ func dir_name() -> String:
 	if absf(facing.x) > absf(facing.y):
 		return "right" if facing.x > 0 else "left"
 	return "down" if facing.y > 0 else "up"
+
+
+# ------------------------------------------------------------------ espectador (ver WorldSync)
+
+## Lo que el espectador necesita para dibujarlo igual.
+func net_pack() -> Dictionary:
+	return {
+		"k": kind,
+		"x": roundi(global_position.x),
+		"y": roundi(global_position.y),
+		"s": state_name,
+		"fx": snappedf(facing.x, 0.01),
+		"fy": snappedf(facing.y, 0.01),
+		"l": snappedf(lift, 0.1),
+		"st": snappedf(stone, 0.01),
+		"cr": snappedf(cracks, 0.01),
+		"gl": snappedf(glow, 0.01),
+		"ch": snappedf(charge, 0.01),
+		"sh": snappedf(shake, 0.1),
+		"ss": snappedf(shadow_size, 0.01),
+		"sa": snappedf(shadow.modulate.a, 0.01),
+		"e": snappedf(eyes.energy, 0.01),
+		"v": visible,
+		"sv": sprite.visible,
+		"hf": _hit_flash > 0.0,
+	}
+
+
+## Títere: entre los estados a y b del jugador (w: cuánto de b).
+func net_apply(a: Dictionary, b: Dictionary, w: float) -> void:
+	var s := a if w < 0.5 else b
+	var pa := Vector2(float(a.get("x", 0)), float(a.get("y", 0)))
+	var pb := Vector2(float(b.get("x", 0)), float(b.get("y", 0)))
+	global_position = pa.lerp(pb, w) if pa.distance_to(pb) < 80.0 else (pa if w < 0.5 else pb)
+	var next := String(s.get("s", state_name))
+	if next != state_name and _states.has(next):
+		_puppet_switch(next)
+	facing = Vector2(float(s.get("fx", 0)), float(s.get("fy", 1)))
+	lift = lerpf(float(a.get("l", 0)), float(b.get("l", 0)), w)
+	stone = float(s.get("st", 0))
+	cracks = float(s.get("cr", 0))
+	glow = float(s.get("gl", 0))
+	charge = float(s.get("ch", 0))
+	shake = float(s.get("sh", 0))
+	shadow_size = float(s.get("ss", -1))
+	shadow.modulate.a = float(s.get("sa", 0.75))
+	eyes.energy = float(s.get("e", 0))
+	visible = bool(s.get("v", true))
+	sprite.visible = bool(s.get("sv", true))
+	if bool(s.get("hf", false)):
+		_hit_flash = 0.15
+	var pedestal := get_parent() as Pedestal
+	if pedestal:
+		pedestal.rubble = state_name != "dormant"
+
+
+## Cambia de estado sin su lógica (ni señales): solo los efectos que se ven.
+func _puppet_switch(next: String) -> void:
+	var prev := state_name
+	_state = _states[next]
+	_state.t = 0.0
+	state_name = next
+	if next == "dying":
+		_puppet_die(prev)
+	elif prev == "dropping":
+		burst(Vector2(0, -2), "Smoke", 10, 0.9, Vector2(0, -10))
+		burst(Vector2(0, -2), "RockGray", 8, 0.6)
+		on_landed()
+	elif next == "waking":
+		burst(Vector2(0, -14), "RockGray", 6, 0.7)
+
+
+func _puppet_die(prev: String) -> void:
+	if self is RunicGuardian and prev in ["windup", "strike"]:
+		(self as RunicGuardian).explosion_fx()
+	var numbers := NumberBurst.new()
+	numbers.position = position + Vector2(0, -6)
+	get_parent().add_child(numbers)
+	burst(Vector2(0, -6), "Smoke", 8, 0.8, Vector2(0, -20))
+	visible = false
+
+
+## Títere que ya no está en la sala del jugador.
+func net_vanish() -> void:
+	if visible and state_name != "dying":
+		_puppet_die(state_name)
+	queue_free()
+
+
+## Estatua que volvió a dormir sobre su pedestal.
+func net_restore() -> void:
+	position = home
+	visible = true
+	sprite.visible = true
+	_state = _states.dormant
+	state_name = "dormant"
+	_state.enter()
+	var pedestal := get_parent() as Pedestal
+	if pedestal:
+		pedestal.rubble = false
 
 
 # ------------------------------------------------------------------ órdenes del director

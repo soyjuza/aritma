@@ -14,6 +14,7 @@ config/name="Paredes Vivas 2D (escenas) - La Camara de los Aritmanos"
 run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.png"
+config/quit_on_go_back=false
 
 [display]
 

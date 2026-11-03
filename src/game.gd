@@ -29,6 +29,7 @@ var challenge_seed := 0          # semilla de los ejercicios de la partida
 var fixed_challenges := false    # pruebas: siempre la primera variante
 var online: OnlineSession
 var in_online_match := false     # jugando una partida del admin
+var touch: TouchControls         # controles en pantalla (Android); null con teclado
 
 var _rules_override: Dictionary = {}    # castigos que eligió el admin
 
@@ -36,6 +37,7 @@ var _observers: Array = []
 var _tool: RefCounted
 var _secret: SecretCodeDetector
 var _changing := false    # evita dos cambios de sala a la vez
+var _bbcode := RegEx.create_from_string("\\[/?[a-z]+(=[^\\]]*)?\\]")
 
 @onready var rig: CameraRig = $Camara
 @onready var player: PlayerController = $Tala
@@ -74,6 +76,9 @@ func _ready() -> void:
 	online = OnlineSession.new(String(data.setting("server_url", "")))
 	_wire_online()
 	machine = _create_states()
+	if TouchControls.wanted():
+		touch = TouchControls.new(self)
+		$Interfaz.add_child(touch)
 	load_level(town_scene.instantiate())
 	settings.applied.connect(_apply_settings)
 	settings.apply()
@@ -117,12 +122,16 @@ func _process(delta: float) -> void:
 	if not held:
 		machine.current.update(delta)
 	if in_online_match and player.is_inside_tree():
-		online.report(delta, net_state())
+		# El estado se arma solo cuando toca mandarlo (recorre los enemigos)
+		if online.state_due(delta):
+			online.send_state(net_state())
+		if machine.current_name == "codex" and online.code_due(delta):
+			online.report_code(codex_state())
 	overlay.queue_redraw()
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if admin_paused():
+	if admin_paused() or (touch and touch.typing()):
 		return
 	if event is InputEventMouse and machine.current.handle_mouse(event):
 		return
@@ -174,6 +183,7 @@ func load_level(new_level: Level) -> void:
 		remove_child(level)
 		level.queue_free()
 	player.visible = true
+	player.process_mode = Node.PROCESS_MODE_INHERIT
 	level = new_level
 	add_child(level)
 	level.setup(self, kit)
@@ -242,6 +252,8 @@ func load_watch_level(index: int, seed_value: int) -> void:
 		load_chamber(index)
 	player.visible = false
 	player.controls_enabled = false
+	# Fuera de la física: la sala del espectador se mueve, pero Tala no pisa nada
+	player.process_mode = Node.PROCESS_MODE_DISABLED
 
 
 func show_title_shot() -> void:
@@ -380,7 +392,9 @@ func admin_paused() -> bool:
 func net_state() -> Dictionary:
 	var pose := player.pose()
 	var room := level as ChamberLevel
+	var town := level as TownLevel
 	return {
+		"t": Time.get_ticks_msec(),    # para que el espectador interpole sin saltos
 		"c": chamber_index,
 		"x": roundi(player.global_position.x),
 		"y": roundi(player.global_position.y),
@@ -390,8 +404,41 @@ func net_state() -> Dictionary:
 		"mh": health.max_halves,
 		"tl": roundi(timer.remaining),
 		"sd": challenge_seed,
-		"ok": room != null and room.solved,
+		"ok": (room != null and room.solved) or (town != null and town.gate.is_solved),
+		"m": machine.current_name,    # qué está haciendo (play, codex, puzzle, quiz…)
+		"w": WorldSync.capture(level),    # enemigos, jefe y orbes
 	}
+
+
+## Lo que el espectador ve del Códice de este jugador.
+func codex_state() -> Dictionary:
+	var lines: Array = []
+	var log: Array = codex.session_log()
+	for line in log.slice(maxi(0, log.size() - 6)):
+		# [lb] es un "[" escrito por el jugador
+		var parts := Array(String(line).split("[lb]")).map(func(part): return _bbcode.sub(part, "", true))
+		lines.append("[".join(parts).strip_edges())
+	return {
+		"title": codex.title_label.text,
+		"src": codex.editor.text,
+		"row": codex.editor.get_caret_line(),
+		"log": lines,
+	}
+
+
+## Vuelve a una partida en línea que había dejado: misma sala, corazones y reloj.
+func resume_online_match(resume: Dictionary) -> void:
+	var index := int(resume.get("c", -1))
+	if index < 0 or index >= data.chamber_count():
+		return
+	load_chamber(index)
+	if bool(resume.get("ok", false)):
+		level.resume_from_save({"solved": true})
+	timer.start()
+	timer.remaining = maxf(1.0, float(resume.get("tl", timer.limit)))
+	if resume.has("h"):
+		health.halves = clampi(int(resume.h), 1, health.max_halves)
+	notify([data.message("net_resumed", {"room": place_title(), "time": CountdownTimer.format(timer.remaining)})], 6.0, true)
 
 
 ## El jugador deja la partida en línea (pausa → salir).
@@ -405,6 +452,7 @@ func leave_online_match() -> void:
 func _wire_online() -> void:
 	online.room_ready.connect(func(): machine.change("admin" if online.is_admin() else "lobby"))
 	online.match_started.connect(_on_match_started)
+	online.finished.connect(_on_rejoined_finished)
 	online.time_added.connect(_on_time_added)
 	online.paused_changed.connect(func(_on): bus.publish(GameEvents.MENU_CONFIRM))
 	online.match_ended.connect(_on_match_ended)
@@ -442,12 +490,19 @@ func _on_online_failed(key: String) -> void:
 		_drop_online("")
 
 
-func _on_match_started(seed_value: int, config: Dictionary) -> void:
+func _on_match_started(seed_value: int, config: Dictionary, resume: Dictionary = {}) -> void:
 	if not online.is_player():
 		return
 	apply_match_rules(config)
 	in_online_match = true
-	machine.change("play", {"mode": "online", "seed": seed_value, "skip_town": bool(config.get("skip_town", false))})
+	machine.change("play", {"mode": "online", "seed": seed_value, "skip_town": bool(config.get("skip_town", false)), "resume": resume})
+
+
+## Volvió a la sala pero ya había terminado (o se le acabó el tiempo afuera): a mirar.
+func _on_rejoined_finished() -> void:
+	in_online_match = false
+	apply_match_rules(online.config)
+	machine.change("watch")
 
 
 ## Se acabó lo en línea (expulsado, sala cerrada): al título.

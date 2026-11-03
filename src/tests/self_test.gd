@@ -22,6 +22,7 @@ func run() -> void:
 	_test_challenge_variants()
 	_test_health_and_alarm_rules()
 	await _test_movement()
+	await _test_touch()
 	await _test_town_and_gate()
 	await _test_corridor()
 	_test_parity_filter()
@@ -115,6 +116,71 @@ func _test_movement() -> void:
 	_release_all()
 	await _wait(0.4)
 	_check(p.state_name == "idle", "Sin teclas vuelve al reposo")
+
+
+## Toca la pantalla (posición en coordenadas de la interfaz).
+func _touch(index: int, at: Vector2, pressed: bool) -> void:
+	var event := InputEventScreenTouch.new()
+	event.index = index
+	event.position = game.get_viewport().get_final_transform() * at
+	event.pressed = pressed
+	Input.parse_input_event(event)
+
+
+func _drag(index: int, at: Vector2) -> void:
+	var event := InputEventScreenDrag.new()
+	event.index = index
+	event.position = game.get_viewport().get_final_transform() * at
+	Input.parse_input_event(event)
+
+
+func _test_touch() -> void:
+	var touch := TouchControls.new(game)
+	game.get_node("Interfaz").add_child(touch)
+	game.dialog.close()
+	await _wait(0.1)
+	var p := game.player
+	var home := Vector2(170, touch.size.y - 170)
+	var start := p.global_position
+	_touch(0, home, true)
+	_drag(0, home + Vector2(80, 0))
+	await _wait(0.5)
+	_check(p.global_position.x - start.x > 15.0, "Táctil: el joystick mueve a Tala")
+	_drag(0, home + Vector2(-140, 0))
+	await _wait(0.3)
+	_check(p.state_name == "run", "Táctil: con el joystick hasta el borde corre")
+	_touch(0, home + Vector2(-140, 0), false)
+	await _wait(0.2)
+	_check(not Input.is_action_pressed("move_right") and p.state_name == "idle", "Táctil: al soltar el joystick Tala se detiene")
+	var jump: Dictionary = touch._buttons.filter(func(b): return b.label == game.data.message("touch_jump"))[0]
+	_touch(1, jump.at, true)
+	await _wait(0.1)
+	_check(p.airborne, "Táctil: el botón SALTO salta")
+	_touch(1, jump.at, false)
+	await _wait(0.6)
+	_check(touch._buttons.size() == 5, "Táctil: sin botones aparte de CORRER ni GOLPE")
+	var action: Dictionary = touch._buttons.filter(func(b): return b.label == game.data.message("touch_action"))[0]
+	_touch(1, action.at, true)
+	await _wait(0.1)
+	_check(p.state_name == "attack", "Táctil: ACCIÓN sin nada enfrente golpea")
+	_touch(1, action.at, false)
+	await _wait(0.8)
+	var pause: Dictionary = touch._buttons.filter(func(b): return b.label == game.data.message("touch_pause"))[0]
+	_touch(2, pause.at, true)
+	_touch(2, pause.at, false)
+	await _wait(0.1)
+	_check(game.machine.current_name == "pause", "Táctil: PAUSA abre la pausa")
+	await _wait(0.1)
+	var accept: Dictionary = touch._buttons.filter(func(b): return b.label == game.data.message("touch_accept"))[0]
+	_touch(3, accept.at, true)
+	_touch(3, accept.at, false)
+	await _wait(0.1)
+	_check(game.machine.current_name == "play", "Táctil: ACEPTAR en la pausa vuelve al juego")
+	var field := TextField.new("", 5, true)
+	field.set_text(" abc12x ")
+	_check(field.text == "ABC12", "Táctil: lo escrito con el teclado del celular respeta mayúsculas y largo")
+	touch.queue_free()
+	await _wait(0.1)
 
 
 func _test_town_and_gate() -> void:
@@ -676,6 +742,31 @@ func _test_vortex() -> void:
 	_check(game.level is FigureLevel and game.chamber_index == 3, "Sala 3: se cruza la salida y se llega a la Sala 4 (Factory: FigureBuilder)")
 
 
+## El espectador ve a los guardianes, los orbes y al jefe de quien mira (títeres de WorldSync).
+func _test_spectator_world(lvl: ThroneLevel) -> void:
+	var world := WorldSync.capture(lvl)
+	var guards: Dictionary = world.get("g", {})
+	_check(world.has("b") and guards.size() >= 4, "Espectador: el estado del jugador lleva al jefe y a los guardianes")
+	var copy := ChamberRegistry.create(game.data.chamber_data(game.chamber_index))
+	copy.visible = false
+	game.add_child(copy)
+	copy.setup(game, game.kit)
+	var sync := WorldSync.new(copy)
+	sync.apply(world, world, 0.0)
+	var boss: ZeroBoss = copy.boss
+	_check(boss.puppet and boss.visible and boss.hp == lvl.boss.hp and boss.global_position.distance_to(lvl.boss.global_position) < 2.0, "Espectador: en su copia aparece el jefe, con la vida y el lugar del jugador")
+	var puppets: Array = copy.nodes_of(Guardian).filter(func(g): return g.puppet and g.from_ceiling == false and g.get_parent() == copy.actors)
+	var dropped: Array = guards.keys().filter(func(id): return String(id).begins_with("i"))
+	_check(puppets.size() == dropped.size() and dropped.size() >= 1, "Espectador: los guardianes que caen del techo aparecen en su copia")
+	await _wait(0.2)
+	_check(boss.state == lvl.boss.state, "Espectador: el jefe títere no piensa por su cuenta")
+	sync.apply({}, {}, 0.0)
+	await _wait(0.1)
+	_check(not boss.visible and copy.nodes_of(Guardian).filter(func(g): return g.get_parent() == copy.actors).is_empty(), "Espectador: si el jugador ya no los tiene, desaparecen de la copia")
+	game.remove_child(copy)
+	copy.queue_free()
+
+
 ## La Sala 6: el jefe completo.
 func _test_boss(lvl: ThroneLevel) -> void:
 	if lvl == null:
@@ -721,6 +812,8 @@ func _test_boss(lvl: ThroneLevel) -> void:
 	quiz.choose((int(quiz.quiz.answer) + 1) % quiz.quiz.options.size())
 	await _wait(QuizState.RESULT_TIME + 1.0)
 	_check(lvl.alarm.fighting() and lvl.alarm.alive_count() == 4, "Jefe: si falla el problema llama a 4 guardianes")
+	await _wait(1.5)
+	await _test_spectator_world(lvl)
 	await _clear_guardians(lvl)
 	await _wait(0.5)
 	_check(boss.can_be_hit(), "Jefe: vencida la ola, el escudo cae")

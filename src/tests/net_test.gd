@@ -121,6 +121,16 @@ func _as_player(url: String) -> void:
 	await _until(func(): return false, 0.4)
 	_check(game.timer.remaining < t0, "En línea: la pausa del jugador no detiene el reloj")
 	game.machine.change("play")
+	# Sale de la partida y vuelve con el mismo nombre
+	var left_at := game.timer.remaining
+	game.leave_online_match()
+	game.machine.change("title")
+	_check(await _until(func(): return String(_other.player(me).get("status", "")) == "left"), "Salir: el admin ve que el jugador salió")
+	await _until(func(): return false, 1.5)
+	game.online.join_room(url, _other.code, "prueba")
+	_check(await _until(func(): return game.in_online_match and game.chamber_index == 0, 8.0), "Volver: con el mismo nombre sigue en la sala donde iba")
+	_check(game.timer.remaining < left_at - 0.8 and game.timer.remaining > left_at - 6.0, "Volver: el reloj siguió corriendo mientras no estaba")
+	_check(game.online.my_id == me and String(_other.player(me).get("status", "")) == "playing", "Volver: recupera su puesto en el tablero")
 	game.finish(false)
 	_check(await _until(func(): return String(_other.player(me).get("status", "")) == "lost"), "Fin: el admin ve que el jugador perdió")
 	await _until(func(): return false, 1.7)
@@ -153,7 +163,7 @@ func _as_admin(url: String) -> void:
 	_check(await _until(func(): return int(game.online.config.get("time_min", 0)) == time_before + 1), "Panel: con → cambia el tiempo de la partida")
 	await _shot("5_panel_admin_espera")
 	var seed_got := [0]
-	_other.match_started.connect(func(seed_value, _config): seed_got[0] = seed_value)
+	_other.match_started.connect(func(seed_value, _config, _resume): seed_got[0] = seed_value)
 	admin._do("start")
 	_check(await _until(func(): return seed_got[0] != 0), "Panel: INICIAR PARTIDA empieza la partida del jugador")
 	var lupe := _other.my_id
@@ -177,6 +187,37 @@ func _as_admin(url: String) -> void:
 		send_state.call()
 		await _until(func(): return false, 0.1)
 	await _shot("7_admin_en_vivo")
+	_other.report(1.0, {"c": 1, "x": spot.x, "y": spot.y, "a": "idle_up", "hop": 0, "h": 7, "mh": 10, "tl": 390, "sd": room_seed, "ok": false, "m": "codex"})
+	_other.report_code({"title": "MURAL", "src": "x = 3\nimprimir(x * 2)", "row": 1, "log": ["6"]})
+	_check(await _until(func(): return String(game.online.codes.get(lupe, {}).get("src", "")).ends_with("imprimir(x * 2)")), "En vivo: el admin ve el código que Lupe escribe en el Códice")
+	_check(await _until(func(): return String(game.online.snaps.get(lupe, {}).get("m", "")) == "codex"), "En vivo: el admin ve que Lupe está escribiendo código")
+	await _shot("8_admin_ve_el_codigo")
+	# Lupe vuelve al pueblo: el admin ve su copia del pueblo, con la puerta cerrada
+	var door := Level.cell_center(Vector2i(20, 12))
+	var town_state := func(x: float, ms: int): _other.report(1.0, {"t": ms, "c": -1, "x": x, "y": door.y, "a": "walk_right", "hop": 0, "h": 7, "mh": 10, "tl": 380, "sd": room_seed, "ok": false, "m": "play"})
+	var clock := 100000
+	for i in 40:
+		clock += 50
+		town_state.call(door.x, clock)
+		if await _until(func(): return game.level is TownLevel and is_instance_valid(admin.view.ghost), 0.05):
+			break
+	_check(game.level is TownLevel and not (game.level as TownLevel).gate.is_solved, "En vivo: el admin ve el pueblo de Lupe con la puerta cerrada")
+	_check(game.level.process_mode != Node.PROCESS_MODE_DISABLED, "En vivo: la sala que se mira no está congelada (se ven las animaciones)")
+	# Movimiento suave: 20 estados por segundo, el fantasma pasa por los puntos intermedios
+	var seen := {}
+	for i in 12:
+		clock += 50
+		town_state.call(door.x + i * 6.0, clock)
+		for f in 3:
+			await game.get_tree().process_frame
+			seen[roundi(admin.view.ghost.position.x * 10.0)] = true
+		await _until(func(): return false, 0.035)
+	_check(seen.size() > 15, "En vivo: el fantasma se desliza entre los estados (no salta)")
+	# Lupe corre puerta.abrir(): el admin ve abrirse la puerta en su copia
+	var town := game.level as TownLevel
+	_other.report_event({"k": "run", "m": String(town.get_path_to(town.gate)), "src": "puerta.abrir()\n"})
+	_check(await _until(func(): return town.gate.is_solved and town.seal.is_open, 4.0), "En vivo: cuando Lupe corre su programa, el admin ve abrirse la puerta del templo")
+	await _shot("9_admin_ve_la_puerta")
 	_press("cancel")
 	_check(game.level is TownLevel, "En vivo: al volver al panel se ve el pueblo de fondo")
 	admin._do("end")

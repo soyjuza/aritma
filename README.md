@@ -130,7 +130,7 @@ En Railway, el servicio `servidor-salas` tiene la carpeta raíz `/` (porque solo
 
 ## Pruebas automáticas
 ```
-godot --path . -- --selftest                       # 160 pruebas de reglas y del recorrido completo
-godot --path . -- --nettest=ws://127.0.0.1:8080    # 28 pruebas en línea (con el servidor encendido)
+godot --path . -- --selftest                       # 173 pruebas de reglas y del recorrido completo
+godot --path . -- --nettest=ws://127.0.0.1:8080    # 38 pruebas en línea (con el servidor encendido)
 godot --path . -- --recorrido=/carpeta[:sala2|:sala3|:sala4|:sala5|:jefe]  # capturas del camino del jugador
 ```

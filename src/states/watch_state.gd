@@ -21,8 +21,9 @@ func exit() -> void:
 	view.stop()
 
 
+## Su sala se mueve (puertas, máquinas) mientras se mira a alguien.
 func freezes_world() -> bool:
-	return true
+	return not _can_watch()
 
 
 func _can_watch() -> bool:

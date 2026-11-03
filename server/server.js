@@ -12,7 +12,8 @@ const PORT = Number(process.env.PORT || 8080);
 const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const BOARD_EVERY_MS = 500;
 const ROOM_IDLE_MS = 10 * 60 * 1000; // sala sin admin: se borra a los 10 minutos
-const MAX_MESSAGE = 4096;
+const MAX_MESSAGE = 16384; // el código del Códice viaja entero
+const MAX_CODE = 12000;
 
 // Lo que el admin puede cambiar: [mínimo, máximo, valor inicial]
 const CONFIG_LIMITS = {
@@ -131,6 +132,8 @@ const handlers = {
       players: new Map(),
       nextId: 1,
       idleSince: 0,
+      pausedMs: 0,  // tiempo total en pausa del admin (para el reloj de quien vuelve)
+      pausedAt: 0,
     };
     rooms.set(code, room);
     ws.meta = { code, role: "admin" };
@@ -143,7 +146,7 @@ const handlers = {
     if (!room) return send(ws, { t: "error", key: "net_err_no_room" });
     const name = cleanName(msg.name);
     if (!name) return send(ws, { t: "error", key: "net_err_name" });
-    if (room.phase !== "lobby") return send(ws, { t: "error", key: "net_err_running" });
+    if (room.phase !== "lobby") return rejoin(ws, room, name);
     const active = [...room.players.values()].filter((p) => p.status !== "left");
     if (active.length >= room.config.max_players) return send(ws, { t: "error", key: "net_err_full" });
     if (active.some((p) => p.name.toLowerCase() === name.toLowerCase())) return send(ws, { t: "error", key: "net_err_name_taken" });
@@ -194,11 +197,13 @@ const handlers = {
     if (ready.length === 0) return send(ws, { t: "error", key: "net_err_no_players" });
     room.phase = "running";
     room.paused = false;
+    room.pausedMs = 0;
     const shared = newSeed();
     for (const p of ready) {
       p.status = "playing";
       p.seed = room.config.same_exercises ? shared : newSeed();
       p.state = null;
+      p.code = null;
       p.result = null;
       send(p.ws, { t: "start", seed: p.seed, config: room.config });
     }
@@ -207,6 +212,10 @@ const handlers = {
 
   pause(ws, msg, room) {
     if (!isAdmin(ws, room) || room.phase !== "running") return;
+    if (!!msg.on !== room.paused) {
+      if (msg.on) room.pausedAt = Date.now();
+      else room.pausedMs += Date.now() - room.pausedAt;
+    }
     room.paused = !!msg.on;
     broadcast(room, { t: "pause", on: room.paused });
     pushLobby(room);
@@ -239,6 +248,7 @@ const handlers = {
   end(ws, msg, room) {
     if (!isAdmin(ws, room) || room.phase !== "running") return;
     room.phase = "ended";
+    if (room.paused) room.pausedMs += Date.now() - room.pausedAt;
     room.paused = false;
     broadcast(room, { t: "ended", players: ranking(room) });
     pushLobby(room);
@@ -250,7 +260,7 @@ const handlers = {
     room.phase = "lobby";
     for (const [id, p] of room.players) {
       if (p.status === "left" && !(p.ws && p.ws.readyState === p.ws.OPEN)) room.players.delete(id);
-      else Object.assign(p, { status: "lobby", state: null, result: null, seed: 0 });
+      else Object.assign(p, { status: "lobby", state: null, code: null, result: null, seed: 0 });
     }
     broadcast(room, { t: "reset" });
     pushLobby(room);
@@ -270,9 +280,32 @@ const handlers = {
     const p = playerOf(ws, room);
     if (!p || !msg.s || typeof msg.s !== "object") return;
     p.state = msg.s;
+    p.stateAt = Date.now();
+    p.statePaused = pausedTotal(room);
     const snap = { t: "snap", id: p.id, s: msg.s };
     for (const other of everyone(room)) {
       if (other.meta && other.meta.watching === p.id) send(other, snap);
+    }
+  },
+
+  // Lo que escribe en el Códice: solo a quien lo está mirando.
+  code(ws, msg, room) {
+    const p = playerOf(ws, room);
+    if (!p || !msg.k || typeof msg.k !== "object") return;
+    p.code = { ...msg.k, src: String(msg.k.src || "").slice(0, MAX_CODE) };
+    const out = { t: "code", id: p.id, k: p.code };
+    for (const other of everyone(room)) {
+      if (other.meta && other.meta.watching === p.id) send(other, out);
+    }
+  },
+
+  // Algo que hizo (correr su programa en una máquina): quien lo mira lo repite.
+  ev(ws, msg, room) {
+    const p = playerOf(ws, room);
+    if (!p || !msg.e || typeof msg.e !== "object") return;
+    const out = { t: "ev", id: p.id, e: msg.e };
+    for (const other of everyone(room)) {
+      if (other.meta && other.meta.watching === p.id) send(other, out);
     }
   },
 
@@ -305,8 +338,48 @@ const handlers = {
     ws.meta.watching = msg.id ? String(msg.id) : null;
     const target = room.players.get(ws.meta.watching);
     if (target && target.state) send(ws, { t: "snap", id: target.id, s: target.state });
+    if (target && target.code) send(ws, { t: "code", id: target.id, k: target.code });
   },
 };
+
+function pausedTotal(room) {
+  return room.pausedMs + (room.paused ? Date.now() - room.pausedAt : 0);
+}
+
+// Con la partida empezada solo vuelve quien ya estaba (mismo nombre y sin conexión).
+// Sigue donde iba; su reloj corrió mientras no estuvo (menos las pausas del admin).
+function rejoin(ws, room, name) {
+  const p = [...room.players.values()].find((x) => x.name.toLowerCase() === name.toLowerCase());
+  if (!p || p.status === "lobby") return send(ws, { t: "error", key: "net_err_running" });
+  if (p.ws && p.ws.readyState === p.ws.OPEN && p.status !== "left") return send(ws, { t: "error", key: "net_err_name_taken" });
+  if (p.ws && p.ws !== ws) {
+    p.ws.meta = null;
+    p.ws.terminate();
+  }
+  p.ws = ws;
+  p.token = newToken();
+  ws.meta = { code: room.code, role: "player", id: p.id };
+  send(ws, { t: "joined", code: room.code, id: p.id, name: p.name, token: p.token, config: room.config });
+  const s = p.state || {};
+  let left = Number.isFinite(s.tl) ? s.tl : room.config.time_min * 60;
+  // En el pueblo el reloj todavía no corre
+  if (Number.isFinite(s.c) && s.c >= 0 && p.stateAt) {
+    left -= (Date.now() - p.stateAt - (pausedTotal(room) - p.statePaused)) / 1000;
+  }
+  if (room.phase === "running" && ["playing", "left"].includes(p.status) && left > 0) {
+    p.status = "playing";
+    const resume = { c: Number.isFinite(s.c) ? s.c : -1, h: s.h, tl: Math.round(left), ok: !!s.ok };
+    send(ws, { t: "start", seed: p.seed, config: room.config, resume });
+  } else {
+    if (room.phase === "running" && ["playing", "left"].includes(p.status)) {
+      p.status = "lost";
+      p.result = { won: false, used: room.config.time_min * 60 };
+      if (p.state) p.state.tl = 0;
+    }
+    send(ws, { t: "finished" });
+  }
+  pushLobby(room);
+}
 
 function isAdmin(ws, room) {
   return room && room.admin === ws;

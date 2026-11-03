@@ -63,7 +63,7 @@ async function main() {
   check((await copy.next("error")).key === "net_err_no_room", "Unirse: un código que no existe da error");
   copy.say({ t: "join", code: created.code, name: "Beto" });
   await copy.next("joined");
-  const beto = copy;
+  let beto = copy;
 
   ana.say({ t: "config", config: { time_min: 5 } });
   await wait(100);
@@ -111,6 +111,8 @@ async function main() {
   check((await ana.next("pause")).on === true, "Admin: la pausa llega a los jugadores");
   admin.say({ t: "add_time", sec: 60 });
   check((await ana.next("add_time")).sec === 60, "Admin: +1 minuto llega a quien está jugando");
+  admin.say({ t: "pause", on: false });
+  await ana.next("pause");
 
   ana.close();
   await wait(50);
@@ -120,11 +122,45 @@ async function main() {
   const again1 = await ana.next("start");
   check(again1.resumed === true && again1.seed === startA.seed, "Reconectar: quien estaba jugando recibe otra vez su «start» con la misma semilla");
 
+  // Salir y volver con el mismo nombre: sigue donde iba y el reloj siguió corriendo
+  ana.say({ t: "state", s: { c: 3, x: 51, y: 60, a: "idle_down", h: 6, mh: 10, tl: 300, ok: true } });
+  await wait(50);
+  ana.say({ t: "leave" });
+  ana.close();
+  await wait(1100);
+  ana = await client();
+  ana.say({ t: "join", code: created.code, name: "ANA" });
+  const rejoined = await ana.next("joined");
+  const back1 = await ana.next("start");
+  check(rejoined.id === joined.id && back1.seed === startA.seed, "Volver: con el mismo nombre recupera su puesto y su semilla");
+  check(back1.resume.c === 3 && back1.resume.h === 6 && back1.resume.ok === true, "Volver: sigue en la misma sala, con sus corazones");
+  check(back1.resume.tl <= 299 && back1.resume.tl >= 297, "Volver: el reloj siguió corriendo mientras no estaba");
+  const imposter = await client();
+  imposter.say({ t: "join", code: created.code, name: "Ana" });
+  check((await imposter.next("error")).key === "net_err_name_taken", "Volver: no se puede entrar con el nombre de alguien que está conectado");
+  imposter.close();
+  const watcherOfCode = await client();
+  admin.say({ t: "watch", id: joined.id });
+  ana.say({ t: "code", k: { src: "avanzar(3)", title: "Mural" } });
+  const code = await admin.next("code");
+  check(code.id === joined.id && code.k.src === "avanzar(3)", "En vivo: el admin ve el código que escribe el jugador");
+  ana.say({ t: "ev", e: { k: "run", m: "Actores/Mural", src: "avanzar(3)" } });
+  const ev = await admin.next("ev");
+  check(ev.id === joined.id && ev.e.src === "avanzar(3)", "En vivo: al admin le llega cuando el jugador corre su programa");
+  watcherOfCode.close();
+
   ana.say({ t: "done", won: true, used: 420 });
   await wait(50);
   admin.say({ t: "end" });
   const ended = await ana.next("ended");
   check(ended.players[0].name === "Ana" && ended.players[0].status === "won", "Fin: en la tabla final la ganadora va primero");
+
+  beto.close();
+  await wait(50);
+  beto = await client();
+  beto.say({ t: "join", code: created.code, name: "Beto" });
+  await beto.next("joined");
+  check((await beto.next("finished")).t === "finished", "Volver: quien ya había perdido entra a mirar");
 
   admin.say({ t: "reset" });
   await ana.next("reset");

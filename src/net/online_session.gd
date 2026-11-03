@@ -5,7 +5,10 @@ extends RefCounted
 
 signal room_ready              # sala creada (admin) o unido (jugador)
 signal lobby_changed
-signal match_started(seed_value: int, config: Dictionary)
+signal match_started(seed_value: int, config: Dictionary, resume: Dictionary)  # resume: dónde iba quien vuelve
+signal finished               # volvió a la sala pero ya había terminado: a mirar
+signal snap_received(id: String, s: Dictionary)
+signal event_received(id: String, ev: Dictionary)    # lo que hizo (correr código…), para repetirlo
 signal paused_changed(on: bool)
 signal time_added(seconds: int)
 signal match_ended
@@ -15,7 +18,8 @@ signal failed(key: String)     # clave del texto del error
 signal connection_lost
 
 const PREFS := "user://en_linea.cfg"
-const SEND_EVERY := 0.1        # posición: 10 veces por segundo
+const SEND_EVERY := 0.05       # posición: 20 veces por segundo
+const CODE_EVERY := 0.15       # el código del Códice, solo si cambió
 const RETRY_EVERY := 2.0
 
 var role := ""                 # "", "admin" o "player"
@@ -29,6 +33,7 @@ var players: Array = []        # tablero: diccionarios del servidor
 var paused := false
 var watching := ""
 var snaps: Dictionary = {}     # id -> último estado recibido
+var codes: Dictionary = {}     # id -> lo último que escribió en el Códice
 var reconnecting := false
 
 var _net := NetClient.new()
@@ -37,14 +42,16 @@ var _pending: Dictionary = {}  # se manda al abrir la conexión
 var _done: Dictionary = {}     # resultado: se vuelve a mandar al reconectar
 var _started := false          # ya arrancó esta partida (el servidor repite "start" al reconectar)
 var _send_wait := 0.0
+var _code_wait := 0.0
+var _code_sent := {}
 var _retry_wait := 0.0
 
 
 func _init(default_url := "") -> void:
 	url = default_url
 	var file := ConfigFile.new()
+	# La dirección del servidor siempre es la de config.json (ya no se elige en el menú)
 	if file.load(PREFS) == OK:
-		url = String(file.get_value("red", "url", url))
 		my_name = String(file.get_value("red", "nombre", ""))
 	_net.opened.connect(_on_opened)
 	_net.closed.connect(_on_closed)
@@ -53,7 +60,6 @@ func _init(default_url := "") -> void:
 
 func save_prefs() -> void:
 	var file := ConfigFile.new()
-	file.set_value("red", "url", url)
 	file.set_value("red", "nombre", my_name)
 	file.save(PREFS)
 
@@ -140,11 +146,43 @@ func watch(id: String) -> void:
 
 ## El jugador manda dónde está (Game lo llama en cada cuadro).
 func report(delta: float, state: Dictionary) -> void:
+	if state_due(delta):
+		send_state(state)
+
+
+## ¿Toca mandar dónde está? (cada SEND_EVERY segundos)
+func state_due(delta: float) -> bool:
 	_send_wait -= delta
 	if _send_wait > 0.0:
-		return
+		return false
 	_send_wait = SEND_EVERY
+	return true
+
+
+func send_state(state: Dictionary) -> void:
 	_net.send({"t": "state", "s": state})
+
+
+## ¿Toca mandar el Códice? (cada CODE_EVERY segundos)
+func code_due(delta: float) -> bool:
+	_code_wait -= delta
+	if _code_wait > 0.0:
+		return false
+	_code_wait = CODE_EVERY
+	return true
+
+
+## Lo que escribe en el Códice, para quien lo mira (solo si cambió).
+func report_code(codex: Dictionary) -> void:
+	if codex == _code_sent:
+		return
+	_code_sent = codex
+	_net.send({"t": "code", "k": codex})
+
+
+## Algo que hizo y que el espectador repite en su copia de la sala.
+func report_event(ev: Dictionary) -> void:
+	_net.send({"t": "ev", "e": ev})
 
 
 func report_done(won: bool, used: float) -> void:
@@ -210,6 +248,8 @@ func _reset() -> void:
 	_token = ""
 	players = []
 	snaps = {}
+	codes = {}
+	_code_sent = {}
 	watching = ""
 	paused = false
 	reconnecting = false
@@ -265,7 +305,9 @@ func _on_message(msg: Dictionary) -> void:
 			phase = "running"
 			config = msg.get("config", config)
 			paused = false
-			match_started.emit(int(msg.seed), config)
+			match_started.emit(int(msg.seed), config, msg.get("resume", {}))
+		"finished":
+			finished.emit()
 		"pause":
 			paused = bool(msg.on)
 			paused_changed.emit(paused)
@@ -273,6 +315,11 @@ func _on_message(msg: Dictionary) -> void:
 			time_added.emit(int(msg.sec))
 		"snap":
 			snaps[String(msg.id)] = msg.get("s", {})
+			snap_received.emit(String(msg.id), snaps[String(msg.id)])
+		"ev":
+			event_received.emit(String(msg.id), msg.get("e", {}))
+		"code":
+			codes[String(msg.id)] = msg.get("k", {})
 		"ended":
 			phase = "ended"
 			paused = false
@@ -281,6 +328,7 @@ func _on_message(msg: Dictionary) -> void:
 		"reset":
 			phase = "lobby"
 			snaps = {}
+			codes = {}
 			watching = ""
 			_done = {}
 			_started = false

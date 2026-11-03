@@ -17,6 +17,8 @@ var footer := Label.new()
 var docked := false
 
 var _shade := ColorRect.new()
+var _keyboard_up := false
+var _keyboard_fraction := 0.0
 
 var _mono: Font
 var _body: Font
@@ -106,6 +108,21 @@ func _layout(side: bool) -> void:
 		footer.add_theme_font_size_override("font_size", 15)
 
 
+## Pantalla táctil: con el teclado del sistema abierto (fraction: alto que tapa),
+## el editor ocupa lo que queda arriba y se esconden la ayuda y la consola.
+func fit_keyboard(fraction: float) -> void:
+	var up := fraction > 0.05
+	if up == _keyboard_up and (not up or is_equal_approx(fraction, _keyboard_fraction)):
+		return
+	_keyboard_up = up
+	_keyboard_fraction = fraction
+	_layout(docked)
+	for control in [console, help_label, run_button, footer]:
+		control.visible = not up
+	if up:
+		editor.anchor_bottom = maxf(editor.anchor_top + 0.2, 1.0 - fraction - 0.02)
+
+
 ## Esconde o muestra el Códice.
 func fold(folded: bool) -> void:
 	visible = not folded
@@ -172,7 +189,9 @@ func _t(key: String, params: Dictionary = {}) -> String:
 
 func open(session: CodexSession, keys_text: String, side := false) -> void:
 	_session = session
-	_layout(side)
+	docked = side
+	_keyboard_up = true    # fit_keyboard(0) vuelve a armar todo sin teclado
+	fit_keyboard(0.0)
 	run_button.text = _t("codex_run_button")
 	title_label.text = _t("codex_title_side" if side else "codex_title", {"title": session.title, "file": session.file_name})
 	editor.text = session.code
@@ -209,6 +228,11 @@ func log_line(text: String, color := "c9d4e2") -> void:
 		_session.log.append(line)
 		if _session.log.size() > 80:
 			_session.log.pop_front()
+
+
+## Lo que muestra la consola (con BBCode).
+func session_log() -> Array:
+	return _session.log if _session else []
 
 
 func _update_counter() -> void:

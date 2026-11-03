@@ -8,6 +8,8 @@ extends Node2D
 var velocity := Vector2.ZERO
 var damage := 1
 var color := Color(0.75, 0.4, 1.0)
+## En la copia del espectador: se mueve con lo que manda el jugador.
+var puppet := false
 
 var _t := 0.0
 
@@ -23,8 +25,10 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_t += delta
-	position += velocity * delta
 	_sprite.frame = int(_t * 12.0) % _sprite.hframes
+	if puppet:
+		return
+	position += velocity * delta
 	if _t >= life:
 		shatter()
 		return

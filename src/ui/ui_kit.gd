@@ -27,6 +27,7 @@ func _init(canvas: CanvasItem) -> void:
 	_fonts["title_light"] = _variation(PIXEL_FONT, 500)
 	_fonts["body"] = _variation(PIXEL_FONT, 400)
 	_fonts["bold"] = _variation(PIXEL_FONT, 600)
+	_fonts["mono"] = load("res://assets/fonts/JetBrainsMono.ttf")
 
 
 static func _variation(path: String, weight: int) -> FontVariation:

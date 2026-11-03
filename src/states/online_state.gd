@@ -1,15 +1,15 @@
-## Patrón State: menú EN LÍNEA. Nombre, código de sala y servidor; unirse o crear sala.
+## Patrón State: menú EN LÍNEA. Nombre y código de sala; unirse o crear sala.
+## El servidor es siempre el de config.json (server_url).
 class_name OnlineState
 extends GameState
 
-enum Row { NAME, CODE, JOIN, CREATE, SERVER, BACK }
+enum Row { NAME, CODE, JOIN, CREATE, BACK }
 
 const ROW_H := 56.0
 
 var _row := Row.NAME
 var _name := TextField.new("", 16)
 var _code := TextField.new("", 5, true)
-var _server := TextField.new("", 120)
 var _error := ""
 
 
@@ -21,7 +21,6 @@ func _init(context) -> void:
 func enter(_params: Dictionary = {}) -> void:
 	game.show_title_shot()
 	_name.text = game.online.my_name
-	_server.text = game.online.url
 	_error = ""
 	_row = Row.NAME if _name.text == "" else Row.CODE
 
@@ -32,9 +31,12 @@ func _field() -> TextField:
 			return _name
 		Row.CODE:
 			return _code
-		Row.SERVER:
-			return _server
 	return null
+
+
+## Campo que se escribe con el teclado del celular (null si la fila no es un campo).
+func touch_field() -> TextField:
+	return null if game.online.connecting() else _field()
 
 
 func handle_key(event: InputEventKey) -> bool:
@@ -58,7 +60,7 @@ func handle_input(actions: Array) -> void:
 		game.bus.publish(GameEvents.MENU_CONFIRM)
 		_error = ""
 		match _row:
-			Row.NAME, Row.CODE, Row.SERVER:
+			Row.NAME, Row.CODE:
 				_row = (_row + 1) as Row
 			Row.JOIN:
 				if _name.text.strip_edges() == "":
@@ -69,17 +71,16 @@ func handle_input(actions: Array) -> void:
 					_row = Row.CODE
 				else:
 					_remember()
-					game.online.join_room(_server.text, _code.text, _name.text.strip_edges())
+					game.online.join_room(game.online.url, _code.text, _name.text.strip_edges())
 			Row.CREATE:
 				_remember()
-				game.online.create_room(_server.text)
+				game.online.create_room(game.online.url)
 			Row.BACK:
 				game.machine.change("menu")
 
 
 func _remember() -> void:
 	game.online.my_name = _name.text.strip_edges()
-	game.online.url = _server.text.strip_edges()
 	game.online.save_prefs()
 
 
@@ -92,8 +93,8 @@ func draw(ui: UIKit) -> void:
 	var w := minf(760.0, s.x - 120.0)
 	var r := Rect2(60, 160, w, Row.size() * ROW_H + 40)
 	ui.panel(r)
-	var labels := ["net_name", "net_code", "net_join", "net_create", "net_server", "net_back"]
-	var hints := {Row.NAME: "net_name_hint", Row.CODE: "net_code_hint", Row.SERVER: "net_server_hint"}
+	var labels := ["net_name", "net_code", "net_join", "net_create", "net_back"]
+	var hints := {Row.NAME: "net_name_hint", Row.CODE: "net_code_hint"}
 	for i in Row.size():
 		var y := r.position.y + 20 + i * ROW_H
 		var focused := i == _row
@@ -105,7 +106,7 @@ func draw(ui: UIKit) -> void:
 		var color := UIKit.GOLD if focused else UIKit.TEXT
 		if hints.has(i):
 			ui.text(label, Vector2(r.position.x + 56, y + 12), 20, color, "title")
-			var field: TextField = [_name, _code, null, null, _server][i]
+			var field: TextField = [_name, _code][i]
 			field.draw(ui, Rect2(r.position.x + 260, y + 4, w - 290, ROW_H - 16), focused, game.data.message(hints[i]))
 		else:
 			ui.text(label, Vector2(r.position.x + 56, y + 10), 26, color, "title")
@@ -117,7 +118,7 @@ func draw(ui: UIKit) -> void:
 		note = game.data.message("net_connecting")
 		note_color = UIKit.CYAN
 	elif note == "":
-		note = game.data.message("net_help_" + ["name", "code", "join", "create", "server", "back"][_row])
+		note = game.data.message("net_help_" + ["name", "code", "join", "create", "back"][_row])
 		note_color = UIKit.MUTED
 	var lines := ui.wrap(note, w - 48, 20)
 	for i in mini(lines.size(), 3):

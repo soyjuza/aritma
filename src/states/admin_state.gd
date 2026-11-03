@@ -34,8 +34,9 @@ func exit() -> void:
 	_watching = false
 
 
+## Mirando a alguien, su sala se mueve (puertas, máquinas); en el panel, quieta.
 func freezes_world() -> bool:
-	return true
+	return not _watching
 
 
 ## Filas del panel según la fase: configuración + acciones.
