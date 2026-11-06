@@ -50,20 +50,21 @@ puntos seguros, fosos, máquinas).
 | 2. El Mural de la Incógnita | Mural | `despejar(a, b, c)`: devolver la x de ax + b = c, o sea `(c - b) / a` (3 ecuaciones: solo se ve la primera) | — |
 | 3. El Vórtice de Celdas | Faro | `luces.encender()` (como `puerta.abrir()` en el pueblo): enciende la sala y el tablero | Buscaminas: E destapa, Q bandera; 10 minas; siempre se resuelve sin adivinar; una mina = −2 corazones y tablero nuevo. Sin guardianes. |
 | 4. La Mesa de las Figuras | Mesa | Sin código: llenar una figura grande con piezas más pequeñas (se arrastran con el ratón; R o clic derecho las gira). Dos figuras: un rectángulo y una casa con las piezas giradas | — |
-| 5. La Singularidad del Cero | — | Sin código: cruzar el abismo por losas numeradas pisando solo las que cumplen la regla (múltiplos de 3 o de 4, al azar) | Una losa mala se rompe y Tala cae (−7 s); la losa queda rota. Tomar el núcleo lleva a la Sala 6. |
+| 5. La Singularidad del Cero | — | Sin código: cruzar el abismo por losas numeradas pisando solo las que cumplen la regla (múltiplos, primos, divisores de 60..., al azar) | Una losa mala se rompe y Tala cae (−7 s); la losa queda rota. Tomar el núcleo lleva a la Sala 6. |
 | 6. El Trono del Cero | — | Nada: es el **jefe final**, el Guardián del Cero (tengu rojo) | 16 de vida en 4 fases. Ráfaga de orbes (3, 5, 6, 7), pisotón con círculo rojo (salir o saltar con ESPACIO; −1 corazón). Al perder cada cuarta parte se cubre con un escudo y pone un **problema** de repaso (par/impar, múltiplo, despejar x; 15 s): si aciertas cae el escudo; si fallas llama 4, 5 o 6 guardianes. Al caer el escudo deja una **poción**. Al entrar se recuperan 2 corazones. Si Tala cae, el jefe vuelve a vida llena. Vencerlo gana. |
 
 ## Ejercicios al azar
 Cada partida sortea una **variante** por sala (`"variants"` en `data/chambers.json`, `src/core/challenge_deck.gd`),
-así el código de una partida no sirve en la siguiente:
+así el código de una partida no sirve en la siguiente. Y no solo cambian los números: varias
+variantes piden otra forma de código (un `and`, un `or`, un `if`, una función con 4 números):
 
 | Sala | Variantes |
 |---|---|
-| 1. La Criba | pares/impares · múltiplos de 3, 4 o 5 · mayores que 15, 20, 25 o 30 |
-| 2. El Mural | `ax + b = c` → `(c - b) / a` · `x/a + b = c` → `(c - b) * a` · `a(x + b) = c` → `c / a - b` |
+| 1. La Criba | pares/impares · múltiplos de 3, 4 o 5 · mayores que 15, 20, 25 o 30 · entre dos números (con `and`) · par o mayor que 40, 50 o 60 (con `or`) · terminan en 3, 7 o 9 (`n % 10`) · divisores de 24, 36, 48 o 60 (`60 % n`) |
+| 2. El Mural | `ax + b = c` → `(c - b) / a` · `x/a + b = c` → `(c - b) * a` · `a(x + b) = c` → `c / a - b` · `ax + b = cx + d` → `despejar(a, b, c, d)` · sin solución: si `a == 0` se devuelve `None` (con un `if`) |
 | 3. El Vórtice | las minas cambian siempre de lugar |
 | 4. La Mesa | Rectángulo + Casa · Escalera + Barco · Torre + Rombo |
-| 5. El Sendero | múltiplos de 3, 4, 5 o 6, con otro camino cada vez |
+| 5. El Sendero | múltiplos de 3, 4 o 6 · primos · divisores de 60 · pares mayores que 20 · terminan en 7, con otro camino cada vez |
 | 6. El Trono | los problemas del jefe salen al azar |
 
 La semilla de la partida decide todo: con la misma semilla salen los mismos ejercicios (se guarda
@@ -130,7 +131,7 @@ En Railway, el servicio `servidor-salas` tiene la carpeta raíz `/` (porque solo
 
 ## Pruebas automáticas
 ```
-godot --path . -- --selftest                       # 173 pruebas de reglas y del recorrido completo
+godot --path . -- --selftest                       # 187 pruebas de reglas y del recorrido completo
 godot --path . -- --nettest=ws://127.0.0.1:8080    # 38 pruebas en línea (con el servidor encendido)
 godot --path . -- --recorrido=/carpeta[:sala2|:sala3|:sala4|:sala5|:jefe]  # capturas del camino del jugador
 ```

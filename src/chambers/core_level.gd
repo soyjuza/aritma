@@ -4,7 +4,7 @@ extends ChamberLevel
 
 var _in_hall := false
 var _won := false
-var _rule: Dictionary = {}          # {"multiple": 3, "text": "múltiplos de 3"}
+var _rule: Dictionary = {}          # {"kind": "multiple", "k": 3, "text": "múltiplos de 3"}
 var _rng := RandomNumberGenerator.new()
 
 @onready var stones: NumberPath = $Sendero
@@ -16,14 +16,17 @@ func wire() -> void:
 		_rng.seed = seed_value
 	else:
 		_rng.randomize()
-	var rules: Array = data.get("rules", [{"multiple": 3, "text": "múltiplos de 3"}])
+	var rules: Array = data.get("rules", [{"kind": "multiple", "k": 3, "text": "múltiplos de 3"}])
 	_rule = rules[_rng.randi_range(0, rules.size() - 1)]
 	data = data.duplicate(true)
 	data["intro"] = rule_lines("intro")
+	# Algunas reglas traen una explicación (por ejemplo, qué es un número primo)
+	if _rule.has("explain"):
+		data["intro"].insert(3, String(_rule.explain))
 	var path: Dictionary = data.get("path", {})
 	stones.cols = int(path.get("cols", stones.cols))
 	stones.rows = int(path.get("rows", stones.rows))
-	stones.generate(_rng, int(_rule.get("multiple", 3)), int(path.get("extra_safe", 3)), int(path.get("top", 60)))
+	stones.generate(_rng, _rule, int(path.get("extra_safe", 3)), int(path.get("top", 60)))
 	$Zonas/EntradaSala.crossed.connect(_on_hall_entered)
 
 

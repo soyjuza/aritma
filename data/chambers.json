@@ -200,6 +200,306 @@
 						"Si una sola esfera cae del lado equivocado, la Criba se traba y mezcla esferas nuevas.",
 						"INSCRIPCIÓN: Dos guardianes de piedra vigilan la Criba. Cada vez que la Criba rechace tu código —aunque sea por un «;» mal puesto— despertarán más. Golpéalos con el garrote (J o clic)."
 					]
+				},
+				{
+					"id": "entre",
+					"params": {
+						"lo": [
+							10,
+							15,
+							20
+						],
+						"hi": [
+							30,
+							35,
+							40
+						]
+					},
+					"rule": {
+						"kind": "between",
+						"lo": "{lo}",
+						"hi": "{hi}"
+					},
+					"glyph": "{lo} <= n <= {hi}",
+					"chalice_label": "{lo} A {hi}",
+					"crucible_label": "OTRAS",
+					"wrong_in": "Ronda {round}: la esfera {n} no está entre {lo} y {hi} y cayó en el cáliz. La Criba se trabó y mezcló esferas nuevas.",
+					"wrong_out": "Ronda {round}: la esfera {n} está entre {lo} y {hi} y cayó en el crisol. La Criba se trabó y mezcló esferas nuevas.",
+					"starter_code": "# Las esferas ENTRE {lo} Y {hi} van al cáliz (izquierda). {lo} y {hi} también cuentan.\n# Todas las demás, al crisol (derecha).\n# Ojo: con una sola comparación no alcanza, necesitas dos unidas con and.\n# La Criba prueba tu programa con 3 rondas: solo ves la primera.\n\n",
+					"help": [
+						[
+							"tolva.quedan()",
+							"cuántas esferas faltan en la tolva"
+						],
+						[
+							"tolva.soltar()",
+							"deja caer la siguiente a la compuerta y devuelve su número"
+						],
+						[
+							"caliz.recibir()",
+							"la esfera de la compuerta va al cáliz (de {lo} a {hi})"
+						],
+						[
+							"crisol.desintegrar()",
+							"la esfera de la compuerta va al crisol (las demás)"
+						],
+						[
+							"n >= {lo} and n <= {hi}",
+							"True si n está entre {lo} y {hi}"
+						],
+						[
+							"and",
+							"True solo si las dos condiciones se cumplen"
+						]
+					],
+					"intro": [
+						"INSCRIPCIÓN: La Criba separa la materia. Solo lo que esté ENTRE {lo} Y {hi} (los dos incluidos) puede llegar al Cáliz; lo que se quede corto o se pase se deshace en el Crisol.",
+						"Usa el atril (E) y programa la Criba. Ella pondrá a prueba tu programa con tres rondas de esferas: solo la primera se ve en el tubo.",
+						"Si una sola esfera cae del lado equivocado, la Criba se traba y mezcla esferas nuevas.",
+						"INSCRIPCIÓN: Dos guardianes de piedra vigilan la Criba. Cada vez que la Criba rechace tu código —aunque sea por un «;» mal puesto— despertarán más. Golpéalos con el garrote (J o clic)."
+					],
+					"rounds": [
+						{
+							"count": [
+								9,
+								10
+							],
+							"min": 1,
+							"max": 50
+						},
+						{
+							"count": [
+								6,
+								7
+							],
+							"min": 1,
+							"max": 60
+						},
+						{
+							"count": [
+								12,
+								13
+							],
+							"min": 0,
+							"max": 60,
+							"zero": true
+						}
+					]
+				},
+				{
+					"id": "par_o_mayor",
+					"params": {
+						"t": [
+							40,
+							50,
+							60
+						]
+					},
+					"rule": {
+						"kind": "multiple_or_greater",
+						"k": 2,
+						"t": "{t}"
+					},
+					"glyph": "n % 2 or n > {t}",
+					"chalice_label": "PAR O >{t}",
+					"crucible_label": "OTRAS",
+					"wrong_in": "Ronda {round}: la esfera {n} es impar y no es mayor que {t} y cayó en el cáliz. La Criba se trabó y mezcló esferas nuevas.",
+					"wrong_out": "Ronda {round}: la esfera {n} es par o mayor que {t} y cayó en el crisol. La Criba se trabó y mezcló esferas nuevas.",
+					"starter_code": "# Al cáliz (izquierda) van las esferas PARES y también las MAYORES QUE {t}.\n# Basta con que cumpla una de las dos. Las demás, al crisol (derecha).\n# Ejemplo: 7 va al crisol, 8 va al cáliz y 61 también va al cáliz.\n# La Criba prueba tu programa con 3 rondas: solo ves la primera.\n\n",
+					"help": [
+						[
+							"tolva.quedan()",
+							"cuántas esferas faltan en la tolva"
+						],
+						[
+							"tolva.soltar()",
+							"deja caer la siguiente a la compuerta y devuelve su número"
+						],
+						[
+							"caliz.recibir()",
+							"la esfera de la compuerta va al cáliz (par o mayor que {t})"
+						],
+						[
+							"crisol.desintegrar()",
+							"la esfera de la compuerta va al crisol (las demás)"
+						],
+						[
+							"n % 2 == 0",
+							"True si n es par"
+						],
+						[
+							"n > {t}",
+							"True si n es mayor que {t}"
+						],
+						[
+							"or",
+							"True si se cumple al menos una de las dos"
+						]
+					],
+					"intro": [
+						"INSCRIPCIÓN: La Criba separa la materia. Al Cáliz llega todo lo PAR y también todo lo MAYOR QUE {t}, aunque sea impar. Solo lo impar y pequeño se deshace en el Crisol.",
+						"Usa el atril (E) y programa la Criba. Ella pondrá a prueba tu programa con tres rondas de esferas: solo la primera se ve en el tubo.",
+						"Si una sola esfera cae del lado equivocado, la Criba se traba y mezcla esferas nuevas.",
+						"INSCRIPCIÓN: Dos guardianes de piedra vigilan la Criba. Cada vez que la Criba rechace tu código —aunque sea por un «;» mal puesto— despertarán más. Golpéalos con el garrote (J o clic)."
+					],
+					"rounds": [
+						{
+							"count": [
+								9,
+								10
+							],
+							"min": 1,
+							"max": 80
+						},
+						{
+							"count": [
+								6,
+								7
+							],
+							"min": 11,
+							"max": 99
+						},
+						{
+							"count": [
+								12,
+								13
+							],
+							"min": 0,
+							"max": 99,
+							"zero": true
+						}
+					]
+				},
+				{
+					"id": "cifra",
+					"params": {
+						"d": [
+							3,
+							7,
+							9
+						]
+					},
+					"rule": {
+						"kind": "last_digit",
+						"d": "{d}"
+					},
+					"glyph": "n % 10",
+					"chalice_label": "CIFRA {d}",
+					"crucible_label": "OTRAS",
+					"wrong_in": "Ronda {round}: la esfera {n} no termina en {d} y cayó en el cáliz. La Criba se trabó y mezcló esferas nuevas.",
+					"wrong_out": "Ronda {round}: la esfera {n} termina en {d} y cayó en el crisol. La Criba se trabó y mezcló esferas nuevas.",
+					"starter_code": "# Las esferas que TERMINAN EN {d} van al cáliz (izquierda): {d}, 1{d}, 2{d}...\n# Todas las demás, al crisol (derecha).\n# Pista: el resto de dividir entre 10 es la última cifra.\n# La Criba prueba tu programa con 3 rondas: solo ves la primera.\n\n",
+					"help": [
+						[
+							"tolva.quedan()",
+							"cuántas esferas faltan en la tolva"
+						],
+						[
+							"tolva.soltar()",
+							"deja caer la siguiente a la compuerta y devuelve su número"
+						],
+						[
+							"caliz.recibir()",
+							"la esfera de la compuerta va al cáliz (termina en {d})"
+						],
+						[
+							"crisol.desintegrar()",
+							"la esfera de la compuerta va al crisol (las demás)"
+						],
+						[
+							"n % 10",
+							"la última cifra de n (de 47 sale 7)"
+						],
+						[
+							"n % 10 == {d}",
+							"True si n termina en {d}"
+						]
+					],
+					"intro": [
+						"INSCRIPCIÓN: La Criba lee la última cifra de cada esfera. Solo las que TERMINAN EN {d} pueden llegar al Cáliz; todas las demás se deshacen en el Crisol.",
+						"Usa el atril (E) y programa la Criba. Ella pondrá a prueba tu programa con tres rondas de esferas: solo la primera se ve en el tubo.",
+						"Si una sola esfera cae del lado equivocado, la Criba se traba y mezcla esferas nuevas.",
+						"INSCRIPCIÓN: Dos guardianes de piedra vigilan la Criba. Cada vez que la Criba rechace tu código —aunque sea por un «;» mal puesto— despertarán más. Golpéalos con el garrote (J o clic)."
+					]
+				},
+				{
+					"id": "divisor",
+					"params": {
+						"of": [
+							24,
+							36,
+							48,
+							60
+						]
+					},
+					"rule": {
+						"kind": "divisor",
+						"of": "{of}"
+					},
+					"glyph": "{of} % n",
+					"chalice_label": "DIVISOR",
+					"crucible_label": "OTRAS",
+					"wrong_in": "Ronda {round}: la esfera {n} no es divisor de {of} y cayó en el cáliz. La Criba se trabó y mezcló esferas nuevas.",
+					"wrong_out": "Ronda {round}: la esfera {n} es divisor de {of} y cayó en el crisol. La Criba se trabó y mezcló esferas nuevas.",
+					"starter_code": "# Las esferas que son DIVISORES DE {of} van al cáliz (izquierda).\n# Un divisor de {of} lo divide exacto: 12 divide a 60 porque 60 % 12 == 0.\n# Ojo: aquí la cuenta va al revés que en n % 2. Las demás, al crisol (derecha).\n# La Criba prueba tu programa con 3 rondas: solo ves la primera.\n\n",
+					"help": [
+						[
+							"tolva.quedan()",
+							"cuántas esferas faltan en la tolva"
+						],
+						[
+							"tolva.soltar()",
+							"deja caer la siguiente a la compuerta y devuelve su número"
+						],
+						[
+							"caliz.recibir()",
+							"la esfera de la compuerta va al cáliz (divide a {of})"
+						],
+						[
+							"crisol.desintegrar()",
+							"la esfera de la compuerta va al crisol (las demás)"
+						],
+						[
+							"{of} % n",
+							"el resto de dividir {of} entre n"
+						],
+						[
+							"{of} % n == 0",
+							"True si n es divisor de {of}"
+						]
+					],
+					"intro": [
+						"INSCRIPCIÓN: La Criba busca las partes exactas de {of}. Solo los DIVISORES DE {of} (los números que lo dividen sin que sobre nada) pueden llegar al Cáliz; los demás se deshacen en el Crisol.",
+						"Usa el atril (E) y programa la Criba. Ella pondrá a prueba tu programa con tres rondas de esferas: solo la primera se ve en el tubo.",
+						"Si una sola esfera cae del lado equivocado, la Criba se traba y mezcla esferas nuevas.",
+						"INSCRIPCIÓN: Dos guardianes de piedra vigilan la Criba. Cada vez que la Criba rechace tu código —aunque sea por un «;» mal puesto— despertarán más. Golpéalos con el garrote (J o clic)."
+					],
+					"rounds": [
+						{
+							"count": [
+								9,
+								10
+							],
+							"min": 1,
+							"max": 20
+						},
+						{
+							"count": [
+								6,
+								7
+							],
+							"min": 1,
+							"max": "{of}"
+						},
+						{
+							"count": [
+								12,
+								13
+							],
+							"min": 1,
+							"max": "{of}"
+						}
+					]
 				}
 			]
 		},
@@ -328,8 +628,87 @@
 						"Recuerda cómo se despeja: lo que multiplica pasa dividiendo y lo que suma pasa restando. Ejemplo: 3(x + 2) = 15 → x + 2 = 5 → x = 3, así que despejar(3, 2, 15) devuelve 3.",
 						"INSCRIPCIÓN: Dos caballeros de piedra vigilan el Mural. Cada vez que el Mural rechace tu código —aunque sea por un error de escritura— despertarán más guardianes."
 					]
+				},
+				{
+					"id": "dos_lados",
+					"form": "dos_lados",
+					"signature": "despejar(a, b, c, d)",
+					"mural_title": "ax + b = cx + d   →   x = ?",
+					"wrong_hint": "Pasa cx a la izquierda y b a la derecha, y después divide.",
+					"starter_code": "# El Mural llama a despejar(a, b, c, d) con tres ecuaciones ax + b = cx + d.\n# Ahora hay x en los dos lados: primero junta las x en un lado.\n# Ejemplo: 5x + 2 = 2x + 14  ->  5x - 2x = 14 - 2  ->  3x = 12  ->  x = 4\n\ndef despejar(a, b, c, d):\n    \n",
+					"help": [
+						[
+							"def despejar(a, b, c, d):",
+							"el Mural la llama con cuatro números"
+						],
+						[
+							"return ...",
+							"devuelve el valor de x"
+						],
+						[
+							"a - c",
+							"las x que quedan al pasar cx restando"
+						],
+						[
+							"d - b",
+							"pasa b al otro lado (restando)"
+						],
+						[
+							"5x + 2 = 2x + 14",
+							"a = 5, b = 2, c = 2, d = 14  ->  x = 4"
+						]
+					],
+					"intro": [
+						"INSCRIPCIÓN: El Mural de la Incógnita guarda ecuaciones con x en los dos lados: ax + b = cx + d. Quien despeje la x abrirá la reja.",
+						"Escribe la función despejar(a, b, c, d) y haz que devuelva el valor de x. Fíjate: esta vez son cuatro números. El Mural la probará con tres ecuaciones: solo ves la primera.",
+						"Primero junta las x: 5x + 2 = 2x + 14 → 5x − 2x = 14 − 2 → 3x = 12 → x = 4, así que despejar(5, 2, 2, 14) devuelve 4.",
+						"INSCRIPCIÓN: Dos caballeros de piedra vigilan el Mural. Cada vez que el Mural rechace tu código —aunque sea por un error de escritura— despertarán más guardianes."
+					]
+				},
+				{
+					"id": "sin_solucion",
+					"form": "sin_solucion",
+					"cases": [
+						"plus",
+						"zero",
+						"minus"
+					],
+					"mural_title": "ax + b = c   ¿y si a = 0?",
+					"wrong_hint": "Primero resta b a c y después divide entre a.",
+					"error_hint": "Cuando a vale 0 no se puede dividir: pregunta antes con if a == 0: y devuelve None.",
+					"starter_code": "# El Mural llama a despejar(a, b, c) con tres ecuaciones ax + b = c.\n# Cuidado: a veces a vale 0 y la ecuación no tiene x (0x + 4 = 9 no se cumple nunca).\n# Si a es 0, devuelve None. Si no, devuelve el valor de x.\n\ndef despejar(a, b, c):\n    \n",
+					"help": [
+						[
+							"def despejar(a, b, c):",
+							"el Mural la llama con a, b y c"
+						],
+						[
+							"if a == 0:",
+							"pregunta si a vale 0"
+						],
+						[
+							"return None",
+							"no hay ninguna x que sirva"
+						],
+						[
+							"(c - b) / a",
+							"si a no es 0, así se despeja"
+						],
+						[
+							"0x + 4 = 9",
+							"ninguna x sirve  ->  None"
+						]
+					],
+					"intro": [
+						"INSCRIPCIÓN: El Mural de la Incógnita guarda ecuaciones ax + b = c, pero entre ellas esconde una trampa: una donde a vale 0.",
+						"Escribe la función despejar(a, b, c). Si a es 0, la ecuación no tiene x (0x + 4 = 9 nunca se cumple) y debes devolver None. Si no, devuelve el valor de x.",
+						"Aquí no basta una sola cuenta: necesitas un if. Ejemplo: despejar(3, 5, 20) devuelve 5 y despejar(0, 4, 9) devuelve None.",
+						"INSCRIPCIÓN: Dos caballeros de piedra vigilan el Mural. Cada vez que el Mural rechace tu código —aunque sea por un error de escritura— despertarán más guardianes."
+					]
 				}
-			]
+			],
+			"signature": "despejar(a, b, c)",
+			"error_hint": ""
 		},
 		{
 			"name": "El Vórtice de Celdas",
@@ -473,20 +852,42 @@
 			"seed": 0,
 			"rules": [
 				{
-					"multiple": 3,
+					"kind": "multiple",
+					"k": 3,
 					"text": "múltiplos de 3"
 				},
 				{
-					"multiple": 4,
+					"kind": "multiple",
+					"k": 4,
 					"text": "múltiplos de 4"
 				},
 				{
-					"multiple": 5,
-					"text": "múltiplos de 5"
+					"kind": "multiple",
+					"k": 6,
+					"text": "múltiplos de 6"
 				},
 				{
-					"multiple": 6,
-					"text": "múltiplos de 6"
+					"kind": "prime",
+					"text": "números primos",
+					"explain": "Un número primo solo se puede dividir exacto entre 1 y entre sí mismo: 2, 3, 5, 7, 11, 13... El 9 no es primo, porque 9 = 3 × 3."
+				},
+				{
+					"kind": "divisor",
+					"of": 60,
+					"text": "divisores de 60",
+					"explain": "Un divisor de 60 lo divide exacto, sin que sobre nada: 12 sirve porque 60 = 12 × 5, pero 7 no."
+				},
+				{
+					"kind": "multiple_and_greater",
+					"k": 2,
+					"t": 20,
+					"text": "pares mayores que 20",
+					"explain": "Ojo: la losa tiene que cumplir las dos cosas a la vez. El 14 es par pero no pasa de 20, y el 23 pasa de 20 pero es impar."
+				},
+				{
+					"kind": "last_digit",
+					"d": 7,
+					"text": "números que terminan en 7"
 				}
 			],
 			"path": {

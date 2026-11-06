@@ -41,21 +41,32 @@ Decisiones tomadas (no hay que volver a discutirlas):
 
 | Sala | Variantes | Dónde está la regla |
 |---|---|---|
-| 1. La Criba | pares/impares · múltiplos de 3, 4 o 5 · mayores que 15, 20, 25 o 30 | `ParityFilter.rule` (`{"kind": "multiple", "k": …}` o `{"kind": "greater", "t": …}`); `accepts(n)` decide |
-| 2. El Mural | `ax + b = c` → `(c - b) / a` · `x/a + b = c` → `(c - b) * a` · `a(x + b) = c` → `c / a - b` | `RootsTrial.form` (`lineal`, `fraccion`, `parentesis`) |
+| 1. La Criba | pares/impares · múltiplos de 3, 4 o 5 · mayores que 15, 20, 25 o 30 · **entre** 10..20 y 30..40 (`and`) · **par o mayor** que 40, 50 o 60 (`or`) · **terminan en** 3, 7 o 9 (`n % 10`) · **divisores** de 24, 36, 48 o 60 (`60 % n`, al revés) | `ParityFilter.rule`, por ejemplo `{"kind": "between", "lo": …, "hi": …}`; quien decide es `NumberRule.accepts(regla, n)` |
+| 2. El Mural | `ax + b = c` → `(c - b) / a` · `x/a + b = c` → `(c - b) * a` · `a(x + b) = c` → `c / a - b` · **`ax + b = cx + d`** → `despejar(a, b, c, d)` con 4 números · **sin solución**: si `a == 0` hay que devolver `None` (pide un `if`) | `RootsTrial.form` (`lineal`, `fraccion`, `parentesis`, `dos_lados`, `sin_solucion`) |
 | 3. El Vórtice | sin variantes: las minas ya cambian siempre | — |
 | 4. La Mesa | Rectángulo + Casa · Escalera + Barco · Torre + Rombo | `"puzzles"` de cada variante |
-| 5. El Sendero | múltiplos de 3, 4, 5 o 6 | lista `"rules"` |
+| 5. El Sendero | múltiplos de 3, 4 o 6 · números primos · divisores de 60 · pares mayores que 20 · terminan en 7 | lista `"rules"` (con la misma `NumberRule` de la Criba) |
 | 6. El Trono | sin variantes: los problemas del jefe ya salen al azar | — |
 
 Para **agregar una variante** solo hay que editar `chambers.json`, sin tocar código. La excepción
-es una regla de Criba o una forma de ecuación nueva: esas se agregan en `ParityFilter.accepts`
-o en `RootsTrial.make_case` / `equation`.
+es una clase de regla nueva (para la Criba y el Sendero) o una forma de ecuación nueva: esas se
+agregan en `NumberRule.accepts` o en `RootsTrial.make_case` / `case_equation`.
+
+Las variantes nuevas no solo cambian los números: piden **otro código**. Por ejemplo, en la Criba
+"entre 10 y 30" no sale con un solo `if n > 10`, hace falta `n >= 10 and n <= 30`; y en el Mural
+"sin solución" la fórmula de siempre se rompe al dividir entre 0, así que hay que poner un `if`.
 
 Detalles:
 
 - Los mensajes de error de la Criba ahora vienen de la variante (`wrong_in`, `wrong_out`).
 - La pista del Mural viene de la variante (`wrong_hint`) y se mete en el texto `mural_wrong` con `{hint}`.
+  Si la función falla (por ejemplo, dividir entre 0) se usa `error_hint`.
+- Los mensajes del Mural usan `{call}` (por ejemplo `despejar(5, 2, 1, 14)`), porque ahora no
+  siempre son tres números.
+- En las rondas ocultas de la Criba salen siempre los números del borde (`t`, `t + 1`, `lo`, `hi`...).
+  Así, si alguien pone `<` donde iba `<=`, la Criba lo nota.
+- Los parámetros como `{t}` llegan del JSON como `30.0`. `ChallengeDeck` los pasa a entero para
+  que el jugador lea "mayores que 30" y no "30.0".
 - La fuente pixel (Jersey 10) **no tiene `≤`**. Por eso la etiqueta del crisol dice `HASTA {t}`.
 
 ## 3. Modo en línea: cómo se usa

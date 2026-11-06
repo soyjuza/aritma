@@ -30,7 +30,11 @@ static func resolve(base: Dictionary, rng: RandomNumberGenerator, fixed := false
 	var choices: Dictionary = pick.get("params", {})
 	for key in choices:
 		var options: Array = choices[key]
-		params[key] = options[0 if fixed else rng.randi_range(0, options.size() - 1)]
+		var value = options[0 if fixed else rng.randi_range(0, options.size() - 1)]
+		# El JSON trae 30 como 30.0: así el jugador no lee "mayores que 30.0"
+		if value is float and is_equal_approx(value, roundf(value)):
+			value = int(value)
+		params[key] = value
 	for key in pick:
 		if key != "params":
 			out[key] = fill(pick[key], params)

@@ -63,7 +63,7 @@ func new_trial() -> void:
 	_rows.clear()
 	for i in trial.cases.size():
 		var c: Dictionary = trial.cases[i]
-		_rows.append({"poly": RootsTrial.equation(c.a, c.b, c.c, trial.form), "result": "", "color": Color("8d97a8"), "lamp": Color("2a3036"), "angle": 0.0, "revealed": i == 0})
+		_rows.append({"poly": RootsTrial.case_equation(c, trial.form), "result": "", "color": Color("8d97a8"), "lamp": Color("2a3036"), "angle": 0.0, "revealed": i == 0})
 	_active = -1
 
 
@@ -84,13 +84,16 @@ func evaluate(source: String, sandbox: ScriptSandbox) -> CodeMachine.Report:
 	var fn = program.context.globals.get("despejar")
 	if not fn is ScriptCallable:
 		report.ok = false
-		report.error = _text.call("mural_no_function", {})
+		report.error = _text.call("mural_no_function", {"call": String(_data.get("signature", "despejar(a, b, c)"))})
 		return report
 	report.success = true
 	for i in trial.cases.size():
 		var c: Dictionary = trial.cases[i]
 		program.context.max_steps = max_steps
-		var answer := sandbox.call_function(program, "despejar", [c.a, c.b, c.c])
+		var call := RootsTrial.call_text(c, trial.form)
+		var eq := RootsTrial.case_equation(c, trial.form)
+		var error_hint := String(_data.get("error_hint", ""))
+		var answer := sandbox.call_function(program, "despejar", RootsTrial.args(c, trial.form))
 		var steps: int = program.context.steps
 		var verdict := RootsTrial.Verdict.ERROR
 		var shown := ""
@@ -98,18 +101,20 @@ func evaluate(source: String, sandbox: ScriptSandbox) -> CodeMachine.Report:
 			var slow: bool = steps > max_steps
 			verdict = RootsTrial.Verdict.TOO_SLOW if slow else RootsTrial.Verdict.ERROR
 			shown = _text.call("mural_row_slow" if slow else "mural_row_error", {})
-			report.message = _text.call("mural_too_slow" if slow else "mural_error", {"a": c.a, "b": c.b, "c": c.c, "max": max_steps, "error": answer[1]})
+			report.message = _text.call("mural_too_slow" if slow else "mural_error", {"call": call, "max": max_steps, "error": answer[1], "hint": " " + error_hint if error_hint != "" else ""})
 		else:
 			verdict = RootsTrial.judge(c, answer[1])
+			var got := ScriptContext.to_text(answer[1])
 			match verdict:
 				RootsTrial.Verdict.RIGHT:
 					shown = RootsTrial.answer(answer[1])
 				RootsTrial.Verdict.BAD_SHAPE:
-					shown = ScriptContext.to_text(answer[1])
-					report.message = _text.call("mural_bad_shape", {"a": c.a, "b": c.b, "c": c.c, "got": shown})
+					shown = got
+					report.message = _text.call("mural_bad_shape", {"call": call, "got": shown})
 				_:
 					shown = RootsTrial.answer(answer[1])
-					report.message = _text.call("mural_wrong", {"a": c.a, "b": c.b, "c": c.c, "got": ScriptContext.to_text(answer[1]), "eq": RootsTrial.equation(c.a, c.b, c.c, trial.form), "want": c.x, "hint": _data.get("wrong_hint", "")})
+					var key := "mural_wrong_none" if typeof(c.x) == TYPE_NIL else "mural_wrong"
+					report.message = _text.call(key, {"call": call, "got": got, "eq": eq, "want": c.x, "hint": _data.get("wrong_hint", "")})
 		report.commands.append(RootsCommand.new(i, verdict, shown, steps))
 		if verdict != RootsTrial.Verdict.RIGHT:
 			report.success = false

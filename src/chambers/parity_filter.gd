@@ -1,5 +1,6 @@
 ## Reglas de la Criba (Sala 1). Cada paso queda como un FilterCommand.
-## La regla cambia con la variante: múltiplos de k (k = 2: pares) o mayores que t.
+## La regla cambia con la variante (ver NumberRule): múltiplos, mayores que, entre dos
+## números (and), par o mayor (or), última cifra o divisores.
 class_name ParityFilter
 extends RefCounted
 
@@ -20,49 +21,46 @@ var _held: Variant = null
 func _init(rules: Array, rng: RandomNumberGenerator, p_rule: Dictionary = {}) -> void:
 	if not p_rule.is_empty():
 		rule = p_rule
-	for r: Dictionary in rules:
-		rounds.append(make_round(r, rng))
+	for i in rules.size():
+		rounds.append(make_round(rules[i], rng, i > 0))
 
 
-func make_round(spec: Dictionary, rng: RandomNumberGenerator) -> Array:
+## with_edge: en las rondas ocultas salen los números del borde (t, lo, hi...),
+## así se nota si el programa usa < cuando debía usar <=.
+func make_round(spec: Dictionary, rng: RandomNumberGenerator, with_edge := false) -> Array:
 	var counts: Array = spec.get("count", [8, 8])
 	var count := rng.randi_range(int(counts[0]), int(counts[-1]))
 	var low := int(spec.get("min", 1))
 	var high := int(spec.get("max", 20))
+	if not NumberRule.allows_zero(rule):
+		low = maxi(low, 1)
 	var values: Array = []
 	for i in count:
-		values.append(rng.randi_range(low, high))
-	if bool(spec.get("zero", false)) and not 0 in values:
-		values[rng.randi_range(0, count - 1)] = 0
-	# Siempre hay al menos una que entra y una que no
+		# Mitad y mitad más o menos, aunque la regla sea rara (divisores, entre...)
+		values.append(NumberRule.pick(rule, rng, low, high, rng.randf() < 0.5))
+	# Lugares libres: el cero y los bordes no se pisan entre ellos
+	var spots := range(count)
+	var must: Array = []
+	if bool(spec.get("zero", false)) and NumberRule.allows_zero(rule):
+		must.append(0)
+	if with_edge:
+		must.append_array(NumberRule.edges(rule).filter(func(n): return n >= low and n <= high))
+	for n in must:
+		if n in values:
+			spots.erase(values.find(n))    # ya está: que no lo tape otro
+		elif spots.size() > 1:
+			values[spots.pop_at(rng.randi_range(0, spots.size() - 1))] = n
+	# Siempre hay al menos una que entra y una que no (en un lugar libre)
 	if not values.any(accepts):
-		values[0] = _accepted_number(rng, low, high)
+		values[spots[0]] = NumberRule.pick(rule, rng, low, high, true)
 	if values.all(accepts):
-		values[-1] = _rejected_number(rng, low, high)
+		values[spots[-1]] = NumberRule.pick(rule, rng, low, high, false)
 	return values
 
 
 ## ¿La esfera va al cáliz?
 func accepts(value: int) -> bool:
-	match String(rule.get("kind", "multiple")):
-		"greater":
-			return value > int(rule.get("t", 0))
-	return posmod(value, maxi(1, int(rule.get("k", 2)))) == 0
-
-
-func _accepted_number(rng: RandomNumberGenerator, low: int, high: int) -> int:
-	if String(rule.get("kind", "")) == "greater":
-		var t := int(rule.get("t", 0))
-		return rng.randi_range(t + 1, maxi(high, t + 10))
-	var k := maxi(1, int(rule.get("k", 2)))
-	return k * rng.randi_range(maxi(1, ceili(low / float(k))), maxi(1, high / k))
-
-
-func _rejected_number(rng: RandomNumberGenerator, low: int, high: int) -> int:
-	if String(rule.get("kind", "")) == "greater":
-		return rng.randi_range(mini(low, int(rule.get("t", 0))), int(rule.get("t", 0)))
-	return _accepted_number(rng, low, high) + 1
-
+	return NumberRule.accepts(rule, value)
 
 
 ## Empieza la ronda index.

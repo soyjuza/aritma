@@ -12,7 +12,7 @@
 | Comportamiento | **Strategy** | `QualityProfile` → `HighQuality`, `LowQuality`; `GuardianAttack` → `MeleeStrike` (caballero), `OrbShot` (hechicero), `RuneBlast` (rúnico); `QuizProblem` → `ParityProblem`, `MultipleProblem`, `SolveProblem` (con `BossQuiz` como contexto) | Calidad de efectos; cómo ataca cada tipo de guardián; qué problema pone el jefe en cada fase. |
 | Comportamiento | **Command** | `FilterCommand`, `RootsCommand` | El programa del jugador deja órdenes que la máquina ejecuta y anima una por una. |
 | Comportamiento | **Template Method** | `CodeMachine` → `GateMachine`, `CribaMachine`, `MuralMachine`, `BeaconMachine` | Pasos fijos para correr el código. Cada máquina redefine `evaluate()` y `perform()`. |
-| Comportamiento | **Strategy** (datos) | `ChallengeDeck` + `"variants"` de `chambers.json`; `ParityFilter.rule`, `RootsTrial.form` | Cada partida sortea la regla de la Criba, la forma de la ecuación del Mural, las figuras de la Mesa y la regla del Sendero. |
+| Comportamiento | **Strategy** (datos) | `ChallengeDeck` + `"variants"` de `chambers.json`; `NumberRule` (reglas de números de la Criba y el Sendero), `RootsTrial.form` | Cada partida sortea la regla de la Criba, la forma de la ecuación del Mural, las figuras de la Mesa y la regla del Sendero. |
 | Comportamiento | **Interpreter** | `src/script_lang/` (Lexer, Parser, nodos, ScriptSandbox) | Ejecuta el código estilo Python que escribe el jugador. |
 
 ## Modo en línea

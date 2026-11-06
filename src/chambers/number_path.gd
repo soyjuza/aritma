@@ -30,7 +30,7 @@ const EDGE_GRACE := 4.0
 		cell = value
 		queue_redraw()
 
-var multiple := 3    # múltiplos de este número
+var rule: Dictionary = {"kind": "multiple", "k": 3}    # ver NumberRule
 var numbers: Dictionary = {}
 var path: Array[Vector2i] = []
 var broken: Dictionary = {}
@@ -43,8 +43,9 @@ var _font: Font = load(UIKit.PIXEL_FONT)
 
 
 ## Arma un sendero nuevo.
-func generate(rng: RandomNumberGenerator, p_multiple: int, extra_safe := 3, top := 60) -> void:
-	multiple = p_multiple
+## p_rule: la regla de las losas buenas, como {"kind": "prime"} (ver NumberRule).
+func generate(rng: RandomNumberGenerator, p_rule: Dictionary, extra_safe := 3, top := 60) -> void:
+	rule = p_rule
 	numbers.clear()
 	broken.clear()
 	path = _random_path(rng)
@@ -98,14 +99,11 @@ func _random_path(rng: RandomNumberGenerator) -> Array[Vector2i]:
 
 
 func _good_number(rng: RandomNumberGenerator, top: int) -> int:
-	return multiple * rng.randi_range(1, top / multiple)
+	return NumberRule.pick(rule, rng, 2, top, true)
 
 
 func _bad_number(rng: RandomNumberGenerator, top: int) -> int:
-	var n := multiple
-	while n % multiple == 0:
-		n = rng.randi_range(2, top)
-	return n
+	return NumberRule.pick(rule, rng, 2, top, false)
 
 
 func in_grid(c: Vector2i) -> bool:
@@ -113,7 +111,7 @@ func in_grid(c: Vector2i) -> bool:
 
 
 func is_safe(c: Vector2i) -> bool:
-	return numbers.has(c) and int(numbers[c]) % multiple == 0
+	return numbers.has(c) and NumberRule.accepts(rule, int(numbers[c]))
 
 
 func origin() -> Vector2:
@@ -175,7 +173,7 @@ func _draw() -> void:
 func _preview() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
-	generate(rng, 3)
+	generate(rng, {"kind": "multiple", "k": 3})
 
 
 func _draw_void() -> void:

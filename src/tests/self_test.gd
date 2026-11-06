@@ -275,14 +275,33 @@ func _run_filter(rules: ParityFilter, code: String) -> Array:
 	return errors
 
 
+## La condición correcta de la Criba para cada regla (lo que escribiría el jugador).
+func _criba_test(rule: Dictionary) -> String:
+	match String(rule.get("kind", "multiple")):
+		"greater":
+			return "n > %d" % int(rule.t)
+		"between":
+			return "n >= %d and n <= %d" % [int(rule.lo), int(rule.hi)]
+		"multiple_or_greater":
+			return "n %% %d == 0 or n > %d" % [int(rule.k), int(rule.t)]
+		"last_digit":
+			return "n %% 10 == %d" % int(rule.d)
+		"divisor":
+			return "%d %% n == 0" % int(rule.of)
+	return "n %% %d == 0" % int(rule.get("k", 2))
+
+
 ## Banco de variantes: cada partida sortea el ejercicio de cada sala.
 func _test_challenge_variants() -> void:
 	var seen := {}
-	for i in 60:
+	var total := 0
+	for room in [0, 1, 3]:
+		total += (game.data.chambers[room].get("variants", []) as Array).size()
+	for i in 150:
 		var picks := ChallengeDeck.roll(game.data.chambers, i + 1)
 		for room in [0, 1, 3]:
 			seen["%d:%s" % [room, picks[room].get("id", "")]] = true
-	_check(seen.size() == 9, "Variantes: en 60 partidas salen las 3 variantes de la Criba, del Mural y de la Mesa")
+	_check(seen.size() == total and total >= 15, "Variantes: en 150 partidas salen todas las variantes de la Criba, del Mural y de la Mesa (%d)" % total)
 	var a := ChallengeDeck.roll(game.data.chambers, 777)
 	var b := ChallengeDeck.roll(game.data.chambers, 777)
 	_check(JSON.stringify(a) == JSON.stringify(b), "Variantes: la misma semilla da los mismos ejercicios (el espectador ve lo mismo)")
@@ -290,39 +309,79 @@ func _test_challenge_variants() -> void:
 	var rng := RandomNumberGenerator.new()
 	var sorts_ok := true
 	var old_fails := true
-	for i in 40:
+	var kinds := {}
+	var no_zero := true
+	var edges_ok := true
+	for i in 150:
 		var room: Dictionary = ChallengeDeck.roll(game.data.chambers, i + 1)[0]
 		var rule: Dictionary = room.get("rule", {})
-		var test := "n > %d" % int(rule.get("t", 0)) if rule.get("kind") == "greater" else "n %% %d == 0" % int(rule.get("k", 2))
+		kinds[rule.get("kind")] = true
+		var test := _criba_test(rule)
 		var code := CRIBA_OK.replace("n % 2 == 0", test)
 		rng.seed = i
 		var rules := ParityFilter.new(room.get("rounds", []), rng, rule)
 		sorts_ok = sorts_ok and _run_filter(rules, code).is_empty() and not rules.failed()
+		for r in rules.rounds.size():
+			no_zero = no_zero and (NumberRule.allows_zero(rule) or not 0 in rules.rounds[r])
+			if r > 0:
+				for e in NumberRule.edges(rule):
+					var spec: Dictionary = room.rounds[r]
+					edges_ok = edges_ok and (e < int(spec.min) or e > int(spec.max) or e in rules.rounds[r])
 		if test != "n % 2 == 0":
 			rules = ParityFilter.new(room.get("rounds", []), rng, rule)
 			_run_filter(rules, CRIBA_OK)
 			old_fails = old_fails and rules.failed()
-	_check(sorts_ok, "Criba: en cada variante (pares, múltiplos de k, mayores que t) el programa correcto pasa")
+	_check(kinds.size() == 6, "Criba: salen las 6 clases de regla (múltiplo, mayor, entre, par o mayor, última cifra, divisor)")
+	_check(sorts_ok, "Criba: en cada variante el programa correcto pasa las 3 rondas")
 	_check(old_fails, "Criba: el programa de pares no sirve para las otras variantes")
-	var formulas := {"lineal": "(c - b) / a", "fraccion": "(c - b) * a", "parentesis": "c / a - b"}
+	_check(no_zero, "Criba: con divisores nunca sale el 0 (sería dividir entre cero)")
+	_check(edges_ok, "Criba: las rondas ocultas traen los números del borde (t, t + 1, lo, hi...)")
+	# Si se usa < en vez de <=, la variante "entre" lo nota
+	var strict_fails := true
+	for i in 30:
+		rng.seed = i
+		var rule := {"kind": "between", "lo": 10 + i % 3 * 5, "hi": 30 + i % 3 * 5}
+		var rounds: Array = game.data.chambers[0].variants.filter(func(v): return v.id == "entre")[0].rounds
+		var rules := ParityFilter.new(rounds, rng, rule)
+		_run_filter(rules, CRIBA_OK.replace("n % 2 == 0", "n > %d and n < %d" % [rule.lo, rule.hi]))
+		strict_fails = strict_fails and rules.failed()
+	_check(strict_fails, "Criba: en «entre», usar < en vez de <= falla en las rondas ocultas")
+	var formulas := {
+		"lineal": "def despejar(a, b, c):\n    return (c - b) / a\n",
+		"fraccion": "def despejar(a, b, c):\n    return (c - b) * a\n",
+		"parentesis": "def despejar(a, b, c):\n    return c / a - b\n",
+		"dos_lados": "def despejar(a, b, c, d):\n    return (d - b) / (a - c)\n",
+		"sin_solucion": "def despejar(a, b, c):\n    if a == 0:\n        return None\n    return (c - b) / a\n",
+	}
 	var sandbox := ScriptSandbox.new()
 	var forms_ok := true
 	var copy_fails := true
+	var forms_seen := {}
+	for v in game.data.chambers[1].get("variants", []):
+		forms_seen[String(v.get("form", "lineal"))] = true
 	for form in formulas:
-		var program := sandbox.run("def despejar(a, b, c):\n    return %s\n" % formulas[form], {}, 2000)
+		var program := sandbox.run(formulas[form], {}, 2000)
 		var old := sandbox.run(ROOTS_OK, {}, 2000)
-		var old_right := 0
+		var kinds_list := ["plus", "minus", "negative", "zero"] if form == "sin_solucion" else ["plus", "minus", "negative"]
+		var old_wrong := 0
 		for i in 60:
-			var c := RootsTrial.make_case(["plus", "minus", "negative"][i % 3], rng, form)
-			var answer := sandbox.call_function(program, "despejar", [c.a, c.b, c.c])
+			var c := RootsTrial.make_case(kinds_list[i % kinds_list.size()], rng, form)
+			var answer := sandbox.call_function(program, "despejar", RootsTrial.args(c, form))
 			forms_ok = forms_ok and answer[0] and RootsTrial.judge(c, answer[1]) == RootsTrial.Verdict.RIGHT
-			var copied := sandbox.call_function(old, "despejar", [c.a, c.b, c.c])
-			old_right += 1 if copied[0] and RootsTrial.judge(c, copied[1]) == RootsTrial.Verdict.RIGHT else 0
+			var copied := sandbox.call_function(old, "despejar", RootsTrial.args(c, form))
+			old_wrong += 0 if copied[0] and RootsTrial.judge(c, copied[1]) == RootsTrial.Verdict.RIGHT else 1
 		if form != "lineal":
-			copy_fails = copy_fails and old_right < 30
-	_check(forms_ok, "Mural: cada forma (ax + b = c, x/a + b = c, a(x + b) = c) se despeja con su fórmula")
+			# sin_solucion: la fórmula vieja falla justo en las ecuaciones con a = 0
+			copy_fails = copy_fails and old_wrong >= (15 if form == "sin_solucion" else 30)
+	_check(forms_seen.size() == formulas.size(), "Mural: hay una variante para cada forma (%d)" % formulas.size())
+	_check(forms_ok, "Mural: cada forma se resuelve con su función (también la de 4 números y la del if con None)")
 	_check(copy_fails, "Mural: la fórmula de ax + b = c no sirve para las otras formas")
 	_check(RootsTrial.equation(4, 3, 5, "fraccion") == "x/4 + 3 = 5" and RootsTrial.equation(3, -2, 15, "parentesis") == "3(x − 2) = 15", "Mural: las otras formas se escriben bien")
+	var two := {"a": 5, "b": 2, "c": 1, "d": -14, "x": -4}
+	_check(RootsTrial.case_equation(two, "dos_lados") == "5x + 2 = x − 14" and RootsTrial.call_text(two, "dos_lados") == "despejar(5, 2, 1, -14)", "Mural: ax + b = cx + d se escribe bien y se llama con 4 números")
+	var none_case := RootsTrial.make_case("zero", rng, "sin_solucion")
+	_check(none_case.a == 0 and none_case.b != none_case.c and RootsTrial.judge(none_case, null) == RootsTrial.Verdict.RIGHT and RootsTrial.judge(none_case, 0) == RootsTrial.Verdict.WRONG, "Mural: con a = 0 solo vale devolver None")
+	_check(RootsTrial.answer(null) == "sin x", "Mural: None se muestra como «sin x»")
 	var figures_ok := true
 	for v in game.data.chambers[3].get("variants", []):
 		for p in v.get("puzzles", game.data.chambers[3].get("puzzles", [])):
@@ -966,6 +1025,39 @@ func _test_mural() -> void:
 		return
 	game.dialog.close()
 	var machine := lvl.machine
+	# Cada variante del Mural, pasada por la máquina de verdad (sin animaciones)
+	var original: Dictionary = machine._data
+	var rng := RandomNumberGenerator.new()
+	var right := {
+		"lineal": "def despejar(a, b, c):\n    return (c - b) / a\n",
+		"fraccion": "def despejar(a, b, c):\n    return (c - b) * a\n",
+		"parentesis": "def despejar(a, b, c):\n    return c / a - b\n",
+		"dos_lados": "def despejar(a, b, c, d):\n    return (d - b) / (a - c)\n",
+		"sin_solucion": "def despejar(a, b, c):\n    if a == 0:\n        return None\n    return (c - b) / a\n",
+	}
+	var machine_ok := true
+	var messages_ok := true
+	for v in game.data.chambers[1].get("variants", []):
+		var only := (game.data.chambers[1] as Dictionary).duplicate(true)
+		only["variants"] = [v]
+		rng.seed = 3
+		machine._data = ChallengeDeck.resolve(only, rng)
+		machine.new_trial()
+		var form := String(machine._data.get("form", "lineal"))
+		var good := machine.evaluate(right[form], ScriptSandbox.new())
+		machine_ok = machine_ok and good.success
+		if not good.success:
+			print("    ", form, ": ", good.message, good.error)
+		if form != "lineal":
+			var bad := machine.evaluate(ROOTS_OK, ScriptSandbox.new())
+			machine_ok = machine_ok and not bad.success
+			messages_ok = messages_ok and bad.message.begins_with("despejar(") and not "{" in bad.message
+			if form == "sin_solucion":
+				messages_ok = messages_ok and "None" in bad.message
+	machine._data = original
+	machine.new_trial()
+	_check(machine_ok, "Mural: la máquina acepta la función correcta de cada variante y rechaza la de ax + b = c")
+	_check(messages_ok, "Mural: los mensajes de error dicen la llamada (despejar(...)) y en «sin solución» piden None")
 	var cases_before: Array = machine.trial.cases.duplicate(true)
 	game.open_codex(machine.session)
 	await _wait(0.6)
@@ -1207,10 +1299,10 @@ func _test_path_rules() -> void:
 	var ok := true
 	var few_safe := true
 	var numbers_ok := true
-	for i in 200:
+	var rules: Array = game.data.chamber_data(4).get("rules", [])
+	for i in 280:
 		rng.seed = i
-		var m := 3 + i % 2
-		stones.generate(rng, m, 3, 60)
+		stones.generate(rng, rules[i % rules.size()], 3, 60)
 		var path := stones.path
 		ok = ok and path[0].y == stones.rows - 1 and path[-1].y == 0 and stones.goal == path[-1]
 		for k in path.size():
@@ -1223,8 +1315,15 @@ func _test_path_rules() -> void:
 			numbers_ok = numbers_ok and stones.numbers[c] >= 2 and stones.numbers[c] <= 60
 		few_safe = few_safe and safe <= path.size() + 3
 	stones.free()
-	_check(ok, "Sendero: en 200 salas hay un camino de losas buenas, vecinas, de abajo hasta el núcleo")
+	_check(ok, "Sendero: en 280 salas (todas las reglas) hay un camino de losas buenas, vecinas, de abajo hasta el núcleo")
 	_check(few_safe and numbers_ok, "Sendero: fuera del camino hay a lo sumo 3 losas buenas; los números van de 2 a 60")
+	var kinds := {}
+	for r in rules:
+		kinds[r.get("kind")] = true
+	_check(kinds.size() >= 5, "Sendero: hay reglas distintas, no solo múltiplos (%d clases)" % kinds.size())
+	_check(NumberRule.is_prime(2) and NumberRule.is_prime(59) and not NumberRule.is_prime(1) and not NumberRule.is_prime(51), "Reglas: los primos se reconocen (2 y 59 sí; 1 y 51 no)")
+	_check(NumberRule.accepts({"kind": "divisor", "of": 60}, 12) and not NumberRule.accepts({"kind": "divisor", "of": 60}, 7) and not NumberRule.accepts({"kind": "divisor", "of": 60}, 0), "Reglas: divisores de 60 (12 sí; 7 y 0 no)")
+	_check(NumberRule.accepts({"kind": "multiple_and_greater", "k": 2, "t": 20}, 22) and not NumberRule.accepts({"kind": "multiple_and_greater", "k": 2, "t": 20}, 14) and not NumberRule.accepts({"kind": "multiple_and_greater", "k": 2, "t": 20}, 23), "Reglas: pares mayores que 20 (22 sí; 14 y 23 no)")
 
 
 ## La Sala 5 completa.
@@ -1237,7 +1336,7 @@ func _test_core() -> void:
 	await _walk_up_until(func(): return lvl._in_hall, 3.0)
 	game.dialog.close()
 	var stones := lvl.stones
-	_check(str(stones.multiple) in lvl.hud_line(), "Sendero: la regla de la sala está en el HUD")
+	_check(String(lvl._rule.get("text", "?")) in lvl.hud_line(), "Sendero: la regla de la sala está en el HUD")
 	# Losa mala
 	var bad := Vector2i(-1, -1)
 	for x in stones.cols:

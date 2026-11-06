@@ -1,6 +1,6 @@
 # UML completo (generado)
 
-Generado por `tools/generar_uml.py` a partir del código: **160 clases**, un diagrama
+Generado por `tools/generar_uml.py` a partir del código: **163 clases**, un diagrama
 por carpeta de `src/`. Las flechas `<|--` son herencia. Las relaciones entre paquetes
 (composición, uso, eventos) están en el diagrama principal de `docs/ARQUITECTURA.md`.
 Para actualizarlo: `python3 tools/generar_uml.py`.
@@ -37,6 +37,8 @@ classDiagram
         +apply_match_rules(config)
         +admin_paused() bool
         +net_state() Dictionary
+        +codex_state() Dictionary
+        +resume_online_match(resume)
         +leave_online_match()
     }
 ```
@@ -99,6 +101,14 @@ classDiagram
         <<RefCounted>>
         +penalize(seconds)
     }
+    class NumberRule {
+        <<RefCounted>>
+        +accepts(rule, n) bool$
+        +edges(rule) Array$
+        +allows_zero(rule) bool$
+        +pick(rule, rng, low, high, want) int$
+        +is_prime(n) bool$
+    }
     class PlayerHealth {
         <<RefCounted>>
         +hearts() int
@@ -138,6 +148,7 @@ classDiagram
 | `GameEvents` | `RefCounted` | `src/core/game_events.gd` |
 | `InputSetup` | `RefCounted` | `src/core/input_setup.gd` |
 | `LifeRules` | `RefCounted` | `src/core/life_rules.gd` |
+| `NumberRule` | `RefCounted` | `src/core/number_rule.gd` |
 | `PlayerHealth` | `RefCounted` | `src/core/player_health.gd` |
 | `SaveRepository` | `RefCounted` | `src/core/save_repository.gd` |
 | `SecretCodeDetector` | `RefCounted` | `src/core/secret_code_detector.gd` |
@@ -342,6 +353,10 @@ classDiagram
         +setup(p_bus, p_kit, p_settings)
         +change(next)
         +dir_name() String
+        +net_pack() Dictionary
+        +net_apply(a, b, w)
+        +net_vanish()
+        +net_restore()
         +wake()
         +drop(at)
         +restore()
@@ -444,6 +459,9 @@ classDiagram
         +phase_hp() int
         +can_be_hit() bool
         +take_hit(amount, direction)
+        +net_pack() Dictionary
+        +net_apply(a, b, w)
+        +net_hide()
         +publish(event)
         +player() PlayerController
         +return_home()
@@ -676,7 +694,7 @@ classDiagram
     }
     class NumberPath {
         <<Node2D>>
-        +generate(rng, p_multiple, extra_safe, top)
+        +generate(rng, p_rule, extra_safe, top)
         +in_grid(c) bool
         +is_safe(c) bool
         +origin() Vector2
@@ -688,7 +706,7 @@ classDiagram
     }
     class ParityFilter {
         <<RefCounted>>
-        +make_round(spec, rng) Array
+        +make_round(spec, rng, with_edge) Array
         +accepts(value) bool
         +start_round(index)
         +failed() bool
@@ -729,6 +747,9 @@ classDiagram
     class RootsTrial {
         <<RefCounted>>
         +make_case(kind, rng, p_form) Dictionary$
+        +args(case, p_form) Array$
+        +call_text(case, p_form) String$
+        +case_equation(case, p_form) String$
         +equation(a, b, c, p_form) String$
         +answer(value) String$
         +judge(case, value) Verdict$
@@ -1012,6 +1033,7 @@ classDiagram
     class OnlineState {
         <<State>>
         +enter(_params)
+        +touch_field() TextField
         +handle_key(event) bool
         +handle_input(actions)
         +draw(ui)
@@ -1031,6 +1053,7 @@ classDiagram
         +exit()
         +timer_runs() bool
         +handle_input(actions)
+        +can_interact() bool
         +update(delta)
         +draw(ui)
     }
@@ -1134,10 +1157,12 @@ classDiagram
 classDiagram
     class CodexPanel {
         <<Control>>
+        +fit_keyboard(fraction)
         +fold(folded)
         +open(session, keys_text, side)
         +close() String
         +log_line(text, color)
+        +session_log() Array
     }
     class CodexSession {
         <<RefCounted>>
@@ -1193,7 +1218,13 @@ classDiagram
     class TextField {
         <<RefCounted>>
         +feed(event) bool
+        +set_text(value)
         +draw(ui, r, focused, placeholder)
+    }
+    class TouchControls {
+        <<Control>>
+        +wanted() bool$
+        +typing() bool
     }
     class UIKit {
         <<RefCounted>>
@@ -1235,6 +1266,7 @@ classDiagram
 | `OverlayCanvas` | `Control` | `src/ui/overlay_canvas.gd` |
 | `ScreenFade` | `RefCounted` | `src/ui/screen_fade.gd` |
 | `TextField` | `RefCounted` | `src/ui/text_field.gd` |
+| `TouchControls` | `Control` | `src/ui/touch_controls.gd` |
 | `UIKit` | `RefCounted` | `src/ui/ui_kit.gd` |
 
 ## `src/world/` — Piezas de los mapas
