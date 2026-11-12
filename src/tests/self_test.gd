@@ -21,6 +21,7 @@ func run() -> void:
 	_test_quality()
 	_test_challenge_variants()
 	_test_health_and_alarm_rules()
+	_test_match_stats()
 	await _test_movement()
 	await _test_touch()
 	await _test_town_and_gate()
@@ -641,6 +642,24 @@ func _test_health_and_alarm_rules() -> void:
 		repeats = repeats or hard.keys[i] == hard.keys[i - 1]
 	_check(not repeats and hard.keys.all(func(k): return k in ["A", "S", "D", "F", "J", "K", "L"]), "Reto de teclas: teclas A S D F J K L, sin repetir dos seguidas")
 	alarm.free()
+
+
+## Los contadores que arman la clasificación final en línea.
+func _test_match_stats() -> void:
+	game.start_new_game(1)
+	game.bus.publish(GameEvents.MACHINE_FAILED, {"message": ""})
+	game.bus.publish(GameEvents.MINE_EXPLODED)
+	game.bus.publish(GameEvents.SLAB_COLLAPSED)
+	game.bus.publish(GameEvents.KEYS_LOST)
+	game.bus.publish(GameEvents.PLAYER_HURT, {"halves": 9, "amount": 1})
+	game.bus.publish(GameEvents.GUARDIAN_DEFEATED)
+	game.bus.publish(GameEvents.GUARDIAN_DEFEATED)
+	_check(game.match_errors == 4, "Clasificación: máquina, mina, losa y teclas cuentan como errores")
+	_check(game.match_hits == 1 and game.match_kills == 2, "Clasificación: se cuentan los golpes recibidos y los guardianes vencidos")
+	var state := game.net_state()
+	_check(int(state.er) == 4 and int(state.ht) == 1 and int(state.ks) == 2 and int(state.out) == 0, "En línea: los contadores viajan en el estado del jugador")
+	game.start_new_game(1)
+	_check(game.match_errors == 0 and game.match_hits == 0 and game.match_kills == 0 and game.match_outs == 0, "Partida nueva: los contadores vuelven a 0")
 
 
 ## Sin corazones y con un minuto o menos se acaba el juego.

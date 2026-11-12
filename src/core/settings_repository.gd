@@ -7,6 +7,7 @@ signal applied
 const PATH := "user://ajustes.cfg"
 
 var values: Dictionary
+var window_locked := false    # en línea la ventana no se toca (pantalla completa obligada)
 var _audio: AudioService
 
 
@@ -42,7 +43,7 @@ func save() -> void:
 func apply() -> void:
 	_audio.set_volume(AudioService.BUS_MUSIC, get_int("music"))
 	_audio.set_volume(AudioService.BUS_SFX, get_int("sfx"))
-	if DisplayServer.get_name() != "headless":
+	if DisplayServer.get_name() != "headless" and not window_locked:
 		var want := DisplayServer.WINDOW_MODE_FULLSCREEN if get_bool("full") else DisplayServer.WINDOW_MODE_WINDOWED
 		var current := DisplayServer.window_get_mode()
 		var windowed_like := current == DisplayServer.WINDOW_MODE_WINDOWED or current == DisplayServer.WINDOW_MODE_MAXIMIZED

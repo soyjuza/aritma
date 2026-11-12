@@ -30,6 +30,13 @@ var fixed_challenges := false    # pruebas: siempre la primera variante
 var online: OnlineSession
 var in_online_match := false     # jugando una partida del admin
 var touch: TouchControls         # controles en pantalla (Android); null con teclado
+var screen_locked := false       # en línea: pantalla completa obligada (solo PC)
+
+# Contadores de la partida, para la clasificación final
+var match_errors := 0            # errores: máquina, mina, losa o reto de teclas
+var match_hits := 0              # veces que Tala recibió daño
+var match_kills := 0             # guardianes derrotados
+var match_outs := 0              # veces que salió del juego (Alt+Tab) en línea
 
 var _rules_override: Dictionary = {}    # castigos que eligió el admin
 
@@ -71,6 +78,10 @@ func _ready() -> void:
 		CameraShakeObserver.new(bus, rig, data.setting("camera_shake", {})),
 	]
 	bus.subscribe(GameEvents.TIME_UP, func(_p): finish(false))
+	for event in [GameEvents.MACHINE_FAILED, GameEvents.MINE_EXPLODED, GameEvents.SLAB_COLLAPSED, GameEvents.KEYS_LOST]:
+		bus.subscribe(event, func(_p): match_errors += 1)
+	bus.subscribe(GameEvents.PLAYER_HURT, func(_p): match_hits += 1)
+	bus.subscribe(GameEvents.GUARDIAN_DEFEATED, func(_p): match_kills += 1)
 	fade = ScreenFade.new(get_tree())
 	rules = LifeRules.new(self)
 	online = OnlineSession.new(String(data.setting("server_url", "")))
@@ -105,6 +116,7 @@ func _create_states() -> StateMachine:
 	m.add("lobby", LobbyState.new(self))
 	m.add("admin", AdminState.new(self))
 	m.add("watch", WatchState.new(self))
+	m.add("ranking", RankingState.new(self))
 	return m
 
 
@@ -146,6 +158,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.is_action_pressed(action):
 			actions.append(action)
 	if "fullscreen" in actions:
+		if screen_locked:
+			notify([data.message("net_screen_locked")], 3.0)
+			return
 		settings.set_value("full", not settings.get_bool("full"))
 		settings.save()
 		return
@@ -307,6 +322,10 @@ func notify(lines: Array, seconds := 5.0, good := false) -> void:
 func start_new_game(seed_value := 0) -> void:
 	challenge_seed = seed_value if seed_value != 0 else randi_range(1, 2147483646)
 	data.roll_challenges(challenge_seed, fixed_challenges)
+	match_errors = 0
+	match_hits = 0
+	match_kills = 0
+	match_outs = 0
 	timer.reset()
 	health.refill()
 	Engine.time_scale = 1.0
@@ -346,6 +365,7 @@ func finish(won: bool, ending := "") -> void:
 	dialog.close()
 	if in_online_match:
 		in_online_match = false
+		unlock_screen()
 		online.report(1.0, net_state())
 		online.report_done(won, timer.elapsed())
 	machine.change("end", {"won": won, "ending": ending})
@@ -403,6 +423,10 @@ func net_state() -> Dictionary:
 		"h": health.halves,
 		"mh": health.max_halves,
 		"tl": roundi(timer.remaining),
+		"er": match_errors,
+		"ht": match_hits,
+		"ks": match_kills,
+		"out": match_outs,
 		"sd": challenge_seed,
 		"ok": (room != null and room.solved) or (town != null and town.gate.is_solved),
 		"m": machine.current_name,    # qué está haciendo (play, codex, puzzle, quiz…)
@@ -438,15 +462,47 @@ func resume_online_match(resume: Dictionary) -> void:
 	timer.remaining = maxf(1.0, float(resume.get("tl", timer.limit)))
 	if resume.has("h"):
 		health.halves = clampi(int(resume.h), 1, health.max_halves)
+	# Los contadores de la clasificación siguen donde iban
+	match_errors = int(resume.get("er", 0))
+	match_hits = int(resume.get("ht", 0))
+	match_kills = int(resume.get("ks", 0))
+	match_outs = int(resume.get("out", 0))
 	notify([data.message("net_resumed", {"room": place_title(), "time": CountdownTimer.format(timer.remaining)})], 6.0, true)
 
 
 ## El jugador deja la partida en línea (pausa → salir).
 func leave_online_match() -> void:
 	in_online_match = false
+	unlock_screen()
 	timer.stop()
 	online.leave()
 	apply_match_rules({})
+
+
+## En línea el juego queda en pantalla completa y no se puede quitar (solo PC).
+## La idea es que nadie busque las respuestas en otra ventana.
+func lock_screen() -> void:
+	if touch != null or DisplayServer.get_name() == "headless":
+		return
+	screen_locked = true
+	settings.window_locked = true
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+
+
+## Al terminar vuelve la ventana que el jugador tenía en sus ajustes.
+func unlock_screen() -> void:
+	if not screen_locked:
+		return
+	screen_locked = false
+	settings.window_locked = false
+	settings.apply()
+
+
+## Salió del juego (Alt+Tab, otra ventana): se cuenta y el admin lo ve.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and in_online_match and touch == null:
+		match_outs += 1
+		notify([data.message("net_out_warn")], 4.0)
 
 
 func _wire_online() -> void:
@@ -470,10 +526,12 @@ func _on_time_added(seconds: int) -> void:
 	notify([data.message("net_time_added", {"s": seconds})], 3.0, true)
 
 
-## El admin terminó la partida antes de tiempo.
+## El admin terminó la partida: todos pasan a la clasificación final.
 func _on_match_ended() -> void:
 	if in_online_match:
 		finish(false, "ending_match_over")
+	elif online.active() and machine.current_name in ["watch", "admin"]:
+		machine.change("ranking")
 
 
 ## Otra partida en la misma sala: de vuelta a la espera.
@@ -495,6 +553,7 @@ func _on_match_started(seed_value: int, config: Dictionary, resume: Dictionary =
 		return
 	apply_match_rules(config)
 	in_online_match = true
+	lock_screen()
 	machine.change("play", {"mode": "online", "seed": seed_value, "skip_town": bool(config.get("skip_town", false)), "resume": resume})
 
 
@@ -502,12 +561,13 @@ func _on_match_started(seed_value: int, config: Dictionary, resume: Dictionary =
 func _on_rejoined_finished() -> void:
 	in_online_match = false
 	apply_match_rules(online.config)
-	machine.change("watch")
+	machine.change("ranking" if online.phase == "ended" else "watch")
 
 
 ## Se acabó lo en línea (expulsado, sala cerrada): al título.
 func _drop_online(message_key: String) -> void:
 	in_online_match = false
+	unlock_screen()
 	timer.stop()
 	apply_match_rules({})
 	machine.change("title")

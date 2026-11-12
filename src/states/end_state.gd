@@ -22,8 +22,11 @@ func enter(params: Dictionary = {}) -> void:
 func handle_input(actions: Array) -> void:
 	if _shown > 1.5 and ("accept" in actions or "cancel" in actions or "interact" in actions):
 		game.bus.publish(GameEvents.MENU_MOVE)
-		# En línea: a ver a los demás (o la clasificación)
-		game.machine.change("watch" if game.online.is_player() else "title")
+		# En línea: a ver a los demás (o la clasificación final si la partida ya acabó)
+		if game.online.is_player():
+			game.machine.change("ranking" if game.online.phase == "ended" else "watch")
+		else:
+			game.machine.change("title")
 
 
 func update(delta: float) -> void:
@@ -55,5 +58,6 @@ func draw(ui: UIKit) -> void:
 	if _shown > 1.5:
 		var hint := "ending_continue"
 		if game.online.is_player():
-			hint = "ending_online_watch" if bool(game.online.config.get("spectate", true)) else "ending_online_board"
+			var watchable: bool = bool(game.online.config.get("spectate", true)) and game.online.phase != "ended"
+			hint = "ending_online_watch" if watchable else "ending_online_board"
 		ui.text_centered(game.data.message(hint), s.y - 60, 20, UIKit.MUTED)

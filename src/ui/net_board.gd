@@ -46,6 +46,10 @@ static func draw(ui: UIKit, r: Rect2, players: Array, data: DataRepository, sele
 		if not bool(p.get("online", true)):
 			name += " " + data.message("net_offline_mark")
 		ui.text(name, Vector2(cols[1], ty), 20, UIKit.GOLD if is_selected else UIKit.TEXT, "bold")
+		# Salió del juego (Alt+Tab): el admin lo ve en rojo al lado del nombre
+		var outs := int(p.get("outs", 0))
+		if outs > 0:
+			ui.text(data.message("net_out_mark", {"n": outs}), Vector2(cols[1] + ui.measure(name, 20, "bold") + 10, ty + 2), 14, UIKit.ALERT, "bold")
 		ui.text(data.message("net_status_" + status), Vector2(cols[2], ty), 18, STATUS_COLORS.get(status, UIKit.TEXT), "bold")
 		if show_live and status != "lobby":
 			ui.text(room_name(data, int(p.get("chamber", -1))), Vector2(cols[3], ty), 18)

@@ -89,6 +89,20 @@ async function main() {
   const board = await admin.next("board", 1500);
   check(board.players[0].name === "Ana" && board.players[0].chamber === 2, "Tablero: va primero quien llegó más lejos");
 
+  // Los dos en la misma sala: desempatan los golpes, y después los errores
+  ana.say({ t: "state", s: { c: 2, x: 10, y: 20, a: "idle_down", h: 8, mh: 10, tl: 490, ht: 5, er: 0, ks: 0 } });
+  beto.say({ t: "state", s: { c: 2, x: 0, y: 0, a: "idle_down", h: 10, mh: 10, tl: 510, ht: 1, er: 3, ks: 2, out: 2 } });
+  await wait(600);
+  admin.drain();
+  const tie = await admin.next("board", 1500);
+  check(tie.players[0].name === "Beto", "Clasificación: en la misma sala va primero quien perdió menos vida");
+  check(tie.players[0].outs === 2 && tie.players[0].kills === 2, "Tablero: golpes, errores, guardianes y salidas del juego llegan al admin");
+  ana.say({ t: "state", s: { c: 2, x: 10, y: 20, a: "idle_down", h: 8, mh: 10, tl: 490, ht: 1, er: 1, ks: 0 } });
+  await wait(600);
+  admin.drain();
+  const tie2 = await admin.next("board", 1500);
+  check(tie2.players[0].name === "Ana", "Clasificación: con los mismos golpes va primero quien se equivocó menos");
+
   admin.say({ t: "watch", id: joined.id });
   await admin.next("snap");
   ana.say({ t: "state", s: { c: 3, x: 50, y: 60, a: "run_left", h: 8, mh: 10, tl: 480 } });
@@ -123,7 +137,7 @@ async function main() {
   check(again1.resumed === true && again1.seed === startA.seed, "Reconectar: quien estaba jugando recibe otra vez su «start» con la misma semilla");
 
   // Salir y volver con el mismo nombre: sigue donde iba y el reloj siguió corriendo
-  ana.say({ t: "state", s: { c: 3, x: 51, y: 60, a: "idle_down", h: 6, mh: 10, tl: 300, ok: true } });
+  ana.say({ t: "state", s: { c: 3, x: 51, y: 60, a: "idle_down", h: 6, mh: 10, tl: 300, ok: true, ht: 3, er: 2, ks: 5, out: 1 } });
   await wait(50);
   ana.say({ t: "leave" });
   ana.close();
@@ -134,6 +148,7 @@ async function main() {
   const back1 = await ana.next("start");
   check(rejoined.id === joined.id && back1.seed === startA.seed, "Volver: con el mismo nombre recupera su puesto y su semilla");
   check(back1.resume.c === 3 && back1.resume.h === 6 && back1.resume.ok === true, "Volver: sigue en la misma sala, con sus corazones");
+  check(back1.resume.ht === 3 && back1.resume.er === 2 && back1.resume.ks === 5 && back1.resume.out === 1, "Volver: los contadores de la clasificación vuelven con él");
   check(back1.resume.tl <= 299 && back1.resume.tl >= 297, "Volver: el reloj siguió corriendo mientras no estaba");
   const imposter = await client();
   imposter.say({ t: "join", code: created.code, name: "Ana" });
@@ -154,6 +169,7 @@ async function main() {
   admin.say({ t: "end" });
   const ended = await ana.next("ended");
   check(ended.players[0].name === "Ana" && ended.players[0].status === "won", "Fin: en la tabla final la ganadora va primero");
+  check(ended.players[0].hits === 3 && ended.players[0].errors === 2 && ended.players[0].kills === 5, "Fin: la tabla final trae los golpes, errores y guardianes de cada uno");
 
   beto.close();
   await wait(50);

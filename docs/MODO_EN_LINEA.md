@@ -71,8 +71,9 @@ Detalles:
 
 ## 3. Modo en línea: cómo se usa
 
-Menú principal → **EN LÍNEA**. Ahí se escriben el nombre, el código de la sala y la dirección del
-servidor. El nombre y la dirección se recuerdan en `user://en_linea.cfg`.
+Menú principal → **EN LÍNEA**. Ahí se escriben el nombre y el código de la sala. El nombre se
+recuerda en `user://en_linea.cfg`. La dirección de la conexión viene de `data/config.json`
+(`server_url`) y no se ve en el juego.
 
 ### El admin
 
@@ -104,14 +105,35 @@ servidor. El nombre y la dirección se recuerdan en `user://en_linea.cfg`.
 3. En línea **la pausa no detiene el reloj** (sería trampa) y **no se puede guardar**. Salir desde
    la pausa abandona la partida.
 4. La pausa del admin congela el juego y el reloj, y muestra «PAUSA DEL ADMIN».
-5. Al ganar o perder, **Enter** lleva al modo espectador: la clasificación y los demás en vivo,
-   si el admin lo permite.
-6. Si se cae la red, el juego se reconecta solo con una clave y sigue en la misma sala.
+5. En PC, al empezar la partida el juego **se pone en pantalla completa y no deja quitarla**
+   hasta terminar (ni con F11 ni desde ajustes). Si el jugador se sale del juego (Alt+Tab),
+   se le avisa, se cuenta y al admin le sale en rojo al lado del nombre: *salió x2*. En celular
+   no aplica. Es para que nadie busque las respuestas en otra ventana.
+6. Al ganar o perder, **Enter** lleva al modo espectador: los demás en vivo, si el admin lo
+   permite.
+7. Si se cae la red, el juego se reconecta solo con una clave y sigue en la misma sala. Los
+   contadores (errores, golpes, guardianes) vuelven con él.
 
-### Clasificación
+### Clasificación final
 
-Primero los que ganaron, ordenados por menos tiempo usado. Después los demás, por la sala a la
-que llegaron y, si empatan, por el tiempo que les queda.
+Cuando el admin pulsa **TERMINAR PARTIDA**, a todos (jugadores y admin) les sale la pantalla
+**CLASIFICACIÓN FINAL** (`src/states/ranking_state.gd`), con los 3 primeros en oro, plata y
+bronce. La idea es premiar a los 3 primeros en clase, así que el orden intenta dejar los
+menores empates posibles. Lo decide el servidor (`compare()` en `server/server.js`), del
+criterio más importante al menos:
+
+1. **Ganar la partida** (y entre ganadores, **menos tiempo usado**).
+2. **Hasta qué sala llegó.**
+3. **Menos veces que perdió vida** (golpes recibidos).
+4. **Menos errores** (código rechazado, mina pisada, losa rota, reto de teclas perdido).
+5. **Más guardianes vencidos.**
+6. **Más tiempo en el reloj.**
+
+Quien se quedó en espera sin jugar va de último. La tabla muestra: puesto, nombre (con
+*salió xN* en rojo si se salió del juego), hasta dónde llegó (con el tiempo si ganó), golpes,
+errores y guardianes. El admin vuelve al panel con ESC (para OTRA PARTIDA o CERRAR SALA); el
+jugador sale de la sala con ESC. Los contadores los lleva el juego del jugador
+(`match_errors`, `match_hits`, `match_kills`, `match_outs` en `game.gd`) y viajan en su estado.
 
 ## 4. Arquitectura
 
@@ -169,7 +191,7 @@ conexión en peleas con muchos enemigos.
 | Archivo | Qué hace |
 |---|---|
 | `server/server.js` | Servidor de salas (Node.js + `ws`). Puerto en `PORT` (8080 por defecto). |
-| `server/test.js` | 20 pruebas del servidor (`npm test`). |
+| `server/test.js` | 33 pruebas del servidor (`npm test`). |
 | `src/net/net_client.gd` | `NetClient`: WebSocket. Mensajes JSON con el campo `"t"`. |
 | `src/net/online_session.gd` | `OnlineSession` (Facade): rol, sala, tablero, espectador, reconexión. Avisa con señales. |
 | `src/net/watch_view.gd` | `WatchView`: vista en vivo (carga la sala, mueve el fantasma, dibuja el panel). |
@@ -178,10 +200,11 @@ conexión en peleas con muchos enemigos.
 | `src/states/lobby_state.gd` | Sala de espera del jugador. |
 | `src/states/admin_state.gd` | Panel del admin (configuración, controles, lista, vista en vivo). |
 | `src/states/watch_state.gd` | Espectador para el jugador que ya terminó. |
+| `src/states/ranking_state.gd` | Pantalla CLASIFICACIÓN FINAL (oro, plata y bronce para los 3 primeros). |
 | `src/ui/text_field.gd` | Campo de texto para la interfaz dibujada (admite CTRL+V). |
 | `src/ui/net_board.gd` | Tabla de jugadores (puesto, nombre, estado, sala, tiempo, corazones). |
 | `src/core/challenge_deck.gd` | Sorteo de variantes. |
-| `src/tests/net_test.gd` | 38 pruebas en línea contra un servidor real. |
+| `src/tests/net_test.gd` | 42 pruebas en línea contra un servidor real. |
 | `src/net/world_sync.gd` | Manda los enemigos, orbes y el jefe al espectador y los dibuja como títeres. |
 | `src/game.gd` | Crea `OnlineSession` y conecta sus señales. Además: `apply_match_rules`, `net_state`, `admin_paused`, `load_watch_level`, `show_town` y la semilla de los ejercicios. |
 | `src/states/{menu,play,pause,end}_state.gd` | Opción EN LÍNEA, modo `"online"`, pausa sin guardar y con reloj corriendo, Enter → espectador. |
@@ -211,6 +234,10 @@ El estado `s` de un jugador tiene estos campos:
 | `hop` | altura del salto |
 | `h`, `mh` | medios corazones y máximo |
 | `tl` | tiempo que le queda |
+| `er` | errores (máquina, mina, losa, reto de teclas) |
+| `ht` | veces que recibió daño |
+| `ks` | guardianes derrotados |
+| `out` | veces que salió del juego (Alt+Tab) |
 | `sd` | semilla de sus ejercicios |
 | `ok` | si ya resolvió la sala |
 
@@ -230,12 +257,12 @@ Godot 4.4.1 no está en el PATH: `C:\Users\SENA\Godot\Godot_v4.4.1-stable_win64_
 cd server
 npm install
 npm start                      # puerto 8080
-npm test                       # 20 pruebas
+npm test                       # 33 pruebas
 
 # Juego (desde la raíz)
 godot --headless --path . --import                    # después de crear clases nuevas (class_name)
-godot --headless --path . -- --selftest               # 173 pruebas
-godot --headless --path . -- --nettest=ws://127.0.0.1:8080          # 38 pruebas en línea
+godot --headless --path . -- --selftest               # 192 pruebas
+godot --headless --path . -- --nettest=ws://127.0.0.1:8080          # 42 pruebas en línea
 godot --path . -- "--nettest=ws://127.0.0.1:8080,C:/carpeta"         # además guarda capturas
 ```
 
@@ -250,6 +277,8 @@ crea la sala (admin) y la otra se une con el código.
   GitHub conectado; ver README). Las 28 pruebas en línea pasan contra Railway:
   `godot --headless --path . -- --nettest=wss://servidor-salas-production.up.railway.app`.
 - ~~Mostrar en la vista en vivo el Códice o los guardianes del otro jugador~~ **Hecho.**
-- Volver a desplegar el servidor en Railway (tiene el límite viejo de 4 KB por mensaje).
+- Volver a desplegar el servidor en Railway (`railway up --ci` desde `server/`): el que está
+  publicado no tiene la clasificación nueva (golpes, errores, guardianes, salidas) ni el límite
+  de 16 KB por mensaje. Sin eso, la tabla final sale con todo en 0.
 - Los `.import`, `.tres`, `main.tscn` y `project.godot` que aparecen modificados en git son solo
   cambios de fin de línea del editor. No se subieron.

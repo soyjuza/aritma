@@ -21,7 +21,7 @@ construía por código al ejecutar el juego.
 | `scenes/enemigos/` | Los guardianes de la tumba: `centinela.tscn` (caballero dorado, golpea de cerca), `hechicero.tscn` (lanza orbes de lejos, `orbe.tscn`) y `runico.tscn` (explota). `scenes/objetos/estatua_guardian.tscn` es el mismo guardián dormido sobre su pedestal. |
 | `assets/tiles/` | TileSets: `suelo.tres` (se pisa) y `muros.tres` (todo lo que se pinta ahí es sólido y hace sombra). |
 | `src/` | Scripts: reglas, patrones de diseño, intérprete del Códice. `src/net/` es el modo en línea. |
-| `server/` | Servidor de salas en línea (Node.js). Ver **Modo en línea**. |
+| `server/` | La parte que conecta a los jugadores en línea (Node.js). Cómo funciona por dentro: `docs/MODO_EN_LINEA.md`. |
 | `data/` | Textos, salas y configuración (JSON): nada de esto está escrito a mano en el código. |
 | `docs/ARQUITECTURA.md` | Patrones de diseño, SOLID y el diagrama UML de las clases principales. |
 | `docs/UML_COMPLETO.md` | El UML de **todas** las clases, generado desde el código con `python3 tools/generar_uml.py`. |
@@ -81,32 +81,20 @@ Menú principal → **EN LÍNEA**.
   en vivo y **SUPR** lo saca de la sala. El admin no juega.
 - **Los jugadores** escriben su nombre y el código y eligen **UNIRSE A LA SALA**. Cuando el admin
   inicia, todos empiezan a la vez. En línea la pausa no detiene el reloj y no se puede guardar.
-- **Al terminar** (ganar o perder) se puede mirar en vivo a los que siguen jugando y ver la
-  clasificación: primero los que ganaron (menos tiempo) y después los que llegaron más lejos.
+- **En PC la partida se juega en pantalla completa obligada**: no se puede quitar hasta
+  terminar. Si el jugador se sale del juego (Alt+Tab, otra ventana), se le avisa y al admin
+  le aparece en rojo al lado del nombre (*salió x2*). Es para que nadie busque las respuestas
+  en otra ventana.
+- **Al terminar** (ganar o perder) se puede mirar en vivo a los que siguen jugando.
+- **Cuando el admin termina la partida**, a todos les sale la **CLASIFICACIÓN FINAL**, con los
+  3 primeros en oro, plata y bronce. El orden, del criterio más importante al menos:
+  1. Ganar la partida (y entre ganadores, menos tiempo).
+  2. Hasta qué sala llegó.
+  3. Menos veces que perdió vida (golpes recibidos).
+  4. Menos errores (código rechazado, minas, losas, reto de teclas).
+  5. Más guardianes vencidos.
+  6. Más tiempo en el reloj.
 - Si se cae la red, el juego se vuelve a conectar solo y sigue en la misma sala.
-
-### El servidor (`server/`)
-```
-cd server
-npm install
-npm start          # escucha en el puerto 8080 (o en PORT)
-npm test           # 20 pruebas del servidor
-```
-El servidor está publicado en Railway: **`wss://servidor-salas-production.up.railway.app`**. Esa
-es la dirección que trae el juego por defecto (`server_url` en `data/config.json`). Se puede
-cambiar en la pantalla EN LÍNEA (por ejemplo, a `ws://localhost:8080` para probar en un solo PC).
-
-El proyecto de Railway no está conectado a GitHub: los cambios del servidor no se publican solos
-con cada push. Para publicarlos:
-```
-npm i -g @railway/cli        # una sola vez
-railway login                # con la cuenta dueña del proyecto aritma-servidor
-cd server
-railway link                 # elegir aritma-servidor / production / servidor-salas (una sola vez)
-railway up --ci              # sube server/ y lo despliega
-```
-En Railway, el servicio `servidor-salas` tiene la carpeta raíz `/` (porque solo se sube
-`server/`), `PORT=8080` y revisión de salud en `/`, y no se suspende.
 
 ## Guardianes, corazones y castigos de tiempo
 - Cada vez que una máquina rechaza el código (también por un error de escritura) sube la
@@ -131,7 +119,7 @@ En Railway, el servicio `servidor-salas` tiene la carpeta raíz `/` (porque solo
 
 ## Pruebas automáticas
 ```
-godot --path . -- --selftest                       # 187 pruebas de reglas y del recorrido completo
-godot --path . -- --nettest=ws://127.0.0.1:8080    # 38 pruebas en línea (con el servidor encendido)
+godot --path . -- --selftest                       # 192 pruebas de reglas y del recorrido completo
+godot --path . -- --nettest=ws://127.0.0.1:8080    # 42 pruebas en línea (con el servidor encendido; se arranca con "npm start" en server/)
 godot --path . -- --recorrido=/carpeta[:sala2|:sala3|:sala4|:sala5|:jefe]  # capturas del camino del jugador
 ```

@@ -73,30 +73,50 @@ function cleanName(raw) {
 
 function playerView(p) {
   const s = p.state || {};
+  const stat = (v) => (Number.isFinite(v) ? v : 0);
   return {
     id: p.id,
     name: p.name,
     status: p.status,
     online: !!(p.ws && p.ws.readyState === p.ws.OPEN),
     chamber: Number.isFinite(s.c) ? s.c : -1,
-    hearts: Number.isFinite(s.h) ? s.h : 0,
-    max_hearts: Number.isFinite(s.mh) ? s.mh : 0,
-    time_left: Number.isFinite(s.tl) ? s.tl : 0,
+    hearts: stat(s.h),
+    max_hearts: stat(s.mh),
+    time_left: stat(s.tl),
     used: p.result ? p.result.used : 0,
     seed: p.seed,
+    hits: stat(s.ht),    // veces que recibió daño
+    errors: stat(s.er),  // errores: máquina, mina, losa o reto de teclas
+    kills: stat(s.ks),   // guardianes derrotados
+    outs: stat(s.out),   // veces que salió del juego (Alt+Tab)
   };
 }
 
-// Primero los que ganaron (menos tiempo), después los que llegaron más lejos.
+// El orden de la clasificación, del criterio más importante al menos:
+// 1. Ganar la partida (y entre ganadores, menos tiempo usado).
+// 2. La sala a la que llegó.
+// 3. Menos veces que perdió vida (golpes recibidos).
+// 4. Menos errores.
+// 5. Más guardianes vencidos.
+// 6. Más tiempo en el reloj.
+// Quien nunca jugó (se quedó en espera) va de último.
+function compare(a, b) {
+  const playedA = a.status !== "lobby";
+  const playedB = b.status !== "lobby";
+  if (playedA !== playedB) return playedA ? -1 : 1;
+  const wonA = a.status === "won";
+  const wonB = b.status === "won";
+  if (wonA !== wonB) return wonA ? -1 : 1;
+  if (wonA) return a.used - b.used;
+  if (a.chamber !== b.chamber) return b.chamber - a.chamber;
+  if (a.hits !== b.hits) return a.hits - b.hits;
+  if (a.errors !== b.errors) return a.errors - b.errors;
+  if (a.kills !== b.kills) return b.kills - a.kills;
+  return b.time_left - a.time_left;
+}
+
 function ranking(room) {
-  return [...room.players.values()].map(playerView).sort((a, b) => {
-    const wonA = a.status === "won";
-    const wonB = b.status === "won";
-    if (wonA !== wonB) return wonA ? -1 : 1;
-    if (wonA) return a.used - b.used;
-    if (a.chamber !== b.chamber) return b.chamber - a.chamber;
-    return b.time_left - a.time_left;
-  });
+  return [...room.players.values()].map(playerView).sort(compare);
 }
 
 function lobbyMessage(room) {
@@ -368,7 +388,7 @@ function rejoin(ws, room, name) {
   }
   if (room.phase === "running" && ["playing", "left"].includes(p.status) && left > 0) {
     p.status = "playing";
-    const resume = { c: Number.isFinite(s.c) ? s.c : -1, h: s.h, tl: Math.round(left), ok: !!s.ok };
+    const resume = { c: Number.isFinite(s.c) ? s.c : -1, h: s.h, tl: Math.round(left), ok: !!s.ok, er: s.er || 0, ht: s.ht || 0, ks: s.ks || 0, out: s.out || 0 };
     send(ws, { t: "start", seed: p.seed, config: room.config, resume });
   } else {
     if (room.phase === "running" && ["playing", "left"].includes(p.status)) {
