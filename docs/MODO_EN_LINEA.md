@@ -181,10 +181,8 @@ Archivos que toqué: `world_sync.gd` (nuevo), `guardian.gd`, `zero_boss.gd`, `ru
 `spectator_ghost.gd`, `watch_view.gd`, `game.gd`, `online_session.gd` y `self_test.gd`
 (5 pruebas nuevas que empiezan con "Espectador:").
 
-**Ojo:** el mensaje con los enemigos es más grande. El servidor nuevo acepta hasta 16 KB
-(`MAX_MESSAGE`), pero el que está en Railway todavía tiene el límite viejo de 4 KB.
-Hay que volver a desplegarlo (`railway up --ci` desde `server/`) o puede cortar la
-conexión en peleas con muchos enemigos.
+**Ojo:** el mensaje con los enemigos es más grande. El servidor acepta hasta 16 KB
+(`MAX_MESSAGE`). El de Railway ya quedó al día (12 nov 2026).
 
 ### Archivos nuevos y cambiados
 
@@ -277,8 +275,8 @@ crea la sala (admin) y la otra se une con el código.
   GitHub conectado; ver README). Las 28 pruebas en línea pasan contra Railway:
   `godot --headless --path . -- --nettest=wss://servidor-salas-production.up.railway.app`.
 - ~~Mostrar en la vista en vivo el Códice o los guardianes del otro jugador~~ **Hecho.**
-- Volver a desplegar el servidor en Railway (`railway up --ci` desde `server/`): el que está
-  publicado no tiene la clasificación nueva (golpes, errores, guardianes, salidas) ni el límite
-  de 16 KB por mensaje. Sin eso, la tabla final sale con todo en 0.
+- ~~Volver a desplegar el servidor en Railway~~ **Hecho (12 nov 2026)**: ya tiene la
+  clasificación nueva (golpes, errores, guardianes, salidas) y el límite de 16 KB. Se probó
+  contra Railway creando una sala y mandando un estado: los campos llegan bien.
 - Los `.import`, `.tres`, `main.tscn` y `project.godot` que aparecen modificados en git son solo
   cambios de fin de línea del editor. No se subieron.
